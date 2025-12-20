@@ -1,0 +1,25 @@
+# MiniQuant-Lite Dependencies
+# 量化投资辅助系统依赖包
+
+# 数据获取 - 锁定版本避免接口变更导致系统故障
+akshare==1.12.0
+
+# 数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 回测引擎
+backtrader>=1.9.78
+
+# 可视化界面
+streamlit>=1.28.0
+
+# 测试框架
+pytest>=7.4.0
+hypothesis>=6.88.0
+
+# 日志处理 (Python 内置，无需安装)
+# logging
+
+# 其他工具
+python-dateutil>=2.8.0

@@ -1,0 +1,5 @@
+2025-12-21 01:23:00 - test - INFO - Test log message
+2025-12-21 01:23:10 - test - DEBUG - Debug message
+2025-12-21 01:23:10 - test - INFO - Info message
+2025-12-21 01:23:10 - test - WARNING - Warning message
+2025-12-21 01:23:10 - test - WARNING - This should appear
