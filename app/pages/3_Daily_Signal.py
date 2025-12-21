@@ -5,6 +5,8 @@ MiniQuant-Lite 每日信号页面
 - 早安确认清单（Pre-market Checklist）
 - 信号表格（含新闻链接、财报窗口期警告）
 - 高费率预警红色高亮
+- 数据新鲜度检测（Data Freshness Watchdog）
+- 交易日历感知（Market Calendar Awareness）
 
 Requirements: 7.6, 7.7, 7.10, 12.1, 12.2, 12.3
 """
@@ -12,8 +14,9 @@ Requirements: 7.6, 7.7, 7.10, 12.1, 12.2, 12.3
 import streamlit as st
 import sys
 import os
+import glob
 from datetime import date, datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import pandas as pd
 
 # 添加项目根目录到 Python 路径
@@ -25,6 +28,9 @@ from core.data_feed import DataFeed
 from core.signal_generator import SignalGenerator, TradingSignal, SignalType
 from core.screener import Screener
 from core.signal_store import SignalStore
+from core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_data_feed() -> DataFeed:
@@ -34,6 +40,180 @@ def get_data_feed() -> DataFeed:
         raw_path=settings.path.get_raw_path(),
         processed_path=settings.path.get_processed_path()
     )
+
+
+def check_data_freshness() -> Dict[str, Any]:
+    """
+    检查数据新鲜度（Data Freshness Watchdog）
+    
+    Returns:
+        {
+            'is_stale': bool,           # 数据是否过期
+            'last_data_date': date,     # 最后数据日期
+            'days_old': int,            # 数据已过期天数
+            'message': str,             # 状态消息
+        }
+    """
+    settings = get_settings()
+    processed_path = settings.path.get_processed_path()
+    
+    try:
+        csv_files = glob.glob(os.path.join(processed_path, "*.csv"))
+        
+        if not csv_files:
+            return {
+                'is_stale': True,
+                'last_data_date': None,
+                'days_old': 999,
+                'message': '未找到任何数据文件，请先下载数据'
+            }
+        
+        sample_file = csv_files[0]
+        df = pd.read_csv(sample_file)
+        
+        if df.empty or 'date' not in df.columns:
+            return {
+                'is_stale': True,
+                'last_data_date': None,
+                'days_old': 999,
+                'message': '数据文件格式异常'
+            }
+        
+        last_date_str = df['date'].iloc[-1]
+        last_data_date = datetime.strptime(last_date_str, '%Y-%m-%d').date()
+        
+        today = date.today()
+        days_old = (today - last_data_date).days
+        is_stale = days_old > 3
+        
+        if is_stale:
+            message = f"数据已过期：最后更新于 {last_data_date.strftime('%Y-%m-%d')}（{days_old} 天前）"
+        else:
+            message = f"数据正常：最后更新于 {last_data_date.strftime('%Y-%m-%d')}"
+        
+        return {
+            'is_stale': is_stale,
+            'last_data_date': last_data_date,
+            'days_old': days_old,
+            'message': message
+        }
+        
+    except Exception as e:
+        logger.error(f"检查数据新鲜度失败: {e}")
+        return {
+            'is_stale': True,
+            'last_data_date': None,
+            'days_old': 999,
+            'message': f'检查数据失败: {str(e)}'
+        }
+
+
+def check_trading_day() -> Dict[str, Any]:
+    """
+    检查今天是否为交易日（Market Calendar Awareness）
+    
+    Returns:
+        {
+            'is_trading_day': bool,     # 今天是否为交易日
+            'message': str,             # 状态消息
+            'next_trading_day': date,   # 下一个交易日
+        }
+    """
+    try:
+        import akshare as ak
+        
+        today = date.today()
+        trade_dates_df = ak.tool_trade_date_hist_sina()
+        
+        if trade_dates_df is None or trade_dates_df.empty:
+            return {
+                'is_trading_day': True,
+                'message': '无法获取交易日历',
+                'next_trading_day': None
+            }
+        
+        trade_dates = pd.to_datetime(trade_dates_df['trade_date']).dt.date.tolist()
+        is_trading_day = today in trade_dates
+        
+        if is_trading_day:
+            return {
+                'is_trading_day': True,
+                'message': '今天是交易日',
+                'next_trading_day': today
+            }
+        else:
+            next_trading_day = None
+            for td in trade_dates:
+                if td > today:
+                    next_trading_day = td
+                    break
+            
+            weekday = today.weekday()
+            reason = "周末" if weekday >= 5 else "节假日"
+            
+            return {
+                'is_trading_day': False,
+                'message': f'今天是{reason}休市日',
+                'next_trading_day': next_trading_day
+            }
+            
+    except Exception as e:
+        logger.error(f"检查交易日历失败: {e}")
+        return {
+            'is_trading_day': True,
+            'message': f'无法获取交易日历: {str(e)}',
+            'next_trading_day': None
+        }
+
+
+def render_data_freshness_warning() -> bool:
+    """
+    渲染数据新鲜度警告
+    
+    Returns:
+        True 如果数据过期且今天是交易日
+    """
+    freshness = check_data_freshness()
+    trading_day = check_trading_day()
+    
+    if freshness['is_stale'] and trading_day['is_trading_day']:
+        st.error(f"""
+        🚫 **数据已过期，信号可能无效！**
+        
+        本地数据最后更新于 **{freshness['last_data_date'].strftime('%Y-%m-%d') if freshness['last_data_date'] else '未知'}**
+        （已过期 {freshness['days_old']} 天）
+        
+        ⚠️ **请先前往"数据管理"页面更新数据后再生成信号！**
+        """)
+        return True
+    
+    return False
+
+
+def render_market_holiday_notice() -> bool:
+    """
+    渲染休市安民告示
+    
+    Returns:
+        True 如果今天是非交易日
+    """
+    trading_day = check_trading_day()
+    
+    if not trading_day['is_trading_day']:
+        next_day_str = ""
+        if trading_day['next_trading_day']:
+            next_day_str = f"下一个交易日：**{trading_day['next_trading_day'].strftime('%Y-%m-%d')}**"
+        
+        st.info(f"""
+        ☕ **{trading_day['message']}，好好休息，不用看盘**
+        
+        {next_day_str}
+        
+        💡 今天生成的信号将用于下一个交易日，请注意时效性。
+        """)
+        return True
+    
+    return False
 
 
 def render_premarket_checklist():
@@ -103,6 +283,16 @@ def render_signal_card(signal: TradingSignal, index: int):
                 <b>📰 新闻快查</b><br>
                 <a href="{signal.news_url}" target="_blank">🔗 东方财富个股资讯</a><br>
                 <small>人眼扫一遍标题只需 10 秒</small>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # 新增：查看最新公告链接（手动确认机制）
+            announcement_url = f"https://data.eastmoney.com/notices/stock/{signal.code}.html"
+            st.markdown(f"""
+            <div style="background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <b>📋 公告确认</b><br>
+                <a href="{announcement_url}" target="_blank">🔗 查看最新公告</a><br>
+                <small>⚠️ 请确认无重大利空公告后再下单</small>
             </div>
             """, unsafe_allow_html=True)
         
@@ -179,9 +369,20 @@ def render_signal_summary_table(signals: List[TradingSignal]):
     
     st.subheader("📋 信号汇总表")
     
+    # 人机协同提示
+    st.info("""
+    ⚠️ **人机协同提醒**：系统已自动过滤财报窗口期，但请在下单前完成最后一步人工确认：
+    1. 点击「新闻链接」扫一眼标题（10秒）
+    2. 点击「公告确认」检查有无重大利空
+    3. 确认无异常后再将信号放入条件单
+    """)
+    
     # 转换为 DataFrame
     data = []
     for signal in signals:
+        # 生成公告链接
+        announcement_url = f"https://data.eastmoney.com/notices/stock/{signal.code}.html"
+        
         row = {
             '股票代码': signal.code,
             '股票名称': signal.name,
@@ -191,7 +392,8 @@ def render_signal_summary_table(signals: List[TradingSignal]):
             '费率': f"{signal.actual_fee_rate:.4%}",
             '财报窗口期': '⚠️ 是' if signal.in_report_window else '否',
             '高费率预警': '⚠️ 是' if signal.high_fee_warning else '否',
-            '新闻链接': signal.news_url
+            '新闻链接': signal.news_url,
+            '公告确认': announcement_url
         }
         data.append(row)
     
@@ -217,7 +419,8 @@ def render_signal_summary_table(signals: List[TradingSignal]):
         use_container_width=True,
         hide_index=True,
         column_config={
-            '新闻链接': st.column_config.LinkColumn('新闻链接', display_text='🔗 查看')
+            '新闻链接': st.column_config.LinkColumn('新闻链接', display_text='🔗 新闻'),
+            '公告确认': st.column_config.LinkColumn('公告确认', display_text='📋 公告')
         }
     )
 
@@ -429,6 +632,15 @@ def main():
     
     st.divider()
     
+    # ========== 数据新鲜度警告（最高优先级）==========
+    data_stale = render_data_freshness_warning()
+    
+    # ========== 休市安民告示 ==========
+    is_holiday = render_market_holiday_notice()
+    
+    if data_stale or is_holiday:
+        st.divider()
+    
     # 早安确认清单
     render_premarket_checklist()
     
@@ -468,8 +680,12 @@ def main():
         st.caption(f"当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         st.caption("推荐: 交易日 19:00-21:00")
     
+    # 如果数据过期，禁用信号生成按钮
+    button_disabled = not selected_stocks or data_stale
+    button_help = "请先更新数据" if data_stale else None
+    
     # 生成信号按钮
-    if st.button("🚀 生成今日信号", type="primary", disabled=not selected_stocks):
+    if st.button("🚀 生成今日信号", type="primary", disabled=button_disabled, help=button_help):
         if not selected_stocks:
             st.warning("请选择要生成信号的股票")
             return

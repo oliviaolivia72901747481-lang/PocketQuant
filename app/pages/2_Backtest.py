@@ -133,6 +133,145 @@ def run_batch_backtest(config, strategy_config, stock_pool):
     
     return pd.DataFrame(results)
 
+def render_commission_analysis(df_results: pd.DataFrame, initial_cash: float, commission_rate: float = 0.0003, min_commission: float = 5.0):
+    """
+    渲染"低消刺客"分析图
+    
+    用饼图展示"净利润 vs 给券商打工的钱"
+    如果手续费占比 > 30%，直接标红提示"策略在该资金量下不可行"
+    
+    Args:
+        df_results: 回测结果 DataFrame
+        initial_cash: 初始资金
+        commission_rate: 手续费率
+        min_commission: 最低手续费
+    """
+    st.markdown("##### 💸 低消刺客分析")
+    
+    # 计算总交易次数和估算手续费
+    total_trades = df_results['交易次数'].sum()
+    
+    # 估算每次交易的手续费（买入+卖出各一次）
+    # 假设平均每次交易金额 = 初始资金 * 0.9（考虑仓位）
+    avg_trade_amount = initial_cash * 0.9
+    
+    # 计算单次手续费（考虑低消）
+    standard_fee = avg_trade_amount * commission_rate
+    actual_fee_per_trade = max(min_commission, standard_fee)
+    
+    # 买入+卖出 = 2次手续费，卖出还有印花税
+    stamp_duty = avg_trade_amount * 0.001
+    total_fee_per_round = actual_fee_per_trade * 2 + stamp_duty
+    
+    # 总手续费估算
+    total_commission = total_fee_per_round * total_trades
+    
+    # 计算总盈亏
+    total_profit = df_results['总收益率'].mean() * initial_cash * len(df_results)
+    
+    # 计算净利润
+    net_profit = total_profit - total_commission
+    
+    # 手续费占比
+    if total_profit > 0:
+        commission_ratio = total_commission / total_profit
+    else:
+        commission_ratio = 1.0 if total_commission > 0 else 0.0
+    
+    # 显示统计
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "总交易次数",
+            f"{total_trades} 次",
+            help="所有股票的交易次数总和"
+        )
+    
+    with col2:
+        st.metric(
+            "估算总手续费",
+            f"¥{total_commission:,.0f}",
+            delta=f"占毛利润 {commission_ratio:.1%}" if total_profit > 0 else "N/A",
+            delta_color="inverse"
+        )
+    
+    with col3:
+        if total_profit > 0:
+            st.metric(
+                "手续费磨损率",
+                f"{commission_ratio:.1%}",
+                delta="过高" if commission_ratio > 0.3 else "正常",
+                delta_color="inverse" if commission_ratio > 0.3 else "normal"
+            )
+        else:
+            st.metric("手续费磨损率", "N/A", help="毛利润为负，无法计算")
+    
+    # 饼图展示
+    if total_profit > 0:
+        import plotly.graph_objects as go
+        
+        # 准备数据
+        if net_profit > 0:
+            labels = ['净利润（你的）', '手续费（券商的）']
+            values = [net_profit, total_commission]
+            colors = ['#4CAF50', '#f44336']
+        else:
+            labels = ['亏损', '手续费（券商的）']
+            values = [abs(net_profit), total_commission]
+            colors = ['#ff9800', '#f44336']
+        
+        fig = go.Figure(data=[go.Pie(
+            labels=labels,
+            values=values,
+            hole=0.4,
+            marker_colors=colors,
+            textinfo='label+percent',
+            textposition='outside'
+        )])
+        
+        fig.update_layout(
+            title_text="利润分配：你 vs 券商",
+            showlegend=True,
+            height=300,
+            margin=dict(t=50, b=20, l=20, r=20)
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # 警告提示
+    if commission_ratio > 0.3:
+        st.error(f"""
+        ⚠️ **策略在该资金量下不可行！**
+        
+        手续费占毛利润的 **{commission_ratio:.1%}**，超过 30% 警戒线。
+        
+        **原因分析**：
+        - 交易过于频繁（共 {total_trades} 次）
+        - 单次交易金额过小，触发 5 元低消
+        - 小资金频繁交易 = 给券商打工
+        
+        **建议**：
+        1. 减少交易频率，耐心等待高质量信号
+        2. 增加本金至 ¥50,000 以上
+        3. 考虑更长周期的策略（周线/月线）
+        """)
+    elif commission_ratio > 0.15:
+        st.warning(f"""
+        ⚠️ **手续费磨损较高**
+        
+        手续费占毛利润的 **{commission_ratio:.1%}**，建议关注。
+        
+        **建议**：适当减少交易频率，或增加单次交易金额。
+        """)
+    else:
+        st.success(f"""
+        ✅ **手续费控制良好**
+        
+        手续费占毛利润的 **{commission_ratio:.1%}**，在合理范围内。
+        """)
+
+
 def main():
     st.set_page_config(page_title="批量回测", page_icon="🧪", layout="wide")
     st.title("🧪 策略回测 (批量独立版)")
@@ -248,6 +387,10 @@ def main():
             use_container_width=True,
             hide_index=True
         )
+        
+        # D. 低消刺客分析 (新增)
+        st.divider()
+        render_commission_analysis(df_results, initial_cash)
         
     elif df_results is not None and df_results.empty:
         st.warning("回测完成，但没有产生有效结果（可能数据不足）。")

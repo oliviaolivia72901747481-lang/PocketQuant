@@ -200,7 +200,11 @@ class TestCalculateMaxShares:
         assert "资金不足" in reason
     
     def test_below_min_trade_amount(self):
-        """测试低于最小交易门槛 (Requirements: 4.6)"""
+        """测试低于最小交易门槛但允许降级买入 (Requirements: 4.6)
+        
+        新逻辑：当资金低于 min_trade_amount 但能买至少 100 股时，
+        允许降级买入并设置 high_fee_warning=True
+        """
         shares, warning, reason = calculate_max_shares(
             cash=10000,
             price=80.0,  # 只能买100股=8000元，低于15000门槛
@@ -212,8 +216,26 @@ class TestCalculateMaxShares:
             min_trade_amount=15000
         )
         
+        # 新的降级逻辑：允许买入但标记高费率警告
+        assert shares == 100  # 可以买 100 股
+        assert warning == True  # 高费率警告
+        # reason 可能为空或包含降级信息
+    
+    def test_truly_insufficient_funds(self):
+        """测试真正资金不足（连100股都买不起）"""
+        shares, warning, reason = calculate_max_shares(
+            cash=500,  # 只有500元
+            price=80.0,  # 100股需要8000元
+            commission_rate=0.0003,
+            min_commission=5.0,
+            max_positions_count=2,
+            current_positions=0,
+            total_value=500,
+            min_trade_amount=15000
+        )
+        
         assert shares == 0
-        assert "低于门槛" in reason
+        assert "资金不足" in reason or "低于门槛" in reason
     
     def test_high_fee_warning(self):
         """测试高费率预警 (Requirements: 4.8)"""
