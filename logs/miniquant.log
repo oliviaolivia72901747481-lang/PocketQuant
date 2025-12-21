@@ -3,3 +3,213 @@
 2025-12-21 01:23:10 - test - INFO - Info message
 2025-12-21 01:23:10 - test - WARNING - Warning message
 2025-12-21 01:23:10 - test - WARNING - This should appear
+2025-12-21 01:47:50 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 01:48:12 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 01:48:26 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:48:37 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:48:41 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 01:49:16 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:49:38 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:49:39 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:49:46 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:49:48 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:49:48 - core.data_feed - INFO - 已清空原始数据目录: C:\Users\hn511\Desktop\VibeCoding\stock2\data/raw
+2025-12-21 01:49:48 - core.data_feed - INFO - 已清空处理后数据目录: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed
+2025-12-21 01:49:48 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:49:54 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:49:55 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:50:28 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:50:33 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:50:35 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:50:35 - core.data_feed - INFO - 已清空原始数据目录: C:\Users\hn511\Desktop\VibeCoding\stock2\data/raw
+2025-12-21 01:50:35 - core.data_feed - INFO - 已清空处理后数据目录: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed
+2025-12-21 01:50:35 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:50:40 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:50:41 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 01:50:44 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:50:48 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:51:27 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 01:52:12 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 10:58:58 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 10:59:08 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 10:59:43 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 10:59:48 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 10:59:48 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 10:59:48 - core.signal_generator - INFO - 开始生成交易信号，候选股票数: 12
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000001.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 000001
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000002.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 000002
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000063.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 000063
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000333.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 000333
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000651.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 000651
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000858.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 000858
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\002415.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 002415
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\002594.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 002594
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\300750.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 300750
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600036.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 600036
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600519.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 600519
+2025-12-21 10:59:57 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600900.csv
+2025-12-21 10:59:57 - core.signal_generator - WARNING - 无法加载数据，跳过: 600900
+2025-12-21 10:59:57 - core.signal_generator - INFO - 信号生成完成: 共 0 个信号
+2025-12-21 11:00:10 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:00:15 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 11:00:31 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:01:21 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:01:21 - backtest.run_backtest - INFO - 回测引擎初始化完成: 初始资金=55000.0, 手续费率=0.0002, 印花税率=0.001
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000001.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000002.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000063.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000333.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000651.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\000858.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\002415.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\002594.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\300750.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600036.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600519.csv
+2025-12-21 11:01:21 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600900.csv
+2025-12-21 11:01:26 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:01:28 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:01:29 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:01:44 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 回测引擎初始化完成: 初始资金=55000.0, 手续费率=0.0002, 印花税率=0.001
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 000001, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 000002, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 000063, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 000333, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 000651, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 000858, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 002415, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 002594, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 300750, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 600036, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 600519, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 添加股票数据: 600900, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 正在加载基准指数数据: 000300
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 基准指数数据加载完成: 000300, 共 242 条记录
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 设置策略: TrendFilteredMACDStrategy
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 设置仓位管理器: SmallCapitalSizer
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 开始执行回测...
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-08-26 买入信号: 价格12.12 > MA60(11.98), MACD金叉, RSI=53.1
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-08-27 买入执行: 价格=12.08, 数量=4300, 成本=51944.00, 手续费=10.39
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-08-27 触发MACD死叉，卖出
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-08-27 退出原因: MACD死叉, 买入价: 12.12, 卖出价: 11.82, 盈亏: -2.5%
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-08-28 卖出执行: 价格=11.85, 数量=-4300, 成本=51944.00, 手续费=61.15
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-08-28 交易完成: 毛利润=-989.00, 净利润=-1060.53, 盈亏比例=-8187.09%
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-12-18 买入信号: 价格11.64 > MA60(11.47), MACD金叉, RSI=55.2
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-12-19 买入执行: 价格=11.63, 数量=4400, 成本=51172.00, 手续费=10.23
+2025-12-21 11:01:44 - TrendFilteredMACDStrategy - INFO - 2025-12-19 策略结束: 最终资金=53885.23
+2025-12-21 11:01:44 - backtest.run_backtest - INFO - 回测完成: 总收益率=-2.03%, 年化收益率=-2.03%, 最大回撤=2.05%, 夏普比率=-3.96, 胜率=0.00%, Alpha=-18.16%
+2025-12-21 11:02:55 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 回测引擎初始化完成: 初始资金=55000.0, 手续费率=0.0002, 印花税率=0.001
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 000001, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 000002, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 000063, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 000333, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 000651, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 000858, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 002415, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 002594, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 300750, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 600036, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 600519, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 添加股票数据: 600900, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 正在加载基准指数数据: 000300
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 基准指数数据加载完成: 000300, 共 242 条记录
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 设置策略: TrendFilteredMACDStrategy
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 设置仓位管理器: SmallCapitalSizer
+2025-12-21 11:02:55 - backtest.run_backtest - INFO - 开始执行回测...
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-08-26 买入信号: 价格12.12 > MA60(11.98), MACD金叉, RSI=53.1
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-08-27 买入执行: 价格=12.08, 数量=4300, 成本=51944.00, 手续费=10.39
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-08-27 触发MACD死叉，卖出
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-08-27 退出原因: MACD死叉, 买入价: 12.12, 卖出价: 11.82, 盈亏: -2.5%
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-08-28 卖出执行: 价格=11.85, 数量=-4300, 成本=51944.00, 手续费=61.15
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-08-28 交易完成: 毛利润=-989.00, 净利润=-1060.53, 盈亏比例=-8187.09%
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-12-18 买入信号: 价格11.64 > MA60(11.47), MACD金叉, RSI=55.2
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-12-19 买入执行: 价格=11.63, 数量=4400, 成本=51172.00, 手续费=10.23
+2025-12-21 11:02:56 - TrendFilteredMACDStrategy - INFO - 2025-12-19 策略结束: 最终资金=53885.23
+2025-12-21 11:02:56 - backtest.run_backtest - INFO - 回测完成: 总收益率=-2.03%, 年化收益率=-2.03%, 最大回撤=2.05%, 夏普比率=-3.96, 胜率=0.00%, Alpha=-18.16%
+2025-12-21 11:03:41 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:04:03 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:04:06 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:04:07 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:04:07 - core.signal_generator - INFO - 开始生成交易信号，候选股票数: 12
+2025-12-21 11:04:19 - core.signal_generator - INFO - 信号生成完成: 共 0 个信号
+2025-12-21 11:05:12 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:05:23 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:05:23 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:05:23 - __main__ - INFO - 日志级别已更改为: INFO
+2025-12-21 11:05:28 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:07:24 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 11:07:35 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:07:55 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:08:18 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:08:33 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:08:53 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:08:55 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:08:55 - core.signal_generator - INFO - 开始生成交易信号，候选股票数: 12
+2025-12-21 11:09:23 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:09:24 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:09:24 - core.signal_generator - INFO - 开始生成交易信号，候选股票数: 12
+2025-12-21 11:09:27 - core.data_feed - WARNING - 批量获取股票名称失败: HTTPSConnectionPool(host='82.push2delay.eastmoney.com', port=443): Read timed out. (read timeout=15)
+2025-12-21 11:09:32 - core.signal_generator - INFO - 信号生成完成: 共 0 个信号
+2025-12-21 11:09:37 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:09:41 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:09:42 - core.signal_generator - INFO - 信号生成完成: 共 0 个信号
+2025-12-21 11:09:43 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:09:57 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 回测引擎初始化完成: 初始资金=55000.0, 手续费率=0.0002, 印花税率=0.001
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 000001, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 000002, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 000063, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 000333, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 000651, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 000858, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 002415, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 002594, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 300750, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 600036, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 600519, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 添加股票数据: 600900, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 正在加载基准指数数据: 000300
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 基准指数数据加载完成: 000300, 共 242 条记录
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 设置策略: TrendFilteredMACDStrategy
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 设置仓位管理器: SmallCapitalSizer
+2025-12-21 11:09:57 - backtest.run_backtest - INFO - 开始执行回测...
+2025-12-21 11:09:57 - TrendFilteredMACDStrategy - INFO - 2025-08-26 买入信号: 价格12.12 > MA60(11.98), MACD金叉, RSI=53.1
+2025-12-21 11:09:57 - TrendFilteredMACDStrategy - INFO - 2025-08-27 买入执行: 价格=12.08, 数量=4300, 成本=51944.00, 手续费=10.39
+2025-12-21 11:09:57 - TrendFilteredMACDStrategy - INFO - 2025-08-27 触发MACD死叉，卖出
+2025-12-21 11:09:57 - TrendFilteredMACDStrategy - INFO - 2025-08-27 退出原因: MACD死叉, 买入价: 12.12, 卖出价: 11.82, 盈亏: -2.5%
+2025-12-21 11:09:57 - TrendFilteredMACDStrategy - INFO - 2025-08-28 卖出执行: 价格=11.85, 数量=-4300, 成本=51944.00, 手续费=61.15
+2025-12-21 11:09:57 - TrendFilteredMACDStrategy - INFO - 2025-08-28 交易完成: 毛利润=-989.00, 净利润=-1060.53, 盈亏比例=-8187.09%
+2025-12-21 11:09:58 - TrendFilteredMACDStrategy - INFO - 2025-12-18 买入信号: 价格11.64 > MA60(11.47), MACD金叉, RSI=55.2
+2025-12-21 11:09:58 - TrendFilteredMACDStrategy - INFO - 2025-12-19 买入执行: 价格=11.63, 数量=4400, 成本=51172.00, 手续费=10.23
+2025-12-21 11:09:58 - TrendFilteredMACDStrategy - INFO - 2025-12-19 策略结束: 最终资金=53885.23
+2025-12-21 11:09:58 - backtest.run_backtest - INFO - 回测完成: 总收益率=-2.03%, 年化收益率=-2.03%, 最大回撤=2.05%, 夏普比率=-3.96, 胜率=0.00%, Alpha=-18.16%
+2025-12-21 11:10:07 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:10:12 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:10:13 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:10:13 - core.signal_generator - INFO - 开始生成交易信号，候选股票数: 12
+2025-12-21 11:10:30 - core.signal_generator - INFO - 信号生成完成: 共 0 个信号
+2025-12-21 11:10:47 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:11:00 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:11:00 - __main__ - INFO - 日志级别已更改为: INFO
+2025-12-21 11:11:29 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:11:39 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:11:41 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:11:46 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:11:50 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:11:57 - __main__ - INFO - 日志查看页面加载
+2025-12-21 11:19:40 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.12.0。如遇数据获取问题，请尝试: pip install akshare==1.12.0
+2025-12-21 11:19:42 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-21 11:19:50 - __main__ - INFO - MiniQuant-Lite 首页加载
