@@ -40,7 +40,8 @@ class BacktestConfig:
     end_date: str = '2024-12-01'       # 回测结束日期
     benchmark_code: str = '000300'     # 基准指数代码（沪深300）
     check_limit_up_down: bool = True   # 是否检测涨跌停板
-    slippage: float = 0.0              # 滑点（暂不使用，回测无法模拟真实滑点）
+    slippage_perc: float = 0.001       # 滑点百分比（0.1%），模拟隔夜跳空和成交滑点
+    min_commission: float = 5.0        # 最低手续费（5元低消）
 
 
 @dataclass
@@ -119,16 +120,22 @@ class LimitUpDownChecker:
 
 class CommissionScheme(bt.CommInfoBase):
     """
-    A股佣金方案
+    A股佣金方案（含最低手续费）
     
     实现A股的佣金计算规则：
     - 买入：手续费（万三，最低5元）
     - 卖出：手续费（万三，最低5元）+ 印花税（千一）
+    
+    重要修复：
+    - 正确实现5元最低手续费，避免小资金回测收益虚高
+    - 小资金交易时，5元低消会显著影响实际费率
+    
+    Requirements: 3.2
     """
     
     params = (
         ('commission', 0.0003),      # 手续费率（小数形式，如 0.0003 表示万三）
-        ('min_commission', 5.0),     # 最低手续费
+        ('min_commission', 5.0),     # 最低手续费（5元低消）
         ('stamp_duty', 0.001),       # 印花税率
         ('stocklike', True),
         ('commtype', bt.CommInfoBase.COMM_FIXED),  # 使用固定佣金模式，我们自己计算
@@ -137,7 +144,15 @@ class CommissionScheme(bt.CommInfoBase):
     
     def _getcommission(self, size, price, pseudoexec):
         """
-        计算佣金
+        计算佣金（含最低手续费）
+        
+        核心公式：commission = max(trade_value * rate, min_commission)
+        
+        这是小资金回测准确性的关键！
+        例如：交易金额 10000 元
+        - 标准费用：10000 × 0.0003 = 3 元
+        - 实际费用：max(3, 5) = 5 元
+        - 实际费率：5 / 10000 = 0.05%（远高于标准 0.03%）
         
         Args:
             size: 交易数量（正数买入，负数卖出）
@@ -149,16 +164,18 @@ class CommissionScheme(bt.CommInfoBase):
         """
         trade_value = abs(size * price)
         
+        if trade_value == 0:
+            return 0.0
+        
         # 使用传入的 commission 参数（小数形式）
         commission_rate = self.p.commission
         min_comm = self.p.min_commission
         stamp = self.p.stamp_duty
         
         # 计算手续费（取标准费用和最低费用的较大值）
-        commission = max(
-            trade_value * commission_rate,
-            min_comm
-        )
+        # 这是关键修复：确保最低手续费生效
+        standard_fee = trade_value * commission_rate
+        commission = max(standard_fee, min_comm)
         
         # 卖出时加收印花税
         if size < 0:
@@ -253,9 +270,21 @@ class BacktestEngine:
         # 设置初始资金
         self.cerebro.broker.setcash(config.initial_cash)
         
-        # 设置佣金方案
+        # 设置滑点（模拟隔夜跳空和成交滑点）
+        if config.slippage_perc > 0:
+            self.cerebro.broker.set_slippage_perc(
+                perc=config.slippage_perc,
+                slip_open=True,   # 开盘价也应用滑点
+                slip_limit=True,  # 限价单也应用滑点
+                slip_match=True,  # 匹配时应用滑点
+                slip_out=False    # 不允许滑出当日价格范围
+            )
+            logger.info(f"滑点配置: {config.slippage_perc:.2%}")
+        
+        # 设置佣金方案（含最低手续费）
         commission_scheme = CommissionScheme(
             commission=config.commission_rate,
+            min_commission=config.min_commission,
             stamp_duty=config.stamp_duty
         )
         self.cerebro.broker.addcommissioninfo(commission_scheme)
@@ -271,7 +300,8 @@ class BacktestEngine:
         self.cerebro.addobserver(EquityObserver)
         
         logger.info(f"回测引擎初始化完成: 初始资金={config.initial_cash}, "
-                   f"手续费率={config.commission_rate}, 印花税率={config.stamp_duty}")
+                   f"手续费率={config.commission_rate}, 最低手续费={config.min_commission}, "
+                   f"印花税率={config.stamp_duty}, 滑点={config.slippage_perc:.2%}")
     
     def add_data(self, code: str, df: pd.DataFrame) -> None:
         """

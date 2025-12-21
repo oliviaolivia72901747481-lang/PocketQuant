@@ -93,7 +93,7 @@ def calculate_max_shares(
     cash_buffer: float = 0.05
 ) -> Tuple[int, bool, str]:
     """
-    计算最大可买入股数（智能版）
+    计算最大可买入股数（智能版，含降级逻辑）
     
     Args:
         cash: 可用现金
@@ -122,7 +122,13 @@ def calculate_max_shares(
     Note:
         现金缓冲逻辑：强制保留 5% 现金，防止因次日高开导致废单
         例如：账户 55000 元，保留 2750 元缓冲，实际可用 52250 元
+        
+        降级逻辑（v1.1 新增）：
+        当资金不足以达到最小交易门槛，但仍可买入至少 1 手时，
+        允许降级买入并发出高费率预警，避免小资金开仓死锁。
     """
+    import math
+    
     # 参数校验
     if price <= 0:
         reason = "股票价格无效（<=0）"
@@ -144,8 +150,8 @@ def calculate_max_shares(
     available_cash = cash * (1 - cash_buffer)
     
     # 3. 计算最大可买股数（考虑手续费）
-    # 先估算不考虑手续费的最大股数
-    estimated_shares = int(available_cash / price / 100) * 100
+    # 使用 math.floor 确保手数为整数，避免浮点数精度问题
+    estimated_shares = math.floor(available_cash / price / 100) * 100
     
     if estimated_shares == 0:
         reason = f"资金不足（可用 ¥{available_cash:,.0f}），无法买入 100 股（需 ¥{price * 100:,.0f}）"
@@ -169,16 +175,24 @@ def calculate_max_shares(
         logger.info(f"拒绝交易: {reason}")
         return 0, False, reason
     
-    # 5. 检查最小交易金额门槛
+    # 5. 检查最小交易金额门槛（含降级逻辑）
     trade_amount = max_shares * price
-    if trade_amount < min_trade_amount:
-        reason = f"交易金额 ¥{trade_amount:,.0f} 低于门槛 ¥{min_trade_amount:,.0f}，手续费磨损过高，放弃交易"
-        logger.info(f"拒绝交易: {reason}")
-        return 0, False, reason
     
-    # 6. 检查高费率预警
+    # 计算实际费率
     actual_fee = max(min_commission, trade_amount * commission_rate)
     actual_fee_rate = actual_fee / trade_amount
+    
+    if trade_amount < min_trade_amount:
+        # 降级逻辑：如果资金不足以达到门槛，但可以买入至少 1 手
+        # 允许降级买入，但强制触发高费率预警
+        logger.warning(
+            f"降级买入: 交易金额 ¥{trade_amount:,.0f} 低于门槛 ¥{min_trade_amount:,.0f}，"
+            f"实际费率 {actual_fee_rate:.4%}，存在低消磨损风险"
+        )
+        # 返回可买股数，但标记高费率预警
+        return max_shares, True, ""
+    
+    # 6. 检查高费率预警（正常情况）
     high_fee_warning = actual_fee_rate > commission_rate * 2
     
     if high_fee_warning:
@@ -257,10 +271,10 @@ if HAS_BACKTRADER:
         
         特点：
         - 采用最大持仓只数模式，避免百分比陷阱
-        - 确保买入数量为100股整数倍
+        - 确保买入数量为100股整数倍（使用 math.floor 避免浮点数精度问题）
         - 预留手续费，考虑5元低消问题
         - 支持仓位容差逻辑
-        - 最小交易金额门槛检查
+        - 最小交易金额门槛检查（含降级逻辑）
         - 强制保留 5% 现金缓冲，防止次日高开废单
         
         Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9
@@ -271,7 +285,7 @@ if HAS_BACKTRADER:
             ('position_tolerance', 0.05),  # 仓位容差（允许超限5%）
             ('commission_rate', 0.0003),   # 手续费率
             ('min_commission', 5.0),       # 最低手续费（5元低消）
-            ('min_trade_amount', 15000.0), # 最小交易金额门槛，低于此值禁止开仓
+            ('min_trade_amount', 15000.0), # 最小交易金额门槛，低于此值触发降级逻辑
             ('cash_buffer', 0.05),         # 现金缓冲比例（5%），防止高开废单
         )
         
@@ -293,8 +307,8 @@ if HAS_BACKTRADER:
             智能仓位计算流程：
             1. 检查当前持仓数量是否已达上限
             2. 计算可用资金（考虑手续费）
-            3. 检查是否满足最小交易金额门槛
-            4. 计算最大可买股数（100股整数倍）
+            3. 检查是否满足最小交易金额门槛（含降级逻辑）
+            4. 计算最大可买股数（100股整数倍，使用 math.floor）
             5. 应用仓位容差逻辑
             
             Args:
@@ -320,7 +334,7 @@ if HAS_BACKTRADER:
             # 获取账户总价值
             total_value = self.broker.getvalue()
             
-            # 计算可买入股数
+            # 计算可买入股数（使用改进后的函数，含降级逻辑）
             shares, high_fee_warning, reject_reason = calculate_max_shares(
                 cash=cash,
                 price=price,
