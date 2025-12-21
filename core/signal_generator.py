@@ -8,6 +8,10 @@ MiniQuant-Lite 每日交易信号生成模块
 - 检查财报窗口期（硬风控）
 - 高费率预警
 
+支持两种策略：
+1. 趋势滤网 MACD 策略 - 适合趋势行情
+2. RSI 超卖反弹策略 - 适合震荡行情
+
 设计原则：把决策权还给人，系统只做硬风控
 
 Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 12.1, 12.2
@@ -46,6 +50,12 @@ class SignalType(Enum):
     BUY = "买入"
     SELL = "卖出"
     HOLD = "持有"
+
+
+class StrategyType(Enum):
+    """策略类型枚举"""
+    RSRS = "RSRS 阻力支撑策略"
+    RSI_REVERSAL = "RSI 超卖反弹策略"
 
 
 @dataclass
@@ -96,6 +106,10 @@ class SignalGenerator:
     3. 生成辅助信息（新闻链接、限价上限）
     4. 集成硬风控（财报窗口期）
     
+    支持策略：
+    - MACD_TREND: 趋势滤网 MACD 策略（适合趋势行情）
+    - RSI_REVERSAL: RSI 超卖反弹策略（适合震荡行情）
+    
     设计原则：
     - 把决策权还给人，系统只做硬风控
     - 新闻链接比 AI 分析更可靠（人眼看标题只需 10 秒）
@@ -105,18 +119,16 @@ class SignalGenerator:
     """
     
     # 允许的高开滑点系数 (1%)
-    # 限价上限 = 收盘价 × 1.01，防止次日高开时盲目追高
     LIMIT_CAP_FACTOR = 1.01
     
     # 东方财富个股资讯 URL 模板
-    # 格式：https://quote.eastmoney.com/{market}{code}.html
-    # market: sh（上海）, sz（深圳）, bj（北京）
     EASTMONEY_NEWS_URL = "https://quote.eastmoney.com/{market}{code}.html"
 
     def __init__(
         self, 
         data_feed: DataFeed, 
-        strategy_class: Optional[type] = None
+        strategy_class: Optional[type] = None,
+        strategy_type: StrategyType = StrategyType.RSRS
     ):
         """
         初始化信号生成器
@@ -124,9 +136,11 @@ class SignalGenerator:
         Args:
             data_feed: 数据获取模块实例
             strategy_class: 策略类（可选，用于获取策略参数）
+            strategy_type: 策略类型，默认为趋势滤网 MACD 策略
         """
         self.data_feed = data_feed
         self.strategy_class = strategy_class
+        self.strategy_type = strategy_type
         self.report_checker = ReportChecker()
         
         # 缓存股票名称，避免重复查询
@@ -316,15 +330,9 @@ class SignalGenerator:
         df: pd.DataFrame
     ) -> Tuple[Optional[SignalType], str]:
         """
-        检查技术指标条件，判断信号类型 (针对小资金优化的 RSI 反转策略)
+        检查技术指标条件，判断信号类型
         
-        策略逻辑 (RSI Mean Reversion):
-        - 买入: RSI(14) < 30 (超卖区反弹)
-        - 卖出: RSI(14) > 70 (超买区止盈)
-        
-        为什么改这个？
-        MACD 适合大趋势，但在震荡市中太慢。对于5.5万资金，
-        我们需要更灵敏的信号，快进快出，积累小胜为大胜。
+        根据 self.strategy_type 选择不同的策略逻辑
         
         Args:
             df: 股票历史数据 DataFrame
@@ -332,16 +340,241 @@ class SignalGenerator:
         Returns:
             (信号类型, 信号依据) 或 (None, "") 无信号时
         """
-        if len(df) < 20:  # RSI至少需要15天数据
+        if self.strategy_type == StrategyType.RSI_REVERSAL:
+            return self._check_rsi_reversal_conditions(df)
+        else:
+            return self._check_rsrs_conditions(df)
+
+    def _check_rsrs_conditions(
+        self, 
+        df: pd.DataFrame
+    ) -> Tuple[Optional[SignalType], str]:
+        """
+        RSRS 阻力支撑相对强度策略
+        
+        计算步骤：
+        1. 取过去 N 天的 High/Low 数据，做线性回归，得到斜率 Beta
+        2. 将 Beta 标准化（Z-Score），与过去 M 天的历史比较
+        3. RSRS 标准分 > 0.7 买入，< -0.7 卖出
+        """
+        n_period = 18   # 斜率计算窗口
+        m_period = 600  # 标准化窗口
+        buy_threshold = 0.7
+        sell_threshold = -0.7
+        
+        if len(df) < max(n_period, 100):  # 至少需要 100 天数据
             return None, ""
         
-        # 1. 计算 RSI (相对强弱指标)
+        import numpy as np
+        
+        high = df['high'].values
+        low = df['low'].values
+        
+        # 计算所有历史的 beta 值
+        betas = []
+        for i in range(n_period, len(df) + 1):
+            h = high[i-n_period:i]
+            l = low[i-n_period:i]
+            
+            # 线性回归：Y = High, X = Low
+            x_mean = np.mean(l)
+            y_mean = np.mean(h)
+            
+            numerator = np.sum((l - x_mean) * (h - y_mean))
+            denominator = np.sum((l - x_mean) ** 2)
+            
+            if denominator != 0:
+                beta = numerator / denominator
+            else:
+                beta = 1.0
+            
+            betas.append(beta)
+        
+        if len(betas) < 2:
+            return None, ""
+        
+        # 当前 beta
+        current_beta = betas[-1]
+        
+        # 标准化（Z-Score）
+        if len(betas) >= m_period:
+            recent_betas = betas[-m_period:]
+        else:
+            recent_betas = betas
+        
+        mean_beta = np.mean(recent_betas)
+        std_beta = np.std(recent_betas)
+        
+        if std_beta > 0:
+            rsrs_score = (current_beta - mean_beta) / std_beta
+        else:
+            rsrs_score = 0
+        
+        # 买入信号：RSRS 标准分 > 0.7
+        if rsrs_score > buy_threshold:
+            reason = f"RSRS买入信号 (标准分={rsrs_score:.2f} > {buy_threshold})"
+            return SignalType.BUY, reason
+        
+        # 卖出信号：RSRS 标准分 < -0.7
+        if rsrs_score < sell_threshold:
+            reason = f"RSRS卖出信号 (标准分={rsrs_score:.2f} < {sell_threshold})"
+            return SignalType.SELL, reason
+        
+        return None, ""
+
+    def _check_bollinger_reversion_conditions(
+        self, 
+        df: pd.DataFrame
+    ) -> Tuple[Optional[SignalType], str]:
+        """
+        布林带均值回归策略
+        
+        买入条件（全部满足）:
+        1. 收盘价 < 布林带下轨（超卖区）
+        2. RSI < 35（确认超卖）
+        3. 成交量 > 5日均量（有资金介入）
+        
+        卖出条件：
+        1. 收盘价 >= 布林带中轨（均值回归完成）
+        2. 收盘价 >= 布林带上轨（超买区止盈）
+        """
+        if len(df) < 30:
+            return None, ""
+        
         close = df['close']
+        volume = df['volume']
+        
+        # 1. 计算布林带 (20日, 2倍标准差)
+        bb_period = 20
+        bb_std = 2.0
+        
+        ma20 = close.rolling(window=bb_period).mean()
+        std20 = close.rolling(window=bb_period).std()
+        
+        upper_band = ma20 + bb_std * std20
+        middle_band = ma20
+        lower_band = ma20 - bb_std * std20
+        
+        current_close = close.iloc[-1]
+        current_upper = upper_band.iloc[-1]
+        current_middle = middle_band.iloc[-1]
+        current_lower = lower_band.iloc[-1]
+        
+        # 2. 计算 RSI
         delta = close.diff()
         gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+        loss = loss.replace(0, 0.000001)
+        rs = gain / loss
+        rsi_series = 100 - (100 / (1 + rs))
+        current_rsi = rsi_series.iloc[-1]
         
-        # 避免除以零
+        # 3. 计算成交量均线
+        volume_ma5 = volume.rolling(window=5).mean()
+        current_volume = volume.iloc[-1]
+        current_volume_ma = volume_ma5.iloc[-1]
+        
+        # 买入信号：价格 < 下轨 + RSI < 35 + 放量
+        if current_close < current_lower and current_rsi < 35 and current_volume > current_volume_ma:
+            reason = f"布林带超卖反弹 (价格{current_close:.2f}<下轨{current_lower:.2f}, RSI={current_rsi:.1f}, 放量)"
+            return SignalType.BUY, reason
+        
+        # 卖出信号：价格 >= 上轨
+        if current_close >= current_upper:
+            reason = f"触及布林带上轨 (价格{current_close:.2f}>=上轨{current_upper:.2f})"
+            return SignalType.SELL, reason
+        
+        # 卖出信号：价格 >= 中轨（均值回归完成）
+        if current_close >= current_middle:
+            # 只有当之前在下轨附近买入时才触发
+            prev_close = close.iloc[-2]
+            prev_lower = lower_band.iloc[-2]
+            if prev_close < prev_lower * 1.02:  # 之前接近下轨
+                reason = f"均值回归完成 (价格{current_close:.2f}>=中轨{current_middle:.2f})"
+                return SignalType.SELL, reason
+        
+        return None, ""
+
+    def _check_macd_trend_conditions(
+        self, 
+        df: pd.DataFrame
+    ) -> Tuple[Optional[SignalType], str]:
+        """
+        趋势滤网 MACD 策略
+        
+        买入条件（全部满足）:
+        1. 股价 > MA60（趋势滤网，只做右侧交易）
+        2. MACD 金叉（DIF 上穿 DEA）
+        3. RSI < 80（避免追高）
+        
+        卖出条件：MACD 死叉
+        """
+        if len(df) < 60:
+            return None, ""
+        
+        close = df['close']
+        
+        # 1. 计算 MA60
+        ma60 = close.rolling(window=60).mean()
+        current_close = close.iloc[-1]
+        current_ma60 = ma60.iloc[-1]
+        
+        # 趋势滤网：股价必须在 MA60 之上
+        if current_close <= current_ma60:
+            return None, ""
+        
+        # 2. 计算 MACD
+        exp12 = close.ewm(span=12, adjust=False).mean()
+        exp26 = close.ewm(span=26, adjust=False).mean()
+        dif = exp12 - exp26
+        dea = dif.ewm(span=9, adjust=False).mean()
+        
+        current_dif = dif.iloc[-1]
+        current_dea = dea.iloc[-1]
+        prev_dif = dif.iloc[-2]
+        prev_dea = dea.iloc[-2]
+        
+        # 3. 计算 RSI
+        delta = close.diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+        loss = loss.replace(0, 0.000001)
+        rs = gain / loss
+        rsi = 100 - (100 / (1 + rs))
+        current_rsi = rsi.iloc[-1]
+        
+        # 买入信号：MACD 金叉 + RSI < 80
+        if prev_dif <= prev_dea and current_dif > current_dea:
+            if current_rsi < 80:
+                reason = f"MACD金叉 (价格{current_close:.2f}>MA60 {current_ma60:.2f}, RSI={current_rsi:.1f})"
+                return SignalType.BUY, reason
+        
+        # 卖出信号：MACD 死叉
+        if prev_dif >= prev_dea and current_dif < current_dea:
+            reason = f"MACD死叉 (DIF={current_dif:.3f} < DEA={current_dea:.3f})"
+            return SignalType.SELL, reason
+        
+        return None, ""
+
+    def _check_rsi_reversal_conditions(
+        self, 
+        df: pd.DataFrame
+    ) -> Tuple[Optional[SignalType], str]:
+        """
+        RSI 超卖反弹策略
+        
+        买入条件：RSI < 30（超卖区反弹）
+        卖出条件：RSI > 70（超买区止盈）
+        """
+        if len(df) < 20:
+            return None, ""
+        
+        close = df['close']
+        
+        # 计算 RSI
+        delta = close.diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
         loss = loss.replace(0, 0.000001)
         rs = gain / loss
         rsi_series = 100 - (100 / (1 + rs))
@@ -349,38 +582,28 @@ class SignalGenerator:
         current_rsi = rsi_series.iloc[-1]
         prev_rsi = rsi_series.iloc[-2]
         
-        # 2. 计算 MA60 (作为生命线风控)
-        # 虽然我们做超跌反弹，但如果股价在 MA60 之下太远（比如下跌趋势中），
-        # 可能是主跌浪，最好还是小心点。
-        # 这里我们放宽限制：只要不是"暴跌"（例如偏离均线20%以上）就可以尝试抄底
+        # MA60 风控：股价不能跌破 MA60 太多
         if len(df) >= 60:
-            ma60 = df['close'].rolling(window=60).mean().iloc[-1]
+            ma60 = close.rolling(window=60).mean().iloc[-1]
             current_close = close.iloc[-1]
-            # 简单的趋势判断：如果股价跌破 MA60 太多(>20%)，可能是垃圾股，不抄底
             if current_close < ma60 * 0.8:
                 return None, ""
         
-        # ==========================================
-        # 🎯 买入信号：超卖反弹
-        # 条件：RSI 跌破 30 (恐慌盘杀出)
-        # ==========================================
+        # 买入信号：RSI < 30
         if current_rsi < 30:
             reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < 30)"
             return SignalType.BUY, reason
-            
-        # 备选买入：RSI 从下方穿过 30 (右侧买点)
+        
+        # 备选买入：RSI 上穿 30
         if prev_rsi < 30 and current_rsi >= 30:
             reason = f"RSI低位金叉 (上穿30, RSI={current_rsi:.1f})"
             return SignalType.BUY, reason
-
-        # ==========================================
-        # 🛑 卖出信号：超买止盈
-        # 条件：RSI 冲过 70 (贪婪盘涌入)
-        # ==========================================
+        
+        # 卖出信号：RSI > 70
         if current_rsi > 70:
             reason = f"RSI超买止盈 (RSI={current_rsi:.1f} > 70)"
             return SignalType.SELL, reason
-            
+        
         return None, ""
 
     def _calculate_limit_cap(self, close_price: float) -> float:

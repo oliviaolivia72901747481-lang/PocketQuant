@@ -25,12 +25,25 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from config.settings import get_settings
 from config.stock_pool import get_watchlist
 from core.data_feed import DataFeed
-from core.signal_generator import SignalGenerator, TradingSignal, SignalType
+from core.signal_generator import SignalGenerator, TradingSignal, SignalType, StrategyType
 from core.screener import Screener
 from core.signal_store import SignalStore
 from core.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+
+# 策略选项配置
+STRATEGY_OPTIONS = {
+    "RSRS 阻力支撑策略": {
+        "type": StrategyType.RSRS,
+        "description": "基于阻力支撑相对强度。买入：RSRS标准分>0.7（市场情绪好）；卖出：RSRS标准分<-0.7",
+    },
+    "RSI 超卖反弹策略": {
+        "type": StrategyType.RSI_REVERSAL,
+        "description": "适合震荡行情，快进快出。买入：RSI<30超卖；卖出：RSI>70超买",
+    },
+}
 
 
 def get_data_feed() -> DataFeed:
@@ -563,12 +576,13 @@ def render_historical_signals():
         st.info("📭 暂无历史信号记录")
 
 
-def generate_signals(stock_pool: List[str]) -> List[TradingSignal]:
+def generate_signals(stock_pool: List[str], strategy_type: StrategyType) -> List[TradingSignal]:
     """
     生成交易信号
     
     Args:
         stock_pool: 股票池
+        strategy_type: 策略类型
     
     Returns:
         信号列表
@@ -576,8 +590,8 @@ def generate_signals(stock_pool: List[str]) -> List[TradingSignal]:
     data_feed = get_data_feed()
     settings = get_settings()
     
-    # 创建信号生成器
-    signal_generator = SignalGenerator(data_feed=data_feed)
+    # 创建信号生成器（使用指定策略）
+    signal_generator = SignalGenerator(data_feed=data_feed, strategy_type=strategy_type)
     
     # 生成信号
     signals = signal_generator.generate_signals(
@@ -651,6 +665,21 @@ def main():
     
     st.divider()
     
+    # ========== 策略选择 ==========
+    st.subheader("📋 策略选择")
+    
+    strategy_name = st.selectbox(
+        "选择策略",
+        options=list(STRATEGY_OPTIONS.keys()),
+        index=0,
+        help="选择要使用的策略类型，与回测页面保持一致"
+    )
+    
+    strategy_info = STRATEGY_OPTIONS[strategy_name]
+    st.info(f"💡 **{strategy_name}**：{strategy_info['description']}")
+    
+    st.divider()
+    
     # 信号生成配置
     st.subheader("⚙️ 信号生成")
     
@@ -690,8 +719,8 @@ def main():
             st.warning("请选择要生成信号的股票")
             return
         
-        with st.spinner("正在生成交易信号，请稍候..."):
-            signals = generate_signals(selected_stocks)
+        with st.spinner(f"正在使用 {strategy_name} 生成交易信号，请稍候..."):
+            signals = generate_signals(selected_stocks, strategy_info['type'])
         
         # 保存信号到历史记录（Requirements: 1.1）
         if signals:
@@ -765,17 +794,36 @@ def main():
     
     with st.expander("信号指标说明", expanded=False):
         st.markdown("""
-        **买入信号条件：**
-        - 股价 > MA60（趋势滤网，只做右侧交易）
-        - MACD 金叉（DIF 上穿 DEA）
-        - RSI < 80（避免追高）
+        ### RSRS 阻力支撑策略
         
-        **卖出信号条件：**
-        - 硬止损：亏损达到 -8%
-        - 移动止盈：盈利超过 15% 后，从最高点回撤 5%
-        - MACD 死叉
+        **核心理念**：
+        - 最高价 = 多头进攻极限 = 阻力位
+        - 最低价 = 空头打压极限 = 支撑位
+        - 阻力位和支撑位的变化关系，比价格本身更能反映市场情绪
         
-        **限价上限：**
+        **计算步骤**：
+        1. 取过去 18 天的 High/Low 数据，做线性回归，得到斜率 Beta
+        2. 将 Beta 标准化（Z-Score），与过去 600 天的历史比较
+        3. 得到 RSRS 标准分
+        
+        **买入信号**：RSRS 标准分 > 0.7（市场情绪处于历史最好的 25%）
+        
+        **卖出信号**：RSRS 标准分 < -0.7（市场情绪处于历史最差的 25%）
+        
+        ---
+        
+        ### RSI 超卖反弹策略
+        
+        **买入信号条件**：
+        - RSI < 30（超卖区反弹）
+        - 或 RSI 上穿 30（右侧买点）
+        
+        **卖出信号条件**：
+        - RSI > 70（超买区止盈）
+        
+        ---
+        
+        **限价上限**：
         - 计算公式：收盘价 × 1.01
         - 作用：防止次日高开时盲目追高
         """)

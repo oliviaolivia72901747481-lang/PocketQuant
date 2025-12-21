@@ -1,2 +1,3 @@
 1. 终端使用 python auto_update_pool.py 命令，筛选股票进股票池
 2. 终端使用 streamlit run app/Home.py 命令，在浏览器打开主页
+
