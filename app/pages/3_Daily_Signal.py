@@ -12,7 +12,7 @@ Requirements: 7.6, 7.7, 7.10, 12.1, 12.2, 12.3
 import streamlit as st
 import sys
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import List, Optional
 import pandas as pd
 
@@ -24,6 +24,7 @@ from config.stock_pool import get_watchlist
 from core.data_feed import DataFeed
 from core.signal_generator import SignalGenerator, TradingSignal, SignalType
 from core.screener import Screener
+from core.signal_store import SignalStore
 
 
 def get_data_feed() -> DataFeed:
@@ -221,6 +222,144 @@ def render_signal_summary_table(signals: List[TradingSignal]):
     )
 
 
+def render_historical_signal_table(df: pd.DataFrame):
+    """
+    渲染历史信号表格
+    
+    使用 Streamlit 原生 column_config 实现样式
+    
+    Args:
+        df: 历史信号 DataFrame
+        
+    Requirements: 3.1, 3.2, 3.3, 3.4, 3.5
+    """
+    # 添加显示用的列
+    display_df = df.copy()
+    
+    # 信号类型添加 emoji
+    display_df['信号'] = display_df['signal_type'].apply(
+        lambda x: f"🟢 {x}" if x == "买入" else f"🔴 {x}"
+    )
+    
+    # 警告标识
+    display_df['警告'] = display_df.apply(
+        lambda row: "⚠️ 财报" if row['in_report_window'] else (
+            "⚠️ 高费率" if row['high_fee_warning'] else ""
+        ),
+        axis=1
+    )
+    
+    # 选择显示列
+    display_columns = [
+        'generated_date', 'code', 'name', '信号', 
+        'limit_cap', 'reason', '警告'
+    ]
+    
+    st.dataframe(
+        display_df[display_columns],
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            'generated_date': st.column_config.DateColumn('日期', format='YYYY-MM-DD'),
+            'code': st.column_config.TextColumn('代码'),
+            'name': st.column_config.TextColumn('名称'),
+            '信号': st.column_config.TextColumn('信号类型'),
+            'limit_cap': st.column_config.NumberColumn('限价上限', format='¥%.2f'),
+            'reason': st.column_config.TextColumn('信号依据'),
+            '警告': st.column_config.TextColumn('警告'),
+        }
+    )
+
+
+def render_historical_signals():
+    """
+    渲染历史信号区域
+    
+    使用 Streamlit 原生组件，不搞复杂 HTML
+    
+    Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 3.1-3.5, 4.1-4.4, 5.1, 5.2
+    """
+    st.subheader("📜 历史信号")
+    
+    signal_store = SignalStore()
+    
+    # ========== 筛选条件 ==========
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        # 日期范围选择（默认最近 30 天）
+        default_start = date.today() - timedelta(days=30)
+        default_end = date.today()
+        date_range = st.date_input(
+            "日期范围",
+            value=(default_start, default_end),
+            max_value=date.today(),
+            key="historical_date_range"
+        )
+    
+    with col2:
+        # 股票代码筛选
+        code_filter = st.text_input(
+            "股票代码",
+            placeholder="输入代码筛选，留空显示全部",
+            key="historical_code_filter"
+        )
+    
+    with col3:
+        # 信号类型筛选
+        signal_type_filter = st.selectbox(
+            "信号类型",
+            options=["全部", "买入", "卖出"],
+            key="historical_signal_type"
+        )
+    
+    # ========== 加载数据 ==========
+    # 处理日期范围（可能是单个日期或元组）
+    if isinstance(date_range, tuple) and len(date_range) == 2:
+        start_date, end_date = date_range
+    else:
+        start_date = date_range if not isinstance(date_range, tuple) else date_range[0]
+        end_date = start_date
+    
+    df = signal_store.load_signals(
+        start_date=start_date,
+        end_date=end_date,
+        code=code_filter if code_filter else None,
+        signal_type=signal_type_filter if signal_type_filter != "全部" else None
+    )
+    
+    # ========== 统计概览 ==========
+    if not df.empty:
+        stats = signal_store.get_statistics(df)
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("总信号数", stats['total_count'])
+        with col2:
+            st.metric("买入信号", stats['buy_count'])
+        with col3:
+            st.metric("卖出信号", stats['sell_count'])
+        with col4:
+            st.metric("涉及股票", stats['stock_count'])
+        
+        st.divider()
+        
+        # ========== 信号表格 ==========
+        render_historical_signal_table(df)
+        
+        # ========== 导出按钮 ==========
+        csv_data = signal_store.export_csv(df)
+        st.download_button(
+            label="📥 导出 CSV",
+            data=csv_data,
+            file_name=f"signals_export_{date.today().strftime('%Y%m%d')}.csv",
+            mime="text/csv",
+            key="export_historical_signals"
+        )
+    else:
+        st.info("📭 暂无历史信号记录")
+
+
 def generate_signals(stock_pool: List[str]) -> List[TradingSignal]:
     """
     生成交易信号
@@ -338,6 +477,25 @@ def main():
         with st.spinner("正在生成交易信号，请稍候..."):
             signals = generate_signals(selected_stocks)
         
+        # 保存信号到历史记录（Requirements: 1.1）
+        if signals:
+            try:
+                signal_store = SignalStore()
+                # 获取大盘状态
+                data_feed = get_data_feed()
+                screener = Screener(data_feed)
+                market_status_info = screener.get_market_status()
+                market_status = "健康" if market_status_info.get('status') == 'healthy' else "不佳"
+                
+                saved_count = signal_store.save_signals(
+                    signals=signals,
+                    generated_date=date.today(),
+                    market_status=market_status
+                )
+                st.success(f"✅ 已保存 {saved_count} 条信号到历史记录")
+            except Exception as e:
+                st.warning(f"保存信号到历史记录失败: {str(e)}")
+        
         st.divider()
         
         # 显示信号
@@ -363,10 +521,9 @@ def main():
             3. 耐心等待机会
             """)
     
-    # 历史信号（简化版，仅显示提示）
+    # 历史信号区域
     st.divider()
-    st.subheader("📜 历史信号")
-    st.info("历史信号功能开发中，敬请期待...")
+    render_historical_signals()
     
     # 使用说明
     st.divider()

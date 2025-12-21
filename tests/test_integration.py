@@ -509,5 +509,315 @@ class TestModuleImports:
         print("应用模块语法检查通过")
 
 
+class TestHistoricalSignalsIntegration:
+    """
+    历史信号模块集成测试
+    
+    Final Checkpoint 4: 验证端到端流程
+    - 生成信号 → 自动保存 → 历史查询 → 导出
+    
+    Requirements: 1.1-1.5, 2.1-2.5, 4.2-4.4, 5.1-5.2
+    """
+    
+    @pytest.fixture
+    def temp_signal_store(self):
+        """创建临时目录的 SignalStore 实例"""
+        from core.signal_store import SignalStore
+        from pathlib import Path
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = Path(tmpdir) / "signal_history.csv"
+            yield SignalStore(file_path=file_path)
+    
+    @pytest.fixture
+    def mock_trading_signals(self):
+        """创建模拟的交易信号列表"""
+        from core.signal_generator import TradingSignal, SignalType
+        
+        signals = [
+            TradingSignal(
+                code='000001',
+                name='平安银行',
+                signal_type=SignalType.BUY,
+                price_range=(10.50, 10.80),
+                limit_cap=10.91,
+                reason='MACD金叉+MA60趋势向上',
+                generated_at=date.today(),
+                trade_amount=50000.0,
+                high_fee_warning=False,
+                actual_fee_rate=0.0003,
+                news_url='https://quote.eastmoney.com/sz000001.html',
+                in_report_window=False,
+                report_warning=None
+            ),
+            TradingSignal(
+                code='600036',
+                name='招商银行',
+                signal_type=SignalType.BUY,
+                price_range=(35.20, 36.00),
+                limit_cap=36.36,
+                reason='MACD金叉+RSI=65',
+                generated_at=date.today(),
+                trade_amount=60000.0,
+                high_fee_warning=False,
+                actual_fee_rate=0.0003,
+                news_url='https://quote.eastmoney.com/sh600036.html',
+                in_report_window=True,
+                report_warning='财报窗口期'
+            ),
+            TradingSignal(
+                code='000002',
+                name='万科A',
+                signal_type=SignalType.SELL,
+                price_range=(8.50, 8.80),
+                limit_cap=8.89,
+                reason='MACD死叉',
+                generated_at=date.today(),
+                trade_amount=30000.0,
+                high_fee_warning=True,
+                actual_fee_rate=0.0005,
+                news_url='https://quote.eastmoney.com/sz000002.html',
+                in_report_window=False,
+                report_warning=None
+            )
+        ]
+        return signals
+    
+    def test_signal_store_initialization(self, temp_signal_store):
+        """测试 SignalStore 初始化和文件创建"""
+        store = temp_signal_store
+        
+        # 验证文件已创建
+        assert store.file_path.exists(), "信号历史文件未创建"
+        
+        # 验证列定义
+        assert len(store.COLUMNS) == 11, "列定义数量不正确"
+        
+        print("SignalStore 初始化测试通过")
+    
+    def test_save_signals_flow(self, temp_signal_store, mock_trading_signals):
+        """测试信号保存流程 (Requirements: 1.1, 1.2)"""
+        store = temp_signal_store
+        signals = mock_trading_signals
+        
+        # 保存信号
+        saved_count = store.save_signals(
+            signals=signals,
+            generated_date=date.today(),
+            market_status="健康"
+        )
+        
+        # 验证保存数量
+        assert saved_count == len(signals), f"保存数量不匹配: {saved_count} != {len(signals)}"
+        
+        print(f"信号保存流程测试通过: 保存 {saved_count} 条信号")
+    
+    def test_load_signals_flow(self, temp_signal_store, mock_trading_signals):
+        """测试信号加载流程 (Requirements: 2.1, 2.2, 2.3, 2.4)"""
+        store = temp_signal_store
+        signals = mock_trading_signals
+        
+        # 先保存信号
+        store.save_signals(signals, date.today(), "健康")
+        
+        # 加载全部信号
+        df = store.load_signals()
+        assert len(df) == len(signals), "加载信号数量不匹配"
+        
+        # 按日期范围筛选
+        df_date = store.load_signals(
+            start_date=date.today(),
+            end_date=date.today()
+        )
+        assert len(df_date) == len(signals), "日期筛选结果不正确"
+        
+        # 按股票代码筛选
+        df_code = store.load_signals(code='000001')
+        assert len(df_code) == 1, "股票代码筛选结果不正确"
+        
+        # 按信号类型筛选
+        df_buy = store.load_signals(signal_type='买入')
+        assert len(df_buy) == 2, "信号类型筛选结果不正确"
+        
+        df_sell = store.load_signals(signal_type='卖出')
+        assert len(df_sell) == 1, "信号类型筛选结果不正确"
+        
+        print("信号加载流程测试通过")
+    
+    def test_idempotent_save_flow(self, temp_signal_store, mock_trading_signals):
+        """测试幂等覆盖更新流程 (Requirements: 1.3, 1.5)"""
+        store = temp_signal_store
+        signals = mock_trading_signals
+        
+        # 第一次保存
+        store.save_signals(signals, date.today(), "健康")
+        
+        # 第二次保存（同一天，应覆盖）
+        new_signals = signals[:1]  # 只保存第一条
+        store.save_signals(new_signals, date.today(), "不佳")
+        
+        # 验证只保留最后一次的数据
+        df = store.load_signals(start_date=date.today(), end_date=date.today())
+        assert len(df) == 1, f"幂等覆盖更新失败: 期望 1 条，实际 {len(df)} 条"
+        
+        # 验证大盘状态已更新
+        assert df.iloc[0]['market_status'] == '不佳', "大盘状态未更新"
+        
+        print("幂等覆盖更新流程测试通过")
+    
+    def test_statistics_flow(self, temp_signal_store, mock_trading_signals):
+        """测试统计计算流程 (Requirements: 4.2, 4.3, 4.4)"""
+        store = temp_signal_store
+        signals = mock_trading_signals
+        
+        # 保存信号
+        store.save_signals(signals, date.today(), "健康")
+        
+        # 加载并计算统计
+        df = store.load_signals()
+        stats = store.get_statistics(df)
+        
+        # 验证统计结果
+        assert stats['total_count'] == 3, "总信号数不正确"
+        assert stats['buy_count'] == 2, "买入信号数不正确"
+        assert stats['sell_count'] == 1, "卖出信号数不正确"
+        assert stats['stock_count'] == 3, "涉及股票数不正确"
+        
+        print(f"统计计算流程测试通过: {stats}")
+    
+    def test_export_csv_flow(self, temp_signal_store, mock_trading_signals):
+        """测试 CSV 导出流程 (Requirements: 5.1, 5.2)"""
+        store = temp_signal_store
+        signals = mock_trading_signals
+        
+        # 保存信号
+        store.save_signals(signals, date.today(), "健康")
+        
+        # 加载并导出
+        df = store.load_signals()
+        csv_bytes = store.export_csv(df)
+        
+        # 验证导出内容
+        assert csv_bytes is not None, "导出内容为空"
+        assert len(csv_bytes) > 0, "导出内容长度为 0"
+        
+        # 验证可以解析回 DataFrame
+        import io
+        exported_df = pd.read_csv(io.BytesIO(csv_bytes))
+        assert len(exported_df) == len(df), "导出数据行数不匹配"
+        
+        print(f"CSV 导出流程测试通过: 导出 {len(csv_bytes)} 字节")
+    
+    def test_end_to_end_signal_flow(self, temp_signal_store, mock_trading_signals):
+        """
+        测试完整的端到端流程
+        
+        流程: 生成信号 → 自动保存 → 历史查询 → 导出
+        """
+        store = temp_signal_store
+        signals = mock_trading_signals
+        
+        # 1. 生成信号（模拟）
+        print("Step 1: 生成信号")
+        assert len(signals) == 3, "信号生成失败"
+        
+        # 2. 自动保存
+        print("Step 2: 自动保存")
+        saved_count = store.save_signals(signals, date.today(), "健康")
+        assert saved_count == 3, "信号保存失败"
+        
+        # 3. 历史查询
+        print("Step 3: 历史查询")
+        df = store.load_signals(
+            start_date=date.today() - timedelta(days=30),
+            end_date=date.today()
+        )
+        assert len(df) == 3, "历史查询失败"
+        
+        # 4. 统计计算
+        print("Step 4: 统计计算")
+        stats = store.get_statistics(df)
+        assert stats['total_count'] == 3, "统计计算失败"
+        
+        # 5. 导出
+        print("Step 5: 导出 CSV")
+        csv_bytes = store.export_csv(df)
+        assert len(csv_bytes) > 0, "CSV 导出失败"
+        
+        print(f"""
+端到端流程测试通过:
+  - 生成信号: {len(signals)} 条
+  - 保存信号: {saved_count} 条
+  - 历史查询: {len(df)} 条
+  - 统计: 总数={stats['total_count']}, 买入={stats['buy_count']}, 卖出={stats['sell_count']}
+  - 导出: {len(csv_bytes)} 字节
+        """)
+    
+    def test_empty_signals_handling(self, temp_signal_store):
+        """测试空信号列表处理"""
+        store = temp_signal_store
+        
+        # 保存空列表
+        saved_count = store.save_signals([], date.today(), "健康")
+        assert saved_count == 0, "空列表保存应返回 0"
+        
+        # 加载空数据
+        df = store.load_signals()
+        assert df.empty, "空数据加载应返回空 DataFrame"
+        
+        # 空数据统计
+        stats = store.get_statistics(df)
+        assert stats['total_count'] == 0, "空数据统计应返回 0"
+        
+        print("空信号列表处理测试通过")
+    
+    def test_no_matching_signals(self, temp_signal_store, mock_trading_signals):
+        """测试无匹配信号的情况 (Requirements: 2.5)"""
+        store = temp_signal_store
+        signals = mock_trading_signals
+        
+        # 保存信号
+        store.save_signals(signals, date.today(), "健康")
+        
+        # 查询不存在的股票代码
+        df = store.load_signals(code='999999')
+        assert df.empty, "不存在的股票代码应返回空结果"
+        
+        # 查询未来日期
+        future_date = date.today() + timedelta(days=30)
+        df = store.load_signals(start_date=future_date, end_date=future_date)
+        assert df.empty, "未来日期应返回空结果"
+        
+        print("无匹配信号处理测试通过")
+    
+    def test_signal_store_module_import(self):
+        """测试 SignalStore 模块可导入"""
+        from core.signal_store import SignalStore, SignalRecord
+        
+        # 验证类存在
+        assert SignalStore is not None
+        assert SignalRecord is not None
+        
+        # 验证 SignalRecord 字段
+        record = SignalRecord(
+            generated_date=date.today(),
+            code='000001',
+            name='测试股票',
+            signal_type='买入',
+            price_low=10.0,
+            price_high=10.5,
+            limit_cap=10.61,
+            reason='测试原因',
+            in_report_window=False,
+            high_fee_warning=False,
+            market_status='健康'
+        )
+        
+        assert record.code == '000001'
+        assert record.signal_type == '买入'
+        
+        print("SignalStore 模块导入测试通过")
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '--tb=short'])

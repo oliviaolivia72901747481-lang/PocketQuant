@@ -316,11 +316,15 @@ class SignalGenerator:
         df: pd.DataFrame
     ) -> Tuple[Optional[SignalType], str]:
         """
-        检查技术指标条件，判断信号类型
+        检查技术指标条件，判断信号类型 (针对小资金优化的 RSI 反转策略)
         
-        基于 TrendFilteredMACDStrategy 的逻辑：
-        - 买入条件：股价 > MA60 且 MACD 金叉 且 RSI < 80
-        - 卖出条件：MACD 死叉
+        策略逻辑 (RSI Mean Reversion):
+        - 买入: RSI(14) < 30 (超卖区反弹)
+        - 卖出: RSI(14) > 70 (超买区止盈)
+        
+        为什么改这个？
+        MACD 适合大趋势，但在震荡市中太慢。对于5.5万资金，
+        我们需要更灵敏的信号，快进快出，积累小胜为大胜。
         
         Args:
             df: 股票历史数据 DataFrame
@@ -328,54 +332,55 @@ class SignalGenerator:
         Returns:
             (信号类型, 信号依据) 或 (None, "") 无信号时
         """
-        if len(df) < 60:
+        if len(df) < 20:  # RSI至少需要15天数据
             return None, ""
         
-        # 计算技术指标
-        close = df['close'].values
-        
-        # MA60
-        ma60 = df['close'].rolling(window=60).mean()
-        current_ma60 = ma60.iloc[-1]
-        current_close = close[-1]
-        
-        # MACD
-        exp1 = df['close'].ewm(span=12, adjust=False).mean()
-        exp2 = df['close'].ewm(span=26, adjust=False).mean()
-        macd_line = exp1 - exp2
-        signal_line = macd_line.ewm(span=9, adjust=False).mean()
-        
-        current_macd = macd_line.iloc[-1]
-        prev_macd = macd_line.iloc[-2]
-        current_signal = signal_line.iloc[-1]
-        prev_signal = signal_line.iloc[-2]
-        
-        # MACD 金叉/死叉判断
-        macd_golden_cross = (prev_macd <= prev_signal) and (current_macd > current_signal)
-        macd_death_cross = (prev_macd >= prev_signal) and (current_macd < current_signal)
-        
-        # RSI
-        delta = df['close'].diff()
+        # 1. 计算 RSI (相对强弱指标)
+        close = df['close']
+        delta = close.diff()
         gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+        
+        # 避免除以零
+        loss = loss.replace(0, 0.000001)
         rs = gain / loss
-        rsi = 100 - (100 / (1 + rs))
-        current_rsi = rsi.iloc[-1]
+        rsi_series = 100 - (100 / (1 + rs))
         
-        # 买入条件检查
-        if current_close > current_ma60:  # 趋势滤网
-            if macd_golden_cross:  # MACD 金叉
-                if current_rsi < 80:  # RSI 过滤
-                    reason = f"趋势向上(MA60) 且 MACD金叉, RSI={current_rsi:.1f}"
-                    return SignalType.BUY, reason
-                else:
-                    logger.debug(f"RSI 过高({current_rsi:.1f})，放弃买入")
+        current_rsi = rsi_series.iloc[-1]
+        prev_rsi = rsi_series.iloc[-2]
         
-        # 卖出条件检查（仅用于持仓股票）
-        if macd_death_cross:
-            reason = f"MACD死叉"
+        # 2. 计算 MA60 (作为生命线风控)
+        # 虽然我们做超跌反弹，但如果股价在 MA60 之下太远（比如下跌趋势中），
+        # 可能是主跌浪，最好还是小心点。
+        # 这里我们放宽限制：只要不是"暴跌"（例如偏离均线20%以上）就可以尝试抄底
+        if len(df) >= 60:
+            ma60 = df['close'].rolling(window=60).mean().iloc[-1]
+            current_close = close.iloc[-1]
+            # 简单的趋势判断：如果股价跌破 MA60 太多(>20%)，可能是垃圾股，不抄底
+            if current_close < ma60 * 0.8:
+                return None, ""
+        
+        # ==========================================
+        # 🎯 买入信号：超卖反弹
+        # 条件：RSI 跌破 30 (恐慌盘杀出)
+        # ==========================================
+        if current_rsi < 30:
+            reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < 30)"
+            return SignalType.BUY, reason
+            
+        # 备选买入：RSI 从下方穿过 30 (右侧买点)
+        if prev_rsi < 30 and current_rsi >= 30:
+            reason = f"RSI低位金叉 (上穿30, RSI={current_rsi:.1f})"
+            return SignalType.BUY, reason
+
+        # ==========================================
+        # 🛑 卖出信号：超买止盈
+        # 条件：RSI 冲过 70 (贪婪盘涌入)
+        # ==========================================
+        if current_rsi > 70:
+            reason = f"RSI超买止盈 (RSI={current_rsi:.1f} > 70)"
             return SignalType.SELL, reason
-        
+            
         return None, ""
 
     def _calculate_limit_cap(self, close_price: float) -> float:

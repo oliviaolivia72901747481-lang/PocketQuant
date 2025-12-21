@@ -203,53 +203,43 @@ class DataFeed:
         self, 
         codes: List[str], 
         start_date: str, 
-        end_date: str,
+        end_date: str, 
         adjust: str = 'qfq'
     ) -> Dict[str, pd.DataFrame]:
         """
-        批量下载股票数据（串行，简单稳定）
-        
-        设计原则：稳定压倒一切
-        - 串行下载几十只股票只需几秒
-        - 避免多线程带来的复杂性（死锁、线程安全、IP 封禁）
-        - 每次请求间隔 0.5 秒，避免被封 IP
-        
-        Args:
-            codes: 股票代码列表
-            start_date: 开始日期 'YYYY-MM-DD'
-            end_date: 结束日期 'YYYY-MM-DD'
-            adjust: 复权类型，默认 'qfq'（前复权）
-        
-        Returns:
-            {股票代码: DataFrame} 字典
-            
-        Requirements: 1.2, 1.5
+        批量下载股票数据（多线程并发版）
         """
-        import time
+        import concurrent.futures
         
         results = {}
         total = len(codes)
         success_count = 0
-        fail_count = 0
         
-        logger.info(f"开始批量下载: 共 {total} 只股票")
+        logger.info(f"开始批量下载: 共 {total} 只股票 (并发数: 8)")
         
-        for i, code in enumerate(codes):
-            df = self.download_stock_data(code, start_date, end_date, adjust)
+        # 使用线程池并发下载
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            # 提交所有任务
+            future_to_code = {
+                executor.submit(self.download_stock_data, code, start_date, end_date, adjust): code 
+                for code in codes
+            }
             
-            if df is not None and not df.empty:
-                results[code] = df
-                success_count += 1
-                logger.info(f"下载完成: {code} ({i+1}/{total})")
-            else:
-                fail_count += 1
-                logger.warning(f"下载失败: {code} ({i+1}/{total})")
-            
-            # 简单的请求间隔，避免被封 IP
-            if i < total - 1:  # 最后一个不需要等待
-                time.sleep(0.5)
-        
-        logger.info(f"批量下载完成: 成功 {success_count}, 失败 {fail_count}")
+            # 获取结果
+            for i, future in enumerate(concurrent.futures.as_completed(future_to_code)):
+                code = future_to_code[future]
+                try:
+                    df = future.result()
+                    if df is not None and not df.empty:
+                        results[code] = df
+                        success_count += 1
+                        # 降低日志频率，每完成 10 只打印一次，避免刷屏
+                        if success_count % 10 == 0:
+                            logger.info(f"进度: {success_count}/{total} 已完成")
+                except Exception as e:
+                    logger.warning(f"下载异常 {code}: {e}")
+
+        logger.info(f"批量下载完成: 成功 {success_count}/{total}")
         return results
     
     def clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -337,7 +327,7 @@ class DataFeed:
         """
         # 计算日期范围
         end_date = date.today()
-        start_date = end_date - timedelta(days=days)
+        start_date = end_date - timedelta(days=1095)
         
         start_str = start_date.strftime('%Y-%m-%d')
         end_str = end_date.strftime('%Y-%m-%d')
