@@ -320,15 +320,15 @@ def render_stock_pool_management():
             valid_codes = validate_stock_codes(codes)
             
             if valid_codes:
-                pool = StockPool(current_pool)
                 added = 0
                 for code in valid_codes:
-                    if pool.add(code):
+                    if code not in current_pool:
+                        StockPool.add_code(code)
                         added += 1
                 
                 if added > 0:
                     st.success(f"✅ 成功添加 {added} 只股票")
-                    # 注意：这里只是演示，实际需要持久化存储
+                    st.rerun()
                 else:
                     st.info("所有股票已在股票池中")
             else:
