@@ -1,1 +1,1 @@
-git rm -r --cached data/  # 例：git rm -r --cached temp
+data/
