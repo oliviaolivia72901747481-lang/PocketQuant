@@ -9,11 +9,97 @@ Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8
 from dataclasses import dataclass
 from typing import Optional, List, Dict
 from datetime import date, datetime, timedelta
+from functools import lru_cache
 import pandas as pd
 import os
 import logging
+import time
 
 logger = logging.getLogger(__name__)
+
+
+# ========== 内存缓存管理 ==========
+class DataCache:
+    """
+    数据缓存管理器
+    
+    提供内存级别的数据缓存，避免重复读取 CSV 文件。
+    缓存策略：
+    - 股票数据缓存 TTL: 5 分钟（同一会话内多次访问）
+    - 市场快照缓存 TTL: 1 分钟（实时数据更新频繁）
+    - 股票名称缓存 TTL: 1 小时（基本不变）
+    """
+    
+    def __init__(self):
+        self._stock_data_cache: Dict[str, tuple] = {}  # {code: (data, timestamp)}
+        self._market_snapshot_cache: Optional[tuple] = None  # (data, timestamp)
+        self._stock_names_cache: Optional[tuple] = None  # (data, timestamp)
+        
+        # 缓存 TTL（秒）
+        self.STOCK_DATA_TTL = 300  # 5 分钟
+        self.MARKET_SNAPSHOT_TTL = 60  # 1 分钟
+        self.STOCK_NAMES_TTL = 3600  # 1 小时
+    
+    def get_stock_data(self, code: str) -> Optional[pd.DataFrame]:
+        """获取缓存的股票数据"""
+        if code in self._stock_data_cache:
+            data, timestamp = self._stock_data_cache[code]
+            if time.time() - timestamp < self.STOCK_DATA_TTL:
+                logger.debug(f"缓存命中: {code}")
+                return data.copy()
+        return None
+    
+    def set_stock_data(self, code: str, data: pd.DataFrame) -> None:
+        """设置股票数据缓存"""
+        self._stock_data_cache[code] = (data.copy(), time.time())
+        logger.debug(f"缓存更新: {code}")
+    
+    def get_market_snapshot(self) -> Optional[pd.DataFrame]:
+        """获取缓存的市场快照"""
+        if self._market_snapshot_cache:
+            data, timestamp = self._market_snapshot_cache
+            if time.time() - timestamp < self.MARKET_SNAPSHOT_TTL:
+                logger.debug("市场快照缓存命中")
+                return data.copy()
+        return None
+    
+    def set_market_snapshot(self, data: pd.DataFrame) -> None:
+        """设置市场快照缓存"""
+        self._market_snapshot_cache = (data.copy(), time.time())
+        logger.debug("市场快照缓存更新")
+    
+    def get_stock_names(self) -> Optional[Dict[str, str]]:
+        """获取缓存的股票名称"""
+        if self._stock_names_cache:
+            data, timestamp = self._stock_names_cache
+            if time.time() - timestamp < self.STOCK_NAMES_TTL:
+                logger.debug("股票名称缓存命中")
+                return data.copy()
+        return None
+    
+    def set_stock_names(self, data: Dict[str, str]) -> None:
+        """设置股票名称缓存"""
+        self._stock_names_cache = (data.copy(), time.time())
+        logger.debug("股票名称缓存更新")
+    
+    def clear(self) -> None:
+        """清空所有缓存"""
+        self._stock_data_cache.clear()
+        self._market_snapshot_cache = None
+        self._stock_names_cache = None
+        logger.info("内存缓存已清空")
+    
+    def get_stats(self) -> Dict[str, int]:
+        """获取缓存统计"""
+        return {
+            'stock_data_count': len(self._stock_data_cache),
+            'has_market_snapshot': self._market_snapshot_cache is not None,
+            'has_stock_names': self._stock_names_cache is not None
+        }
+
+
+# 全局缓存实例
+_data_cache = DataCache()
 
 
 @dataclass
@@ -355,16 +441,23 @@ class DataFeed:
         logger.info(f"覆盖更新成功: {code}, 保存至 {file_path}, 共 {len(cleaned)} 条记录")
         return True
     
-    def load_processed_data(self, code: str) -> Optional[pd.DataFrame]:
+    def load_processed_data(self, code: str, use_cache: bool = True) -> Optional[pd.DataFrame]:
         """
-        加载已处理的数据
+        加载已处理的数据（支持内存缓存）
         
         Args:
             code: 股票代码
+            use_cache: 是否使用内存缓存，默认 True
         
         Returns:
             DataFrame 或 None（文件不存在时）
         """
+        # 尝试从缓存获取
+        if use_cache:
+            cached = _data_cache.get_stock_data(code)
+            if cached is not None:
+                return cached
+        
         file_path = os.path.join(self.processed_path, f"{code}.csv")
         
         if not os.path.exists(file_path):
@@ -375,10 +468,28 @@ class DataFeed:
             df = pd.read_csv(file_path)
             df['date'] = pd.to_datetime(df['date'])
             logger.debug(f"加载数据成功: {code}, 共 {len(df)} 条记录")
+            
+            # 存入缓存
+            if use_cache:
+                _data_cache.set_stock_data(code, df)
+            
             return df
         except Exception as e:
             logger.error(f"加载数据失败: {code}, 错误: {e}")
             return None
+    
+    def get_stock_data(self, code: str, use_cache: bool = True) -> Optional[pd.DataFrame]:
+        """
+        获取股票数据（load_processed_data 的别名，保持兼容性）
+        
+        Args:
+            code: 股票代码
+            use_cache: 是否使用内存缓存
+        
+        Returns:
+            DataFrame 或 None
+        """
+        return self.load_processed_data(code, use_cache=use_cache)
     
     def save_raw_data(self, code: str, df: pd.DataFrame) -> bool:
         """
@@ -407,7 +518,8 @@ class DataFeed:
 
     def get_market_snapshot(
         self, 
-        liquidity_filter: Optional[LiquidityFilter] = None
+        liquidity_filter: Optional[LiquidityFilter] = None,
+        use_cache: bool = True
     ) -> pd.DataFrame:
         """
         获取全市场实时快照并进行预剪枝（性能优化关键）
@@ -423,6 +535,7 @@ class DataFeed:
         
         Args:
             liquidity_filter: 流动性过滤配置，None 时使用默认值
+            use_cache: 是否使用内存缓存，默认 True
         
         Returns:
             DataFrame，包含列：code, name, price, market_cap, turnover_rate
@@ -430,6 +543,12 @@ class DataFeed:
         Requirements: 1.8, 2.13
         """
         import akshare as ak
+        
+        # 尝试从缓存获取（仅当不使用过滤器时）
+        if use_cache and liquidity_filter is None:
+            cached = _data_cache.get_market_snapshot()
+            if cached is not None:
+                return cached
         
         if liquidity_filter is None:
             liquidity_filter = LiquidityFilter()
@@ -480,6 +599,11 @@ class DataFeed:
             result['turnover_rate'] = result['turnover_rate'] / 100
             
             logger.info(f"预剪枝完成: {len(result)} 只候选股票 (从 {original_count} 只中筛选)")
+            
+            # 存入缓存
+            if use_cache:
+                _data_cache.set_market_snapshot(result)
+            
             return result
             
         except Exception as e:
@@ -561,7 +685,7 @@ class DataFeed:
     
     def clear_cache(self) -> bool:
         """
-        清空所有缓存数据
+        清空所有缓存数据（包括文件缓存和内存缓存）
         
         Returns:
             是否清空成功
@@ -569,6 +693,9 @@ class DataFeed:
         import shutil
         
         try:
+            # 清空内存缓存
+            _data_cache.clear()
+            
             # 清空原始数据目录
             if os.path.exists(self.raw_path):
                 for file in os.listdir(self.raw_path):
@@ -620,18 +747,27 @@ class DataFeed:
             logger.warning(f"获取股票名称失败: {code}, 错误: {e}")
             return None
     
-    def get_stock_names_batch(self, codes: List[str]) -> Dict[str, str]:
+    def get_stock_names_batch(self, codes: List[str], use_cache: bool = True) -> Dict[str, str]:
         """
-        批量获取股票名称
+        批量获取股票名称（支持内存缓存）
         
         一次性获取多只股票的名称，比逐个获取更高效
         
         Args:
             codes: 股票代码列表
+            use_cache: 是否使用内存缓存
         
         Returns:
             {股票代码: 股票名称} 字典
         """
+        # 尝试从缓存获取
+        if use_cache:
+            cached = _data_cache.get_stock_names()
+            if cached is not None:
+                # 检查是否所有请求的代码都在缓存中
+                if all(code in cached for code in codes):
+                    return {code: cached[code] for code in codes}
+        
         try:
             import akshare as ak
             
@@ -640,12 +776,20 @@ class DataFeed:
             if df is None or df.empty:
                 return {}
             
+            # 构建完整的名称映射
+            all_names = {}
+            for _, row in df.iterrows():
+                all_names[row['代码']] = row['名称']
+            
+            # 存入缓存
+            if use_cache:
+                _data_cache.set_stock_names(all_names)
+            
             # 筛选目标股票
             result = {}
             for code in codes:
-                stock_row = df[df['代码'] == code]
-                if not stock_row.empty:
-                    result[code] = stock_row.iloc[0]['名称']
+                if code in all_names:
+                    result[code] = all_names[code]
                 else:
                     result[code] = code  # 找不到名称时使用代码作为名称
             
@@ -654,3 +798,11 @@ class DataFeed:
         except Exception as e:
             logger.warning(f"批量获取股票名称失败: {e}")
             return {code: code for code in codes}  # 失败时返回代码作为名称
+    
+    def clear_memory_cache(self) -> None:
+        """清空内存缓存"""
+        _data_cache.clear()
+    
+    def get_cache_stats(self) -> Dict[str, int]:
+        """获取缓存统计信息"""
+        return _data_cache.get_stats()

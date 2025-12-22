@@ -226,6 +226,11 @@ class SignalGenerator:
         """
         分析单只股票，生成交易信号
         
+        重要修复：使用 T-1 日数据生成信号，避免未来函数
+        - 信号基于 T-1 日收盘数据计算
+        - 限价上限基于 T-1 日收盘价 × 1.01
+        - 实际执行在 T 日
+        
         Args:
             code: 股票代码
             current_cash: 当前可用现金
@@ -240,14 +245,17 @@ class SignalGenerator:
             logger.warning(f"无法加载数据，跳过: {code}")
             return None
         
-        # 确保数据足够（至少需要 60 天计算 MA60）
-        if len(df) < 60:
+        # 确保数据足够（至少需要 61 天，因为要用 T-1 数据）
+        if len(df) < 61:
             logger.warning(f"数据不足（{len(df)} 条），跳过: {code}")
             return None
         
-        # 2. 获取最新数据
-        latest_row = df.iloc[-1]
-        close_price = float(latest_row['close'])
+        # 2. 【重要修复】使用 T-1 日数据生成信号，避免未来函数
+        # df.iloc[-1] 是最新数据（T日），df.iloc[-2] 是前一天数据（T-1日）
+        # 信号基于 T-1 日数据计算，T 日执行
+        signal_df = df.iloc[:-1]  # 排除最新一天，使用 T-1 及之前的数据
+        latest_row = signal_df.iloc[-1]  # T-1 日数据
+        close_price = float(latest_row['close'])  # T-1 日收盘价
         
         # 获取股票名称
         stock_name = self._stock_names_cache.get(code, code)
@@ -255,8 +263,8 @@ class SignalGenerator:
         # 3. 检查财报窗口期（硬风控）
         is_in_window, report_warning = self.report_checker.check_report_window(code)
         
-        # 4. 计算技术指标，判断信号
-        signal_type, reason = self._check_signal_conditions(df)
+        # 4. 计算技术指标，判断信号（使用 T-1 及之前的数据）
+        signal_type, reason = self._check_signal_conditions(signal_df)
         
         if signal_type is None:
             logger.debug(f"无交易信号: {code}")
@@ -561,15 +569,25 @@ class SignalGenerator:
         df: pd.DataFrame
     ) -> Tuple[Optional[SignalType], str]:
         """
-        RSI 超卖反弹策略
+        RSI 超卖反弹策略（增强版）
         
-        买入条件：RSI < 30（超卖区反弹）
+        买入条件（全部满足）：
+        1. RSI < 30（超卖区反弹）
+        2. 股价 > MA60 × 0.85（趋势确认，避免接飞刀）
+        3. 股价 > MA20 × 0.90（短期趋势确认）
+        
         卖出条件：RSI > 70（超买区止盈）
+        
+        优化说明：
+        - 增加趋势确认，避免在单边下跌市中频繁抄底
+        - MA60 × 0.85 是趋势安全底线
+        - MA20 × 0.90 是短期趋势确认
         """
-        if len(df) < 20:
+        if len(df) < 60:
             return None, ""
         
         close = df['close']
+        current_close = close.iloc[-1]
         
         # 计算 RSI
         delta = close.diff()
@@ -582,22 +600,34 @@ class SignalGenerator:
         current_rsi = rsi_series.iloc[-1]
         prev_rsi = rsi_series.iloc[-2]
         
-        # MA60 风控：股价不能跌破 MA60 太多
-        if len(df) >= 60:
-            ma60 = close.rolling(window=60).mean().iloc[-1]
-            current_close = close.iloc[-1]
-            if current_close < ma60 * 0.8:
-                return None, ""
+        # 计算均线
+        ma60 = close.rolling(window=60).mean().iloc[-1]
+        ma20 = close.rolling(window=20).mean().iloc[-1]
         
-        # 买入信号：RSI < 30
+        # 趋势确认条件
+        ma60_floor = ma60 * 0.85  # MA60 的 85% 是安全底线
+        ma20_floor = ma20 * 0.90  # MA20 的 90% 是短期底线
+        
+        # 买入信号：RSI < 30 + 趋势确认
         if current_rsi < 30:
-            reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < 30)"
+            # 检查趋势安全性
+            if current_close < ma60_floor:
+                # 股价跌破 MA60 太多，可能是单边下跌，不买入
+                return None, ""
+            
+            if current_close < ma20_floor:
+                # 短期趋势太弱，谨慎买入
+                reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < 30, ⚠️短期趋势偏弱)"
+            else:
+                reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < 30, 趋势确认✓)"
+            
             return SignalType.BUY, reason
         
-        # 备选买入：RSI 上穿 30
+        # 备选买入：RSI 上穿 30 + 趋势确认
         if prev_rsi < 30 and current_rsi >= 30:
-            reason = f"RSI低位金叉 (上穿30, RSI={current_rsi:.1f})"
-            return SignalType.BUY, reason
+            if current_close >= ma60_floor:
+                reason = f"RSI低位金叉 (上穿30, RSI={current_rsi:.1f}, 趋势确认✓)"
+                return SignalType.BUY, reason
         
         # 卖出信号：RSI > 70
         if current_rsi > 70:

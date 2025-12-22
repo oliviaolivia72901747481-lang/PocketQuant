@@ -33,7 +33,8 @@ class BollingerExitReason(Enum):
     """退出原因"""
     MEAN_REVERSION = "均值回归(中轨)"
     UPPER_BAND = "触及上轨"
-    HARD_STOP_LOSS = "硬止损(-6%)"
+    ATR_STOP_LOSS = "ATR动态止损"
+    HARD_STOP_LOSS = "硬止损(-8%)"
     TIME_STOP = "时间止损(10日)"
     MANUAL = "手动卖出"
 
@@ -45,11 +46,12 @@ class BollingerPositionTracker:
     entry_bar: int               # 买入时的 bar 索引
     highest_price: float         # 持仓期间最高价
     current_profit_pct: float    # 当前盈亏百分比
+    atr_stop_price: float        # ATR 动态止损价（买入价 - 2倍ATR）
 
 
 class BollingerReversionStrategy(BaseStrategy):
     """
-    布林带均值回归策略
+    布林带均值回归策略（增强版）
     
     核心理念：
     - 利用布林带识别超买超卖区域
@@ -65,8 +67,13 @@ class BollingerReversionStrategy(BaseStrategy):
     卖出条件（任一满足）:
     1. 收盘价 >= 布林带中轨（均值回归完成）
     2. 收盘价 >= 布林带上轨（超买区止盈）
-    3. 硬止损：亏损达到 -6%
+    3. ATR 动态止损（默认 2 倍 ATR）或硬止损（-8%）
     4. 持仓超过 10 个交易日（时间止损）
+    
+    优化说明：
+    - 止损从固定 -6% 改为 ATR 动态止损
+    - ATR 止损更适应不同波动率的股票
+    - 保留硬止损 -8% 作为最后防线
     """
     
     params = (
@@ -75,7 +82,9 @@ class BollingerReversionStrategy(BaseStrategy):
         ('rsi_period', 14),          # RSI 周期
         ('rsi_buy_threshold', 35),   # RSI 买入阈值（超卖）
         ('volume_period', 5),        # 成交量均线周期
-        ('hard_stop_loss', -0.06),   # 硬止损比例（-6%）
+        ('atr_period', 14),          # ATR 周期
+        ('atr_multiplier', 2.0),     # ATR 止损倍数
+        ('hard_stop_loss', -0.08),   # 硬止损比例（-8%，最后防线）
         ('max_hold_days', 10),       # 最大持仓天数
     )
     
@@ -93,6 +102,11 @@ class BollingerReversionStrategy(BaseStrategy):
         # RSI 指标
         self.rsi = bt.indicators.RSI(
             self.data.close, period=self.params.rsi_period
+        )
+        
+        # ATR 指标（用于动态止损）
+        self.atr = bt.indicators.ATR(
+            self.data, period=self.params.atr_period
         )
         
         # 成交量均线
@@ -170,10 +184,16 @@ class BollingerReversionStrategy(BaseStrategy):
         检查退出条件
         
         优先级：
-        1. 硬止损（-6%）- 最高优先级
-        2. 时间止损（10日）
-        3. 触及上轨（超买止盈）
-        4. 回归中轨（均值回归完成）
+        1. 硬止损（-8%）- 最后防线，最高优先级
+        2. ATR 动态止损（2倍ATR）- 适应不同波动率
+        3. 时间止损（10日）
+        4. 触及上轨（超买止盈）
+        5. 回归中轨（均值回归完成）
+        
+        优化说明：
+        - ATR 止损比固定止损更灵活，能适应不同波动率的股票
+        - 高波动股票止损空间大，低波动股票止损空间小
+        - 保留硬止损 -8% 作为最后防线，防止极端行情
         
         Returns:
             退出原因，None 表示不需要退出
@@ -185,32 +205,54 @@ class BollingerReversionStrategy(BaseStrategy):
         entry_price = self.position_tracker.entry_price
         profit_pct = (current_price - entry_price) / entry_price
         
-        # 1. 硬止损检查
+        # 1. 硬止损检查（-8%，最后防线）
         if profit_pct <= self.params.hard_stop_loss:
             return BollingerExitReason.HARD_STOP_LOSS
         
-        # 2. 时间止损检查
+        # 2. ATR 动态止损检查
+        if current_price <= self.position_tracker.atr_stop_price:
+            return BollingerExitReason.ATR_STOP_LOSS
+        
+        # 3. 时间止损检查
         hold_days = self.bar_count - self.position_tracker.entry_bar
         if hold_days >= self.params.max_hold_days:
             return BollingerExitReason.TIME_STOP
         
-        # 3. 触及上轨（超买止盈）
+        # 4. 触及上轨（超买止盈）
         if current_price >= self.boll.lines.top[0]:
             return BollingerExitReason.UPPER_BAND
         
-        # 4. 回归中轨（均值回归完成）
+        # 5. 回归中轨（均值回归完成）
         if current_price >= self.boll.lines.mid[0]:
             return BollingerExitReason.MEAN_REVERSION
         
         return None
     
     def _init_position_tracker(self) -> None:
-        """初始化持仓跟踪器"""
+        """
+        初始化持仓跟踪器
+        
+        计算 ATR 动态止损价：
+        - 止损价 = 买入价 - ATR × 倍数
+        - 默认使用 2 倍 ATR，适应不同波动率的股票
+        """
+        entry_price = self.data.close[0]
+        current_atr = self.atr[0]
+        
+        # 计算 ATR 止损价（买入价 - 2倍ATR）
+        atr_stop = entry_price - (current_atr * self.params.atr_multiplier)
+        
         self.position_tracker = BollingerPositionTracker(
-            entry_price=self.data.close[0],
+            entry_price=entry_price,
             entry_bar=self.bar_count,
-            highest_price=self.data.close[0],
-            current_profit_pct=0.0
+            highest_price=entry_price,
+            current_profit_pct=0.0,
+            atr_stop_price=atr_stop
+        )
+        
+        self.log(
+            f'建仓: 买入价={entry_price:.2f}, ATR={current_atr:.2f}, '
+            f'ATR止损价={atr_stop:.2f} ({(atr_stop/entry_price - 1)*100:.1f}%)'
         )
     
     def _update_position_tracker(self) -> None:

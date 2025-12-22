@@ -226,8 +226,36 @@ def render_cache_management(data_feed: DataFeed):
     """
     st.subheader("🗑️ 缓存管理")
     
+    # ========== 内存缓存状态 ==========
+    st.markdown("#### 💾 内存缓存")
+    
+    cache_stats = data_feed.get_cache_stats()
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("股票数据缓存", f"{cache_stats['stock_data_count']} 只")
+    with col2:
+        snapshot_status = "✅ 已缓存" if cache_stats['has_market_snapshot'] else "❌ 未缓存"
+        st.metric("市场快照", snapshot_status)
+    with col3:
+        names_status = "✅ 已缓存" if cache_stats['has_stock_names'] else "❌ 未缓存"
+        st.metric("股票名称", names_status)
+    
+    st.caption("💡 内存缓存可加速重复数据访问，TTL: 股票数据 5分钟 / 市场快照 1分钟 / 股票名称 1小时")
+    
+    # 清空内存缓存按钮
+    if st.button("🧹 清空内存缓存", help="仅清空内存缓存，不影响已下载的文件"):
+        data_feed.clear_memory_cache()
+        st.success("✅ 内存缓存已清空")
+        st.rerun()
+    
+    st.divider()
+    
+    # ========== 文件缓存状态 ==========
+    st.markdown("#### 📁 文件缓存")
+    
     st.warning("""
-    **注意**：清空缓存将删除所有已下载的股票数据，需要重新下载。
+    **注意**：清空文件缓存将删除所有已下载的股票数据，需要重新下载。
     
     适用场景：
     - 数据出现异常或损坏

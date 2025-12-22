@@ -28,20 +28,134 @@ from core.data_feed import DataFeed
 from core.signal_generator import SignalGenerator, TradingSignal, SignalType, StrategyType
 from core.screener import Screener
 from core.signal_store import SignalStore
+from core.position_tracker import PositionTracker
+from core.sell_signal_checker import SellSignalChecker, SellSignal
 from core.logging_config import get_logger
+from core.notification import NotificationConfig, NotificationConfigStore, NotificationService, auto_send_notification
 
 logger = get_logger(__name__)
 
 
-# 策略选项配置
+def format_signal_for_copy(signal: 'TradingSignal') -> str:
+    """
+    格式化信号为可复制的文本（适合发送到券商APP条件单）
+    
+    Args:
+        signal: TradingSignal 对象
+        
+    Returns:
+        格式化的信号文本
+    """
+    signal_type = "买入" if signal.signal_type == SignalType.BUY else "卖出"
+    
+    # 计算建议股数（按100股整数倍）
+    suggested_shares = int(signal.trade_amount / signal.limit_cap / 100) * 100
+    
+    text = f"""【{signal_type}信号】{signal.code} {signal.name}
+限价: ¥{signal.limit_cap:.2f}
+数量: {suggested_shares}股
+金额: ¥{signal.trade_amount:,.0f}
+依据: {signal.reason}"""
+    
+    if signal.in_report_window:
+        text += "\n⚠️ 财报窗口期，请注意风险"
+    
+    return text
+
+
+def format_all_signals_for_copy(signals: List['TradingSignal']) -> str:
+    """
+    格式化所有信号为可复制的文本
+    
+    Args:
+        signals: 信号列表
+        
+    Returns:
+        格式化的信号文本
+    """
+    if not signals:
+        return "今日无交易信号"
+    
+    from datetime import date
+    
+    lines = [f"📡 MiniQuant 交易信号 ({date.today().strftime('%Y-%m-%d')})", ""]
+    
+    buy_signals = [s for s in signals if s.signal_type == SignalType.BUY]
+    sell_signals = [s for s in signals if s.signal_type == SignalType.SELL]
+    
+    if buy_signals:
+        lines.append("🟢 买入信号:")
+        for s in buy_signals:
+            shares = int(s.trade_amount / s.limit_cap / 100) * 100
+            lines.append(f"  {s.code} {s.name} | ¥{s.limit_cap:.2f} | {shares}股")
+        lines.append("")
+    
+    if sell_signals:
+        lines.append("🔴 卖出信号:")
+        for s in sell_signals:
+            shares = int(s.trade_amount / s.limit_cap / 100) * 100
+            lines.append(f"  {s.code} {s.name} | ¥{s.limit_cap:.2f} | {shares}股")
+        lines.append("")
+    
+    lines.append("⚠️ 请在下单前确认新闻面无重大利空")
+    
+    return "\n".join(lines)
+
+
+def record_trade_from_signal(signal: 'TradingSignal'):
+    """
+    将信号数据存储到 session_state 以便在交易记录页面预填充
+    
+    Args:
+        signal: TradingSignal 对象
+        
+    Requirements: 6.6
+    """
+    # 生成信号ID（使用日期+代码+信号类型）
+    signal_id = f"sig_{date.today().strftime('%Y%m%d')}_{signal.code}_{signal.signal_type.value}"
+    
+    # 从信号原因中提取策略名称
+    reason_lower = signal.reason.lower()
+    if 'rsrs' in reason_lower:
+        strategy = 'RSRS'
+    elif 'rsi' in reason_lower:
+        strategy = 'RSI'
+    elif 'bollinger' in reason_lower or 'boll' in reason_lower:
+        strategy = 'Bollinger'
+    elif 'macd' in reason_lower:
+        strategy = 'MACD'
+    else:
+        strategy = ''
+    
+    # 存储预填充数据到 session_state
+    st.session_state['prefill_trade'] = {
+        'code': signal.code,
+        'name': signal.name,
+        'action': signal.signal_type.value,  # "买入" 或 "卖出"
+        'price': signal.limit_cap,  # 使用限价上限作为默认价格
+        'quantity': int(signal.trade_amount / signal.limit_cap) if signal.limit_cap > 0 else 100,
+        'trade_date': date.today(),
+        'signal_id': signal_id,
+        'signal_date': date.today(),
+        'signal_price': signal.limit_cap,
+        'strategy': strategy,
+        'reason': signal.reason,
+        'commission': 5.0,  # 默认手续费
+    }
+    
+    # 设置跳转标志
+    st.session_state['redirect_to_trade_journal'] = True
+
+
+# 策略选项配置（RSI 超卖反弹策略为默认）
 STRATEGY_OPTIONS = {
-    "RSRS 阻力支撑策略": {
-        "type": StrategyType.RSRS,
-        "description": "基于阻力支撑相对强度。买入：RSRS标准分>0.7（市场情绪好）；卖出：RSRS标准分<-0.7",
-    },
     "RSI 超卖反弹策略": {
         "type": StrategyType.RSI_REVERSAL,
         "description": "适合震荡行情，快进快出。买入：RSI<30超卖；卖出：RSI>70超买",
+    },
+    "RSRS 阻力支撑策略": {
+        "type": StrategyType.RSRS,
+        "description": "基于阻力支撑相对强度。买入：RSRS标准分>0.7（市场情绪好）；卖出：RSRS标准分<-0.7",
     },
 }
 
@@ -260,7 +374,7 @@ def render_signal_card(signal: TradingSignal, index: int):
         signal: TradingSignal 对象
         index: 信号索引
         
-    Requirements: 7.6, 7.7, 12.1, 12.2, 12.3
+    Requirements: 7.6, 7.7, 12.1, 12.2, 12.3, 6.6
     """
     # 信号类型图标
     signal_emoji = "🟢" if signal.signal_type == SignalType.BUY else "🔴" if signal.signal_type == SignalType.SELL else "⚪"
@@ -268,7 +382,7 @@ def render_signal_card(signal: TradingSignal, index: int):
     # 创建卡片容器
     with st.container():
         # 标题行
-        col1, col2, col3 = st.columns([3, 2, 1])
+        col1, col2, col3, col4, col5 = st.columns([3, 2, 1, 1, 1])
         
         with col1:
             st.markdown(f"### {signal_emoji} {signal.code} {signal.name}")
@@ -282,6 +396,22 @@ def render_signal_card(signal: TradingSignal, index: int):
         with col3:
             st.markdown(f"**交易金额**: ¥{signal.trade_amount:,.0f}")
             st.markdown(f"**费率**: {signal.actual_fee_rate:.4%}")
+        
+        with col4:
+            # 一键复制按钮
+            copy_text = format_signal_for_copy(signal)
+            st.code(copy_text, language=None)
+            st.caption("👆 选中复制")
+        
+        with col5:
+            # 记录交易按钮 (Requirements: 6.6)
+            if st.button(
+                "📝 记录交易",
+                key=f"record_trade_{signal.code}_{index}",
+                help="点击跳转到交易记录页面，自动填充信号信息"
+            ):
+                record_trade_from_signal(signal)
+                st.switch_page("pages/6_📝_Trade_Journal.py")
         
         # 信号依据
         st.markdown(f"**信号依据**: {signal.reason}")
@@ -376,19 +506,28 @@ def render_signal_summary_table(signals: List[TradingSignal]):
     
     Args:
         signals: 信号列表
+        
+    Requirements: 6.6
     """
     if not signals:
         return
     
     st.subheader("📋 信号汇总表")
     
-    # 人机协同提示
-    st.info("""
-    ⚠️ **人机协同提醒**：系统已自动过滤财报窗口期，但请在下单前完成最后一步人工确认：
-    1. 点击「新闻链接」扫一眼标题（10秒）
-    2. 点击「公告确认」检查有无重大利空
-    3. 确认无异常后再将信号放入条件单
-    """)
+    # 一键复制所有信号
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.info("""
+        ⚠️ **人机协同提醒**：系统已自动过滤财报窗口期，但请在下单前完成最后一步人工确认：
+        1. 点击「新闻链接」扫一眼标题（10秒）
+        2. 点击「公告确认」检查有无重大利空
+        3. 确认无异常后再将信号放入条件单
+        """)
+    with col2:
+        st.markdown("**📋 一键复制所有信号**")
+        all_signals_text = format_all_signals_for_copy(signals)
+        st.code(all_signals_text, language=None)
+        st.caption("👆 选中全部文本复制")
     
     # 转换为 DataFrame
     data = []
@@ -436,6 +575,28 @@ def render_signal_summary_table(signals: List[TradingSignal]):
             '公告确认': st.column_config.LinkColumn('公告确认', display_text='📋 公告')
         }
     )
+    
+    # 快速记录交易按钮区域 (Requirements: 6.6)
+    st.markdown("**📝 快速记录交易**")
+    st.caption("执行交易后，点击对应按钮跳转到交易记录页面，自动填充信号信息")
+    
+    # 每行显示4个按钮
+    cols_per_row = 4
+    for i in range(0, len(signals), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for j, col in enumerate(cols):
+            idx = i + j
+            if idx < len(signals):
+                signal = signals[idx]
+                signal_emoji = "🟢" if signal.signal_type == SignalType.BUY else "🔴"
+                with col:
+                    if st.button(
+                        f"{signal_emoji} {signal.code}",
+                        key=f"quick_record_{signal.code}_{idx}",
+                        help=f"{signal.name} - {signal.signal_type.value}"
+                    ):
+                        record_trade_from_signal(signal)
+                        st.switch_page("pages/6_📝_Trade_Journal.py")
 
 
 def render_historical_signal_table(df: pd.DataFrame):
@@ -603,6 +764,73 @@ def generate_signals(stock_pool: List[str], strategy_type: StrategyType) -> List
     return signals
 
 
+def render_sell_signals_section():
+    """
+    渲染卖出信号区域（在每日信号页面）
+    
+    只有当有持仓时才显示
+    
+    Requirements: 5.1, 5.2, 5.3
+    """
+    tracker = PositionTracker()
+    positions = tracker.get_all_positions()
+    
+    if not positions:
+        return
+    
+    st.subheader("🚨 持仓卖出信号")
+    
+    data_feed = get_data_feed()
+    checker = SellSignalChecker(data_feed)
+    signals = checker.check_all_positions(positions)
+    
+    if not signals:
+        st.success(f"✅ 当前 {len(positions)} 只持仓无卖出信号")
+        st.divider()
+        return
+    
+    # 统计
+    high_count = sum(1 for s in signals if s.urgency == "high")
+    medium_count = sum(1 for s in signals if s.urgency == "medium")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("持仓数量", f"{len(positions)} 只")
+    with col2:
+        if high_count > 0:
+            st.metric("🚨 止损信号", f"{high_count} 个", delta="紧急", delta_color="inverse")
+        else:
+            st.metric("🚨 止损信号", "0 个")
+    with col3:
+        st.metric("⚠️ 策略卖出", f"{medium_count} 个")
+    
+    # 显示信号
+    for signal in signals:
+        if signal.urgency == "high":
+            st.error(f"""
+            🚨 **紧急止损 - {signal.code} {signal.name}**
+            
+            {signal.exit_reason}
+            
+            买入价: ¥{signal.holding.buy_price:.2f} → 现价: ¥{signal.current_price:.2f} | 盈亏: **{signal.pnl_pct:.1%}**
+            
+            ⚠️ **建议立即止损卖出！**
+            """)
+        elif signal.urgency == "medium":
+            st.warning(f"""
+            ⚠️ **策略卖出 - {signal.code} {signal.name}**
+            
+            {signal.exit_reason}
+            
+            买入价: ¥{signal.holding.buy_price:.2f} → 现价: ¥{signal.current_price:.2f} | 盈亏: {signal.pnl_pct:.1%}
+            """)
+    
+    # 链接到持仓管理页面
+    st.info("💡 前往 **持仓管理** 页面查看详细持仓信息和管理持仓")
+    
+    st.divider()
+
+
 def render_market_status():
     """渲染大盘状态"""
     st.subheader("📊 大盘状态")
@@ -633,6 +861,89 @@ def render_market_status():
         st.warning(f"无法获取大盘状态: {str(e)}")
 
 
+def render_notification_settings():
+    """
+    渲染微信通知配置面板
+    
+    Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7
+    """
+    with st.expander("🔔 微信通知设置", expanded=False):
+        # 加载已保存配置 (Requirements 4.3)
+        config = NotificationConfigStore.load()
+        
+        st.markdown("""
+        配置企业微信群机器人，在信号生成时自动推送到手机。
+        
+        **获取 Webhook URL**：
+        1. 在企业微信群中添加「群机器人」
+        2. 复制机器人的 Webhook 地址
+        """)
+        
+        # Webhook URL 输入（密码框形式）(Requirements 4.7)
+        webhook_url = st.text_input(
+            "Webhook URL",
+            value=config.webhook_url,
+            type="password",
+            placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=...",
+            help="企业微信群机器人 Webhook 地址"
+        )
+        
+        # 显示脱敏的当前配置
+        if config.webhook_url:
+            masked_url = NotificationConfigStore.mask_webhook_url(config.webhook_url)
+            st.caption(f"当前配置: {masked_url}")
+        
+        # 启用开关
+        enabled = st.checkbox("启用微信通知", value=config.enabled)
+        
+        # 买入/卖出通知选项
+        col1, col2 = st.columns(2)
+        with col1:
+            notify_on_buy = st.checkbox("买入信号通知", value=config.notify_on_buy)
+        with col2:
+            notify_on_sell = st.checkbox("卖出信号通知", value=config.notify_on_sell)
+        
+        # 按钮区域
+        col_save, col_test = st.columns(2)
+        
+        with col_save:
+            # 保存按钮 (Requirements 4.2)
+            if st.button("💾 保存配置", use_container_width=True):
+                new_config = NotificationConfig(
+                    webhook_url=webhook_url,
+                    enabled=enabled,
+                    notify_on_buy=notify_on_buy,
+                    notify_on_sell=notify_on_sell
+                )
+                if NotificationConfigStore.save(new_config):
+                    st.success("✅ 配置已保存")
+                else:
+                    st.error("❌ 保存失败")
+        
+        with col_test:
+            # 测试按钮 (Requirements 4.4, 4.5, 4.6)
+            if st.button("🔔 发送测试通知", use_container_width=True):
+                if not webhook_url:
+                    st.error("请先输入 Webhook URL")
+                else:
+                    # 使用当前输入的配置进行测试
+                    test_config = NotificationConfig(
+                        webhook_url=webhook_url,
+                        enabled=True,
+                        notify_on_buy=notify_on_buy,
+                        notify_on_sell=notify_on_sell
+                    )
+                    service = NotificationService(test_config)
+                    
+                    with st.spinner("正在发送测试通知..."):
+                        success, message = service.send_test_notification()
+                    
+                    if success:
+                        st.success("✅ 测试通知发送成功！请检查企业微信群")
+                    else:
+                        st.error(f"❌ 发送失败: {message}")
+
+
 def main():
     """信号页面主函数"""
     st.set_page_config(
@@ -660,8 +971,16 @@ def main():
     
     st.divider()
     
+    # ========== 卖出信号（持仓检查）==========
+    render_sell_signals_section()
+    
     # 大盘状态
     render_market_status()
+    
+    st.divider()
+    
+    # ========== 微信通知设置 ==========
+    render_notification_settings()
     
     st.divider()
     
@@ -745,6 +1064,16 @@ def main():
         
         # 显示信号
         if signals:
+            # 自动发送微信通知 (Requirements 5.1)
+            notification_config = NotificationConfigStore.load()
+            if notification_config.enabled and notification_config.webhook_url:
+                with st.spinner("正在发送微信通知..."):
+                    notification_success = auto_send_notification(signals)
+                if notification_success:
+                    st.success("📱 微信通知已发送")
+                else:
+                    st.warning("📱 微信通知发送失败，请检查配置")
+            
             # 信号汇总表
             render_signal_summary_table(signals)
             

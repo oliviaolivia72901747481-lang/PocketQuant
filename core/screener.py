@@ -55,11 +55,40 @@ class LiquidityFilter:
     用于过滤流动性不佳的股票，避免买入后无法卖出
     """
     min_market_cap: float = 5e9       # 最小流通市值（50亿）
-    max_market_cap: float = 5e10      # 最大流通市值（500亿）
+    max_market_cap: float = float('inf')  # 最大流通市值（不限制，保留大盘股）
     min_turnover_rate: float = 0.02   # 最小换手率（2%）
-    max_turnover_rate: float = 0.15   # 最大换手率（15%）
+    max_turnover_rate: float = 0.20   # 最大换手率（20%，放宽以适应放量反弹）
+    extreme_turnover_threshold: float = 0.25  # 极端换手率阈值（25%），超过标记警告
     exclude_st: bool = True           # 剔除 ST 股
     min_listing_days: int = 60        # 最小上市天数
+    require_ma60_uptrend: bool = False  # 是否要求 MA60 趋势向上（RSI策略不需要）
+
+
+@dataclass
+class VolatilityFilter:
+    """
+    波动率过滤配置
+    
+    使用 NATR (Normalized ATR) 过滤波动率异常的股票
+    NATR = ATR(14) / Close * 100%
+    """
+    enabled: bool = True              # 是否启用波动率过滤
+    min_natr: float = 2.0             # 最小 NATR（%），低于此值为"织布机"
+    max_natr: float = 8.0             # 最大 NATR（%），高于此值为"妖股"
+    atr_period: int = 14              # ATR 计算周期
+
+
+@dataclass
+class RiskFilter:
+    """
+    风险过滤配置
+    
+    基于近期涨跌幅的风险控制
+    """
+    enabled: bool = True              # 是否启用风险过滤
+    max_5d_gain: float = 0.20         # 5日最大涨幅（20%），超过标记为"追高风险"
+    max_5d_loss: float = -0.15        # 5日最大跌幅（-15%），超过标记为"超跌"
+    volume_alert_ratio: float = 3.0   # 成交量异常倍数（相对5日均量）
 
 
 @dataclass
@@ -87,6 +116,42 @@ class IndustryDiversification:
 
 
 @dataclass
+class TrendSafetyFilter:
+    """
+    趋势安全过滤配置
+    
+    防止在极端下跌趋势中抄底，避免"接飞刀"
+    从 SignalGenerator 中提取的隐藏风控，显式化配置
+    """
+    enabled: bool = True              # 是否启用趋势安全过滤
+    ma60_floor_ratio: float = 0.80    # 股价不能跌破 MA60 的 80%
+    ma20_floor_ratio: float = 0.85    # 股价不能跌破 MA20 的 85%（更严格的短期保护）
+
+
+@dataclass
+class StrategyPrefilter:
+    """
+    策略预筛配置
+    
+    根据不同策略类型进行预筛，提高信号生成效率
+    """
+    enabled: bool = True              # 是否启用策略预筛
+    strategy_type: str = "RSI_REVERSAL"  # 策略类型: RSI_REVERSAL, RSRS, BOLLINGER
+    
+    # RSI 超卖反弹策略预筛
+    rsi_prefilter_enabled: bool = True
+    rsi_max_threshold: float = 45.0   # RSI < 45 才有反弹空间
+    rsi_min_threshold: float = 10.0   # RSI > 10 避免极端超跌
+    
+    # RSRS 策略预筛
+    min_history_days: int = 100       # 最小历史数据天数（RSRS 需要足够数据）
+    
+    # 布林带策略预筛
+    bollinger_prefilter_enabled: bool = False
+    price_below_ma20_ratio: float = 0.98  # 价格低于 MA20 的 98%
+
+
+@dataclass
 class ScreenerResult:
     """
     筛选结果
@@ -102,6 +167,15 @@ class ScreenerResult:
     industry: str                     # 所属行业
     indicators: Dict[str, float] = field(default_factory=dict)  # 关键指标值
     in_report_window: bool = False    # 是否在财报窗口期
+    # 风险标记
+    natr: float = 0.0                 # NATR 波动率（%）
+    gain_5d: float = 0.0              # 5日涨跌幅
+    volume_ratio: float = 0.0         # 成交量比（相对5日均量）
+    risk_warnings: List[str] = field(default_factory=list)  # 风险警告列表
+    # 策略预筛指标
+    rsi: float = 50.0                 # RSI 值（用于策略预筛）
+    history_days: int = 0             # 历史数据天数
+    ma60_distance: float = 0.0        # 与 MA60 的距离百分比
     
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
@@ -114,19 +188,28 @@ class ScreenerResult:
             'ma60_trend': self.ma60_trend,
             'industry': self.industry,
             'indicators': self.indicators,
-            'in_report_window': self.in_report_window
+            'in_report_window': self.in_report_window,
+            'natr': self.natr,
+            'gain_5d': self.gain_5d,
+            'volume_ratio': self.volume_ratio,
+            'risk_warnings': self.risk_warnings,
+            'rsi': self.rsi,
+            'history_days': self.history_days,
+            'ma60_distance': self.ma60_distance
         }
 
 
 class Screener:
     """
-    选股器（含流动性过滤、大盘滤网、行业互斥）
+    选股器（含流动性过滤、大盘滤网、行业互斥、策略预筛）
     
     设计原则：
     - 两阶段筛选优化：先用实时快照预剪枝，再下载历史数据精筛
     - 多线程加速：并行处理历史数据分析
     - 大盘滤网：沪深300 < MA20 时强制空仓
     - 行业互斥：同行业最多 1 只，分散风险
+    - 策略预筛：根据策略类型进行针对性预筛
+    - 趋势安全：防止在极端下跌趋势中抄底
     
     Requirements: 2.1-2.13
     """
@@ -143,6 +226,10 @@ class Screener:
         self.liquidity_filter = LiquidityFilter()
         self.market_filter = MarketFilter()
         self.industry_diversification = IndustryDiversification()
+        self.volatility_filter = VolatilityFilter()
+        self.risk_filter = RiskFilter()
+        self.trend_safety_filter = TrendSafetyFilter()    # 新增趋势安全过滤
+        self.strategy_prefilter = StrategyPrefilter()     # 新增策略预筛
         
         # 行业缓存（避免重复查询）
         self._industry_cache: Dict[str, str] = {}
@@ -169,6 +256,30 @@ class Screener:
         """设置行业分散配置"""
         self.industry_diversification = config
         logger.debug(f"设置行业分散: {'启用' if config.enabled else '禁用'}, 同行业最多 {config.max_same_industry} 只")
+        return self
+    
+    def set_trend_safety_filter(self, filter_config: TrendSafetyFilter) -> 'Screener':
+        """设置趋势安全过滤配置"""
+        self.trend_safety_filter = filter_config
+        logger.debug(f"设置趋势安全过滤: {'启用' if filter_config.enabled else '禁用'}")
+        return self
+    
+    def set_strategy_prefilter(self, config: StrategyPrefilter) -> 'Screener':
+        """设置策略预筛配置"""
+        self.strategy_prefilter = config
+        logger.debug(f"设置策略预筛: {'启用' if config.enabled else '禁用'}, 策略类型: {config.strategy_type}")
+        return self
+    
+    def set_volatility_filter(self, filter_config: VolatilityFilter) -> 'Screener':
+        """设置波动率过滤配置"""
+        self.volatility_filter = filter_config
+        logger.debug(f"设置波动率过滤: {'启用' if filter_config.enabled else '禁用'}, NATR {filter_config.min_natr}%-{filter_config.max_natr}%")
+        return self
+    
+    def set_risk_filter(self, filter_config: RiskFilter) -> 'Screener':
+        """设置风险过滤配置"""
+        self.risk_filter = filter_config
+        logger.debug(f"设置风险过滤: {'启用' if filter_config.enabled else '禁用'}")
         return self
     
     def clear_conditions(self) -> None:
@@ -480,6 +591,262 @@ class Screener:
         elif op == 'between': return target <= value <= target2
         else: return False
     
+    def _calculate_natr(self, df: pd.DataFrame) -> float:
+        """
+        计算 NATR (Normalized Average True Range)
+        
+        NATR = ATR(14) / Close * 100%
+        用于衡量股票波动率，过滤"织布机"和"妖股"
+        
+        Returns:
+            NATR 百分比值，计算失败返回 0.0
+        """
+        if df is None or df.empty or len(df) < self.volatility_filter.atr_period + 1:
+            return 0.0
+        
+        try:
+            high = df['high'].astype(float)
+            low = df['low'].astype(float)
+            close = df['close'].astype(float)
+            
+            # 计算 True Range
+            tr1 = high - low
+            tr2 = abs(high - close.shift(1))
+            tr3 = abs(low - close.shift(1))
+            tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+            
+            # 计算 ATR
+            atr = tr.rolling(window=self.volatility_filter.atr_period).mean()
+            
+            # 计算 NATR (百分比)
+            natr = (atr / close) * 100
+            
+            latest_natr = natr.iloc[-1]
+            return float(latest_natr) if not pd.isna(latest_natr) else 0.0
+            
+        except Exception as e:
+            logger.debug(f"计算 NATR 失败: {e}")
+            return 0.0
+    
+    def _calculate_risk_metrics(self, df: pd.DataFrame) -> tuple:
+        """
+        计算风险指标
+        
+        Returns:
+            (gain_5d, volume_ratio, risk_warnings)
+            - gain_5d: 5日涨跌幅（百分比）
+            - volume_ratio: 成交量比（相对5日均量）
+            - risk_warnings: 风险警告列表
+        """
+        risk_warnings = []
+        gain_5d = 0.0
+        volume_ratio = 0.0
+        
+        if df is None or df.empty or len(df) < 6:
+            return gain_5d, volume_ratio, risk_warnings
+        
+        try:
+            close = df['close'].astype(float)
+            
+            # 计算5日涨跌幅
+            if len(close) >= 6:
+                price_5d_ago = close.iloc[-6]
+                price_today = close.iloc[-1]
+                if price_5d_ago > 0:
+                    gain_5d = (price_today - price_5d_ago) / price_5d_ago * 100
+            
+            # 计算成交量比
+            if 'volume' in df.columns and len(df) >= 6:
+                volume = df['volume'].astype(float)
+                vol_ma5 = volume.iloc[-6:-1].mean()  # 前5日均量
+                vol_today = volume.iloc[-1]
+                if vol_ma5 > 0:
+                    volume_ratio = vol_today / vol_ma5
+            
+            # 生成风险警告
+            if self.risk_filter.enabled:
+                if gain_5d > self.risk_filter.max_5d_gain * 100:
+                    risk_warnings.append(f"追高风险: 5日涨幅 {gain_5d:.1f}%")
+                
+                if gain_5d < self.risk_filter.max_5d_loss * 100:
+                    risk_warnings.append(f"超跌警告: 5日跌幅 {gain_5d:.1f}%")
+                
+                if volume_ratio > self.risk_filter.volume_alert_ratio:
+                    risk_warnings.append(f"放量异常: 成交量是5日均量的 {volume_ratio:.1f} 倍")
+            
+            # 检查极端换手率
+            if hasattr(self.liquidity_filter, 'extreme_turnover_threshold'):
+                # 这里 volume_ratio 是成交量比，换手率需要从 snapshot 获取
+                pass
+            
+            return gain_5d, volume_ratio, risk_warnings
+            
+        except Exception as e:
+            logger.debug(f"计算风险指标失败: {e}")
+            return gain_5d, volume_ratio, risk_warnings
+    
+    def _calculate_rsi(self, df: pd.DataFrame, period: int = 14) -> float:
+        """
+        计算 RSI 指标
+        
+        用于策略预筛，筛选出 RSI 接近超卖区的股票
+        
+        Args:
+            df: 股票历史数据
+            period: RSI 计算周期，默认 14
+        
+        Returns:
+            RSI 值，计算失败返回 50.0（中性值）
+        """
+        if df is None or df.empty or len(df) < period + 1:
+            return 50.0
+        
+        try:
+            close = df['close'].astype(float)
+            delta = close.diff()
+            
+            gain = delta.where(delta > 0, 0)
+            loss = (-delta).where(delta < 0, 0)
+            
+            avg_gain = gain.rolling(window=period).mean()
+            avg_loss = loss.rolling(window=period).mean()
+            
+            # 避免除零
+            avg_loss = avg_loss.replace(0, 1e-10)
+            rs = avg_gain / avg_loss
+            rsi = 100 - (100 / (1 + rs))
+            
+            latest_rsi = rsi.iloc[-1]
+            return float(latest_rsi) if not pd.isna(latest_rsi) else 50.0
+            
+        except Exception as e:
+            logger.debug(f"计算 RSI 失败: {e}")
+            return 50.0
+    
+    def _calculate_ma60_distance(self, df: pd.DataFrame) -> float:
+        """
+        计算当前价格与 MA60 的距离百分比
+        
+        用于趋势安全过滤，防止在极端下跌趋势中抄底
+        
+        Returns:
+            距离百分比，正值表示在 MA60 之上，负值表示在 MA60 之下
+        """
+        if df is None or df.empty or len(df) < 60:
+            return 0.0
+        
+        try:
+            close = df['close'].astype(float)
+            ma60 = close.rolling(window=60).mean().iloc[-1]
+            current_price = close.iloc[-1]
+            
+            if ma60 > 0:
+                distance = (current_price - ma60) / ma60 * 100
+                return float(distance)
+            return 0.0
+            
+        except Exception as e:
+            logger.debug(f"计算 MA60 距离失败: {e}")
+            return 0.0
+    
+    def _check_trend_safety(self, df: pd.DataFrame) -> tuple:
+        """
+        检查趋势安全性
+        
+        防止在极端下跌趋势中抄底，避免"接飞刀"
+        
+        Returns:
+            (is_safe, warning_message)
+            - is_safe: 是否安全
+            - warning_message: 警告信息（如果不安全）
+        """
+        if not self.trend_safety_filter.enabled:
+            return True, None
+        
+        if df is None or df.empty or len(df) < 60:
+            return True, None
+        
+        try:
+            close = df['close'].astype(float)
+            current_price = close.iloc[-1]
+            
+            # 检查 MA60 底线
+            ma60 = close.rolling(window=60).mean().iloc[-1]
+            ma60_floor = ma60 * self.trend_safety_filter.ma60_floor_ratio
+            
+            if current_price < ma60_floor:
+                warning = f"趋势风险: 股价 {current_price:.2f} 跌破 MA60 的 {self.trend_safety_filter.ma60_floor_ratio*100:.0f}% ({ma60_floor:.2f})"
+                return False, warning
+            
+            # 检查 MA20 底线（更严格的短期保护）
+            if len(df) >= 20:
+                ma20 = close.rolling(window=20).mean().iloc[-1]
+                ma20_floor = ma20 * self.trend_safety_filter.ma20_floor_ratio
+                
+                if current_price < ma20_floor:
+                    warning = f"短期趋势风险: 股价 {current_price:.2f} 跌破 MA20 的 {self.trend_safety_filter.ma20_floor_ratio*100:.0f}% ({ma20_floor:.2f})"
+                    # 这里只标记警告，不强制剔除
+                    logger.debug(warning)
+            
+            return True, None
+            
+        except Exception as e:
+            logger.debug(f"检查趋势安全性失败: {e}")
+            return True, None
+    
+    def _check_strategy_prefilter(self, df: pd.DataFrame) -> tuple:
+        """
+        检查策略预筛条件
+        
+        根据策略类型进行针对性预筛，提高信号生成效率
+        
+        Returns:
+            (pass_filter, rsi_value, history_days)
+            - pass_filter: 是否通过预筛
+            - rsi_value: RSI 值
+            - history_days: 历史数据天数
+        """
+        if not self.strategy_prefilter.enabled:
+            return True, 50.0, len(df) if df is not None else 0
+        
+        if df is None or df.empty:
+            return False, 50.0, 0
+        
+        history_days = len(df)
+        rsi_value = self._calculate_rsi(df)
+        
+        strategy_type = self.strategy_prefilter.strategy_type
+        
+        # RSRS 策略：检查历史数据充足性
+        if strategy_type == "RSRS":
+            if history_days < self.strategy_prefilter.min_history_days:
+                logger.debug(f"RSRS 预筛: 历史数据不足 ({history_days} < {self.strategy_prefilter.min_history_days})")
+                return False, rsi_value, history_days
+        
+        # RSI 超卖反弹策略：检查 RSI 是否在合适区间
+        if strategy_type == "RSI_REVERSAL" and self.strategy_prefilter.rsi_prefilter_enabled:
+            if rsi_value > self.strategy_prefilter.rsi_max_threshold:
+                logger.debug(f"RSI 预筛: RSI={rsi_value:.1f} > {self.strategy_prefilter.rsi_max_threshold}，无反弹空间")
+                return False, rsi_value, history_days
+            
+            if rsi_value < self.strategy_prefilter.rsi_min_threshold:
+                logger.debug(f"RSI 预筛: RSI={rsi_value:.1f} < {self.strategy_prefilter.rsi_min_threshold}，极端超跌")
+                # 极端超跌不剔除，但标记警告
+                pass
+        
+        # 布林带策略：检查价格是否接近下轨
+        if strategy_type == "BOLLINGER" and self.strategy_prefilter.bollinger_prefilter_enabled:
+            if len(df) >= 20:
+                close = df['close'].astype(float)
+                ma20 = close.rolling(window=20).mean().iloc[-1]
+                current_price = close.iloc[-1]
+                
+                if current_price > ma20 * self.strategy_prefilter.price_below_ma20_ratio:
+                    logger.debug(f"布林带预筛: 价格 {current_price:.2f} 高于 MA20 的 {self.strategy_prefilter.price_below_ma20_ratio*100:.0f}%")
+                    return False, rsi_value, history_days
+        
+        return True, rsi_value, history_days
+    
     def _build_screener_result(
         self, 
         code: str, 
@@ -516,6 +883,20 @@ class Screener:
         
         in_report_window = self._check_report_window(code)
         
+        # 计算波动率和风险指标
+        natr = self._calculate_natr(df)
+        gain_5d, volume_ratio, risk_warnings = self._calculate_risk_metrics(df)
+        
+        # 计算策略预筛指标
+        rsi = self._calculate_rsi(df)
+        history_days = len(df)
+        ma60_distance = self._calculate_ma60_distance(df)
+        
+        # 检查极端换手率并添加警告
+        if hasattr(self.liquidity_filter, 'extreme_turnover_threshold'):
+            if turnover_rate > self.liquidity_filter.extreme_turnover_threshold * 100:
+                risk_warnings.append(f"极端换手: 换手率 {turnover_rate:.1f}% 超过 {self.liquidity_filter.extreme_turnover_threshold*100:.0f}%")
+        
         return ScreenerResult(
             code=code,
             name=name,
@@ -525,7 +906,14 @@ class Screener:
             ma60_trend=ma60_trend,
             industry=industry,
             indicators=indicators,
-            in_report_window=in_report_window
+            in_report_window=in_report_window,
+            natr=natr,
+            gain_5d=gain_5d,
+            volume_ratio=volume_ratio,
+            risk_warnings=risk_warnings,
+            rsi=rsi,
+            history_days=history_days,
+            ma60_distance=ma60_distance
         )
     
     def screen(self, stock_pool: Optional[List[str]] = None) -> List[ScreenerResult]:
@@ -616,11 +1004,36 @@ class Screener:
                     if not self._check_listing_days(code, self.liquidity_filter.min_listing_days): return None
                     if snapshot_row is not None and self._check_st_stock(snapshot_row.get('name', '')): return None
                 
-                # 财报窗口期过滤 (耗时操作，并行化后收益巨大)
-                if self._check_report_window(code): return None
+                # 财报窗口期检查（不再强制剔除，只标记）
+                # 注：财报窗口期的股票会在结果中标记 in_report_window=True
+                # 由信号生成器决定是否过滤
                 
-                # MA60 趋势过滤
-                if not self._check_ma60_trend(df): return None
+                # 波动率过滤（NATR）- 硬性剔除"织布机"和"妖股"
+                if self.volatility_filter.enabled:
+                    natr = self._calculate_natr(df)
+                    if natr > 0:  # 只有计算成功才过滤
+                        if natr < self.volatility_filter.min_natr:
+                            logger.debug(f"股票 {code} NATR={natr:.2f}% < {self.volatility_filter.min_natr}%，波动率过低（织布机），剔除")
+                            return None
+                        if natr > self.volatility_filter.max_natr:
+                            logger.debug(f"股票 {code} NATR={natr:.2f}% > {self.volatility_filter.max_natr}%，波动率过高（妖股），剔除")
+                            return None
+                
+                # 趋势安全过滤 - 防止在极端下跌趋势中抄底
+                is_trend_safe, trend_warning = self._check_trend_safety(df)
+                if not is_trend_safe:
+                    logger.debug(f"股票 {code} {trend_warning}，剔除")
+                    return None
+                
+                # 策略预筛 - 根据策略类型进行针对性预筛
+                pass_prefilter, rsi_value, history_days = self._check_strategy_prefilter(df)
+                if not pass_prefilter:
+                    logger.debug(f"股票 {code} 未通过策略预筛，剔除")
+                    return None
+                
+                # MA60 趋势过滤（可选，RSI策略不需要）
+                if self.liquidity_filter.require_ma60_uptrend:
+                    if not self._check_ma60_trend(df): return None
                 
                 # 技术指标条件过滤
                 if not self._check_technical_conditions(df): return None
@@ -628,7 +1041,7 @@ class Screener:
                 # 构建结果
                 result = self._build_screener_result(code, df, snapshot_row)
                 if result:
-                    logger.debug(f"股票 {code} 通过筛选")
+                    logger.debug(f"股票 {code} 通过筛选 (RSI={rsi_value:.1f}, 历史天数={history_days})")
                 return result
                 
             except Exception as e:

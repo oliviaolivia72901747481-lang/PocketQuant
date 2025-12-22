@@ -120,14 +120,15 @@ class LimitUpDownChecker:
 
 class CommissionScheme(bt.CommInfoBase):
     """
-    A股佣金方案（含最低手续费）
+    A股佣金方案（含最低手续费 + 过户费）
     
     实现A股的佣金计算规则：
-    - 买入：手续费（万三，最低5元）
-    - 卖出：手续费（万三，最低5元）+ 印花税（千一）
+    - 买入：手续费（万三，最低5元）+ 过户费（上海股票 0.02‰）
+    - 卖出：手续费（万三，最低5元）+ 印花税（千一）+ 过户费（上海股票 0.02‰）
     
     重要修复：
     - 正确实现5元最低手续费，避免小资金回测收益虚高
+    - 补充上海股票过户费（0.02‰），使回测更贴近真实交易
     - 小资金交易时，5元低消会显著影响实际费率
     
     Requirements: 3.2
@@ -137,6 +138,7 @@ class CommissionScheme(bt.CommInfoBase):
         ('commission', 0.0003),      # 手续费率（小数形式，如 0.0003 表示万三）
         ('min_commission', 5.0),     # 最低手续费（5元低消）
         ('stamp_duty', 0.001),       # 印花税率
+        ('transfer_fee', 0.00002),   # 过户费率（上海股票 0.02‰）
         ('stocklike', True),
         ('commtype', bt.CommInfoBase.COMM_FIXED),  # 使用固定佣金模式，我们自己计算
         ('percabs', True),           # 佣金为绝对值
@@ -144,15 +146,17 @@ class CommissionScheme(bt.CommInfoBase):
     
     def _getcommission(self, size, price, pseudoexec):
         """
-        计算佣金（含最低手续费）
+        计算佣金（含最低手续费 + 过户费）
         
-        核心公式：commission = max(trade_value * rate, min_commission)
+        核心公式：commission = max(trade_value * rate, min_commission) + transfer_fee
         
         这是小资金回测准确性的关键！
-        例如：交易金额 10000 元
+        例如：交易金额 10000 元（上海股票）
         - 标准费用：10000 × 0.0003 = 3 元
         - 实际费用：max(3, 5) = 5 元
-        - 实际费率：5 / 10000 = 0.05%（远高于标准 0.03%）
+        - 过户费：10000 × 0.00002 = 0.2 元
+        - 总费用：5 + 0.2 = 5.2 元
+        - 实际费率：5.2 / 10000 = 0.052%
         
         Args:
             size: 交易数量（正数买入，负数卖出）
@@ -171,11 +175,18 @@ class CommissionScheme(bt.CommInfoBase):
         commission_rate = self.p.commission
         min_comm = self.p.min_commission
         stamp = self.p.stamp_duty
+        transfer = self.p.transfer_fee
         
         # 计算手续费（取标准费用和最低费用的较大值）
         # 这是关键修复：确保最低手续费生效
         standard_fee = trade_value * commission_rate
         commission = max(standard_fee, min_comm)
+        
+        # 计算过户费（上海股票）
+        # 注：这里简化处理，对所有股票都收取过户费
+        # 实际上只有上海股票（6开头）需要收取
+        transfer_fee = trade_value * transfer
+        commission += transfer_fee
         
         # 卖出时加收印花税
         if size < 0:

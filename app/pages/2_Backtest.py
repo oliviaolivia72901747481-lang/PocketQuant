@@ -89,18 +89,19 @@ class RSIMeanReversionStrategy(bt.Strategy):
 # ==========================================
 # 策略配置
 # ==========================================
+# 策略配置（RSI 超卖反弹策略为默认）
 STRATEGY_OPTIONS = {
-    "RSRS 阻力支撑策略": {
-        "class": RSRSStrategy,
-        "description": "基于阻力支撑相对强度。买入：RSRS标准分>0.7（市场情绪好）；卖出：RSRS标准分<-0.7或止损-6%",
-        "min_data_days": 100,
-        "params": ["n_period", "m_period", "buy_threshold", "sell_threshold", "hard_stop_loss"],
-    },
     "RSI 超卖反弹策略": {
         "class": RSIMeanReversionStrategy,
         "description": "适合震荡行情，快进快出。买入：RSI<30超卖；卖出：RSI>70或止损-5%或止盈+15%",
         "min_data_days": 20,
         "params": ["buy_threshold", "sell_threshold", "stop_loss", "take_profit"],
+    },
+    "RSRS 阻力支撑策略": {
+        "class": RSRSStrategy,
+        "description": "基于阻力支撑相对强度。买入：RSRS标准分>0.7（市场情绪好）；卖出：RSRS标准分<-0.7或止损-6%",
+        "min_data_days": 100,
+        "params": ["n_period", "m_period", "buy_threshold", "sell_threshold", "hard_stop_loss"],
     },
 }
 
@@ -513,20 +514,7 @@ def render_strategy_params(strategy_name: str) -> Dict:
     """根据策略类型渲染参数配置 UI"""
     strategy_config = {}
     
-    if strategy_name == "RSRS 阻力支撑策略":
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**RSRS 参数**")
-            strategy_config['n_period'] = st.number_input("斜率计算窗口(N)", value=18, min_value=10, max_value=30)
-            strategy_config['m_period'] = st.number_input("标准化窗口(M)", value=600, min_value=100, max_value=1000)
-            
-        with col2:
-            st.markdown("**信号阈值**")
-            strategy_config['buy_threshold'] = st.number_input("买入阈值", value=0.7, min_value=0.3, max_value=1.5, format="%.1f")
-            strategy_config['sell_threshold'] = st.number_input("卖出阈值", value=-0.7, min_value=-1.5, max_value=-0.3, format="%.1f")
-            strategy_config['hard_stop_loss'] = st.number_input("硬止损比例", value=-0.06, min_value=-0.15, max_value=-0.01, format="%.2f")
-            
-    elif strategy_name == "RSI 超卖反弹策略":
+    if strategy_name == "RSI 超卖反弹策略":
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("**RSI 参数**")
@@ -539,41 +527,118 @@ def render_strategy_params(strategy_name: str) -> Dict:
             strategy_config['stop_loss'] = st.number_input("止损比例", value=0.05, min_value=0.01, max_value=0.15, format="%.2f")
             strategy_config['take_profit'] = st.number_input("止盈比例", value=0.15, min_value=0.05, max_value=0.50, format="%.2f")
     
+    elif strategy_name == "RSRS 阻力支撑策略":
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**RSRS 参数**")
+            strategy_config['n_period'] = st.number_input("斜率计算窗口(N)", value=18, min_value=10, max_value=30)
+            strategy_config['m_period'] = st.number_input("标准化窗口(M)", value=600, min_value=100, max_value=1000)
+            
+        with col2:
+            st.markdown("**信号阈值**")
+            strategy_config['buy_threshold'] = st.number_input("买入阈值", value=0.7, min_value=0.3, max_value=1.5, format="%.1f")
+            strategy_config['sell_threshold'] = st.number_input("卖出阈值", value=-0.7, min_value=-1.5, max_value=-0.3, format="%.1f")
+            strategy_config['hard_stop_loss'] = st.number_input("硬止损比例", value=-0.06, min_value=-0.15, max_value=-0.01, format="%.2f")
+    
     return strategy_config
 
 
 def main():
     st.set_page_config(page_title="策略回测", page_icon="🧪", layout="wide")
     st.title("🧪 策略回测")
+    st.caption("验证策略有效性，检测过拟合风险")
     
-    # ========== 策略选择 ==========
-    st.subheader("📋 策略选择")
+    # ========== 顶部：策略选择卡片 ==========
+    st.markdown("---")
     
-    strategy_name = st.selectbox(
-        "选择策略",
-        options=list(STRATEGY_OPTIONS.keys()),
-        index=0,
-        help="选择要回测的策略类型"
-    )
+    col_strategy, col_info = st.columns([1, 2])
     
-    # 显示策略说明
-    strategy_info = STRATEGY_OPTIONS[strategy_name]
-    st.info(f"💡 **{strategy_name}**：{strategy_info['description']}")
+    with col_strategy:
+        st.markdown("#### 📋 选择策略")
+        strategy_name = st.selectbox(
+            "策略类型",
+            options=list(STRATEGY_OPTIONS.keys()),
+            index=0,
+            label_visibility="collapsed",
+            help="选择要回测的策略类型"
+        )
     
-    # ========== 参数配置 ==========
-    with st.expander("⚙️ 参数配置", expanded=False):
-        col_date, col_cash = st.columns(2)
-        with col_date:
-            st.markdown("**回测区间**")
-            start_date = st.date_input("开始日期", value=date.today() - timedelta(days=365))
-            end_date = st.date_input("结束日期", value=date.today())
-        with col_cash:
-            st.markdown("**资金设置**")
-            initial_cash = st.number_input("每只初始资金", value=55000)
+    with col_info:
+        strategy_info = STRATEGY_OPTIONS[strategy_name]
+        st.markdown("#### 💡 策略说明")
+        st.info(f"**{strategy_name}**\n\n{strategy_info['description']}\n\n📊 最少需要 **{strategy_info['min_data_days']}** 天数据")
+    
+    st.markdown("---")
+    
+    # ========== 中部：配置区（三列布局）==========
+    col_date, col_stock, col_params = st.columns([1, 1, 1])
+    
+    with col_date:
+        st.markdown("##### 📅 回测区间")
+        start_date = st.date_input(
+            "开始日期", 
+            value=date.today() - timedelta(days=365),
+            key="bt_start_date"
+        )
+        end_date = st.date_input(
+            "结束日期", 
+            value=date.today(),
+            key="bt_end_date"
+        )
+        initial_cash = st.number_input(
+            "每只初始资金 (¥)", 
+            value=55000,
+            min_value=10000,
+            step=5000,
+            key="bt_initial_cash"
+        )
+    
+    with col_stock:
+        st.markdown("##### 📈 股票选择")
+        stock_pool = get_watchlist()
         
-        st.divider()
-        strategy_config = render_strategy_params(strategy_name)
+        use_all = st.checkbox(
+            f"全选股票池 ({len(stock_pool)} 只)", 
+            value=True,
+            key="bt_use_all"
+        )
+        
+        if use_all:
+            selected_stocks = stock_pool
+            st.caption(f"已选择全部 {len(stock_pool)} 只股票")
+        else:
+            selected_stocks = st.multiselect(
+                "选择股票",
+                options=stock_pool,
+                default=stock_pool[:5] if len(stock_pool) >= 5 else stock_pool,
+                key="bt_selected_stocks"
+            )
+            st.caption(f"已选择 {len(selected_stocks)} 只股票")
     
+    with col_params:
+        st.markdown("##### ⚙️ 策略参数")
+        strategy_config = render_strategy_params_compact(strategy_name)
+    
+    # ========== 回测按钮 ==========
+    st.markdown("---")
+    
+    col_btn, col_tip = st.columns([1, 3])
+    
+    with col_btn:
+        start_btn = st.button(
+            "🚀 开始回测", 
+            type="primary", 
+            use_container_width=True,
+            disabled=not selected_stocks
+        )
+    
+    with col_tip:
+        if not selected_stocks:
+            st.warning("⚠️ 请选择至少一只股票")
+        else:
+            st.caption(f"将对 {len(selected_stocks)} 只股票进行回测，预计耗时 {len(selected_stocks) * 2} 秒")
+    
+    # 构建回测配置
     backtest_config = BacktestConfig(
         initial_cash=float(initial_cash),
         commission_rate=0.0003,
@@ -584,29 +649,14 @@ def main():
         check_limit_up_down=False,
         slippage_perc=0.001,
     )
-    
-    # ========== 选股与控制 ==========
-    stock_pool = get_watchlist()
-    
-    col_sel, col_btn = st.columns([4, 1])
-    
-    with col_sel:
-        use_all = st.checkbox(f"全选 ({len(stock_pool)}只)", value=True)
-        if use_all:
-            selected_stocks = stock_pool
-        else:
-            selected_stocks = st.multiselect("选择股票", stock_pool, default=stock_pool[:5])
-    
-    with col_btn:
-        st.write("")
-        st.write("")
-        start_btn = st.button("🚀 开始回测", type="primary", use_container_width=True)
 
     # ========== 结果处理 ==========
     if 'batch_results' not in st.session_state:
         st.session_state.batch_results = None
     if 'last_strategy' not in st.session_state:
         st.session_state.last_strategy = None
+    if 'last_config' not in st.session_state:
+        st.session_state.last_config = None
 
     if start_btn:
         if not selected_stocks:
@@ -617,37 +667,157 @@ def main():
                     backtest_config, strategy_name, strategy_config, selected_stocks
                 )
                 st.session_state.last_strategy = strategy_name
+                st.session_state.last_config = strategy_config
 
     # ========== 结果展示 ==========
     df_results = st.session_state.batch_results
     
     if df_results is not None and not df_results.empty:
-        st.divider()
-        st.subheader(f"📊 策略体检报告 - {st.session_state.last_strategy}")
+        st.markdown("---")
+        render_backtest_results(df_results, initial_cash, strategy_config, backtest_config, selected_stocks)
         
-        avg_return = df_results['总收益率'].mean()
-        win_rate_mean = df_results['胜率'].mean()
-        positive_count = len(df_results[df_results['总收益率'] > 0])
-        positive_ratio = positive_count / len(df_results)
+    elif df_results is not None and df_results.empty:
+        st.warning("回测完成，但没有产生有效结果（可能数据不足）。")
+
+
+def render_strategy_params_compact(strategy_name: str) -> Dict:
+    """紧凑版策略参数配置"""
+    strategy_config = {}
+    
+    if strategy_name == "RSI 超卖反弹策略":
+        strategy_config['rsi_period'] = st.number_input(
+            "RSI 周期", value=14, min_value=5, max_value=30, key="rsi_period"
+        )
         
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("平均收益率", f"{avg_return:.2%}")
-        m2.metric("正收益占比", f"{positive_ratio:.1%}", f"{positive_count}/{len(df_results)} 只")
-        m3.metric("平均胜率", f"{win_rate_mean:.1%}")
-        m4.metric("测试样本", f"{len(df_results)} 只")
+        col1, col2 = st.columns(2)
+        with col1:
+            strategy_config['buy_threshold'] = st.number_input(
+                "买入 (RSI<)", value=30, min_value=10, max_value=40, key="rsi_buy"
+            )
+        with col2:
+            strategy_config['sell_threshold'] = st.number_input(
+                "卖出 (RSI>)", value=70, min_value=60, max_value=90, key="rsi_sell"
+            )
         
-        # 收益分布图
+        col1, col2 = st.columns(2)
+        with col1:
+            strategy_config['stop_loss'] = st.number_input(
+                "止损 %", value=5.0, min_value=1.0, max_value=15.0, key="rsi_sl"
+            ) / 100
+        with col2:
+            strategy_config['take_profit'] = st.number_input(
+                "止盈 %", value=15.0, min_value=5.0, max_value=50.0, key="rsi_tp"
+            ) / 100
+    
+    elif strategy_name == "RSRS 阻力支撑策略":
+        col1, col2 = st.columns(2)
+        with col1:
+            strategy_config['n_period'] = st.number_input(
+                "斜率窗口(N)", value=18, min_value=10, max_value=30, key="rsrs_n"
+            )
+        with col2:
+            strategy_config['m_period'] = st.number_input(
+                "标准化(M)", value=600, min_value=100, max_value=1000, key="rsrs_m"
+            )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            strategy_config['buy_threshold'] = st.number_input(
+                "买入阈值", value=0.7, min_value=0.3, max_value=1.5, format="%.1f", key="rsrs_buy"
+            )
+        with col2:
+            strategy_config['sell_threshold'] = st.number_input(
+                "卖出阈值", value=-0.7, min_value=-1.5, max_value=-0.3, format="%.1f", key="rsrs_sell"
+            )
+        
+        strategy_config['hard_stop_loss'] = st.number_input(
+            "硬止损 %", value=-6.0, min_value=-15.0, max_value=-1.0, key="rsrs_sl"
+        ) / 100
+    
+    return strategy_config
+
+
+def render_backtest_results(df_results: pd.DataFrame, initial_cash: float, strategy_config: Dict, backtest_config, selected_stocks: List[str]):
+    """渲染回测结果（优化布局）"""
+    st.subheader(f"📊 策略体检报告 - {st.session_state.last_strategy}")
+    
+    # ========== 核心指标卡片 ==========
+    avg_return = df_results['总收益率'].mean()
+    win_rate_mean = df_results['胜率'].mean()
+    positive_count = len(df_results[df_results['总收益率'] > 0])
+    positive_ratio = positive_count / len(df_results)
+    avg_drawdown = df_results['最大回撤'].mean()
+    
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        delta_color = "normal" if avg_return >= 0 else "inverse"
+        st.metric("平均收益率", f"{avg_return:.2%}", delta_color=delta_color)
+    
+    with col2:
+        st.metric("正收益占比", f"{positive_ratio:.0%}", f"{positive_count}/{len(df_results)}")
+    
+    with col3:
+        st.metric("平均胜率", f"{win_rate_mean:.0%}")
+    
+    with col4:
+        st.metric("平均回撤", f"{avg_drawdown:.1%}")
+    
+    with col5:
+        st.metric("测试样本", f"{len(df_results)} 只")
+    
+    # ========== 两列布局：图表 + 排行榜 ==========
+    col_chart, col_table = st.columns([1, 1])
+    
+    with col_chart:
         st.markdown("##### 📈 收益率分布")
-        fig = px.histogram(df_results, x="总收益率", nbins=20, color_discrete_sequence=['#4CAF50'])
-        fig.add_vline(x=0, line_dash="dash", line_color="red", annotation_text="盈亏平衡线")
-        fig.update_layout(margin=dict(t=10, b=10))
+        fig = px.histogram(
+            df_results, x="总收益率", nbins=20, 
+            color_discrete_sequence=['#4CAF50']
+        )
+        fig.add_vline(x=0, line_dash="dash", line_color="red", annotation_text="盈亏线")
+        fig.update_layout(
+            margin=dict(t=20, b=20, l=20, r=20),
+            height=300,
+            xaxis_title="收益率",
+            yaxis_title="股票数量"
+        )
         st.plotly_chart(fig, use_container_width=True)
-        
-        # 排行榜
-        st.markdown("##### 🏆 详细战绩")
-        display_df = df_results.sort_values(by='总收益率', ascending=False)
+    
+    with col_table:
+        st.markdown("##### 🏆 收益排行榜")
+        display_df = df_results.sort_values(by='总收益率', ascending=False).head(10)
         st.dataframe(
-            display_df,
+            display_df[['代码', '总收益率', '胜率', '最大回撤', '交易次数']],
+            column_config={
+                "代码": st.column_config.TextColumn("代码", width="small"),
+                "总收益率": st.column_config.NumberColumn("收益率", format="%.1f%%"),
+                "胜率": st.column_config.NumberColumn("胜率", format="%.0f%%"),
+                "最大回撤": st.column_config.NumberColumn("回撤", format="%.1f%%"),
+                "交易次数": st.column_config.NumberColumn("交易", width="small"),
+            },
+            use_container_width=True,
+            hide_index=True,
+            height=300
+        )
+    
+    # ========== 手续费分析（折叠）==========
+    with st.expander("💸 手续费磨损分析", expanded=False):
+        render_commission_analysis(df_results, initial_cash)
+    
+    # ========== 参数敏感性分析（折叠）==========
+    with st.expander("🔬 参数敏感性分析（检测过拟合）", expanded=False):
+        render_sensitivity_analysis(
+            st.session_state.last_strategy, 
+            st.session_state.last_config or strategy_config, 
+            backtest_config, 
+            selected_stocks
+        )
+    
+    # ========== 完整数据（折叠）==========
+    with st.expander("📋 完整回测数据", expanded=False):
+        st.dataframe(
+            df_results.sort_values(by='总收益率', ascending=False),
             column_config={
                 "总收益率": st.column_config.NumberColumn(format="%.2f%%"),
                 "胜率": st.column_config.NumberColumn(format="%.1f%%"),
@@ -658,22 +828,6 @@ def main():
             use_container_width=True,
             hide_index=True
         )
-        
-        st.divider()
-        render_commission_analysis(df_results, initial_cash)
-        
-        # 参数敏感性分析
-        st.divider()
-        with st.expander("🔬 参数敏感性分析（检测过拟合）", expanded=False):
-            render_sensitivity_analysis(
-                st.session_state.last_strategy, 
-                strategy_config, 
-                backtest_config, 
-                selected_stocks
-            )
-        
-    elif df_results is not None and df_results.empty:
-        st.warning("回测完成，但没有产生有效结果（可能数据不足）。")
 
 
 if __name__ == "__main__":

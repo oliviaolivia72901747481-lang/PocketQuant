@@ -34,7 +34,8 @@ from strategies.base_strategy import BaseStrategy
 class RSRSExitReason(Enum):
     """退出原因"""
     RSRS_SELL_SIGNAL = "RSRS卖出信号"
-    HARD_STOP_LOSS = "硬止损(-6%)"
+    ATR_STOP_LOSS = "ATR动态止损"
+    HARD_STOP_LOSS = "硬止损(-8%)"
     MANUAL = "手动卖出"
 
 
@@ -44,6 +45,7 @@ class RSRSPositionTracker:
     entry_price: float           # 买入价格
     highest_price: float         # 持仓期间最高价
     current_profit_pct: float    # 当前盈亏百分比
+    atr_stop_price: float        # ATR 动态止损价（买入价 - 2倍ATR）
 
 
 class RSRSIndicator(bt.Indicator):
@@ -148,7 +150,9 @@ class RSRSStrategy(BaseStrategy):
         ('min_history', 50),         # 最小历史数据要求
         ('buy_threshold', 0.7),      # 买入阈值
         ('sell_threshold', -0.7),    # 卖出阈值
-        ('hard_stop_loss', -0.06),   # 硬止损比例（-6%）
+        ('atr_period', 14),          # ATR 周期
+        ('atr_multiplier', 2.0),     # ATR 止损倍数
+        ('hard_stop_loss', -0.08),   # 硬止损比例（-8%，最后防线）
     )
     
     def __init__(self):
@@ -161,6 +165,11 @@ class RSRSStrategy(BaseStrategy):
             n_period=self.params.n_period,
             m_period=self.params.m_period,
             min_history=self.params.min_history
+        )
+        
+        # ATR 指标（用于动态止损）
+        self.atr = bt.indicators.ATR(
+            self.data, period=self.params.atr_period
         )
         
         # 持仓跟踪
@@ -217,8 +226,13 @@ class RSRSStrategy(BaseStrategy):
         检查退出条件
         
         优先级：
-        1. 硬止损（-6%）
-        2. RSRS 卖出信号
+        1. 硬止损（-8%，最后防线）
+        2. ATR 动态止损（2倍ATR）
+        3. RSRS 卖出信号
+        
+        优化说明：
+        - ATR 止损比固定止损更灵活，能适应不同波动率的股票
+        - 保留硬止损 -8% 作为最后防线
         
         Returns:
             退出原因，None 表示不需要退出
@@ -230,11 +244,15 @@ class RSRSStrategy(BaseStrategy):
         entry_price = self.position_tracker.entry_price
         profit_pct = (current_price - entry_price) / entry_price
         
-        # 1. 硬止损检查
+        # 1. 硬止损检查（-8%，最后防线）
         if profit_pct <= self.params.hard_stop_loss:
             return RSRSExitReason.HARD_STOP_LOSS
         
-        # 2. RSRS 卖出信号
+        # 2. ATR 动态止损检查
+        if current_price <= self.position_tracker.atr_stop_price:
+            return RSRSExitReason.ATR_STOP_LOSS
+        
+        # 3. RSRS 卖出信号
         rsrs_score = self.rsrs.rsrs[0]
         if rsrs_score < self.params.sell_threshold:
             return RSRSExitReason.RSRS_SELL_SIGNAL
@@ -242,11 +260,29 @@ class RSRSStrategy(BaseStrategy):
         return None
     
     def _init_position_tracker(self) -> None:
-        """初始化持仓跟踪器"""
+        """
+        初始化持仓跟踪器
+        
+        计算 ATR 动态止损价：
+        - 止损价 = 买入价 - ATR × 倍数
+        - 默认使用 2 倍 ATR，适应不同波动率的股票
+        """
+        entry_price = self.data.close[0]
+        current_atr = self.atr[0]
+        
+        # 计算 ATR 止损价（买入价 - 2倍ATR）
+        atr_stop = entry_price - (current_atr * self.params.atr_multiplier)
+        
         self.position_tracker = RSRSPositionTracker(
-            entry_price=self.data.close[0],
-            highest_price=self.data.close[0],
-            current_profit_pct=0.0
+            entry_price=entry_price,
+            highest_price=entry_price,
+            current_profit_pct=0.0,
+            atr_stop_price=atr_stop
+        )
+        
+        self.log(
+            f'建仓: 买入价={entry_price:.2f}, ATR={current_atr:.2f}, '
+            f'ATR止损价={atr_stop:.2f} ({(atr_stop/entry_price - 1)*100:.1f}%)'
         )
     
     def _update_position_tracker(self) -> None:
