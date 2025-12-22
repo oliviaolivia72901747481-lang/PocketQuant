@@ -35,7 +35,7 @@ except ImportError:
 from core.data_feed import DataFeed
 from core.report_checker import ReportChecker
 from core.sizers import calculate_max_shares, calculate_actual_fee_rate
-from config.settings import get_settings
+from config.settings import get_settings, load_strategy_params
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -78,6 +78,7 @@ class TradingSignal:
         actual_fee_rate: 实际手续费率（考虑5元低消）
         news_url: 新闻链接（东方财富个股资讯页）
         in_report_window: 是否在财报窗口期
+        signal_strength: 信号强度评分（0-100）
     
     Requirements: 6.2, 6.3, 12.1, 10.2
     """
@@ -94,6 +95,7 @@ class TradingSignal:
     news_url: str                     # 新闻链接 (Requirements 12.1)
     in_report_window: bool            # 是否在财报窗口期 (Requirements 10.2)
     report_warning: Optional[str] = None  # 财报窗口期警告信息
+    signal_strength: float = 50.0     # 信号强度评分（0-100，默认50）
 
 
 class SignalGenerator:
@@ -163,7 +165,8 @@ class SignalGenerator:
            c. 计算技术指标，判断信号
            d. 计算资金和费率
            e. 生成辅助信息（新闻链接、限价上限）
-        3. 返回信号列表
+        3. 计算信号质量评分
+        4. 按质量评分排序返回
         
         设计原则：把决策权还给人，系统只做硬风控
         
@@ -173,7 +176,7 @@ class SignalGenerator:
             current_positions: 当前持仓只数，默认为 0
         
         Returns:
-            交易信号列表
+            交易信号列表（按质量评分排序）
             
         Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6
         """
@@ -208,11 +211,8 @@ class SignalGenerator:
                 logger.error(f"生成信号失败 {code}: {e}")
                 continue
         
-        # 按信号类型排序：买入信号优先
-        signals.sort(key=lambda s: (
-            0 if s.signal_type == SignalType.BUY else 1,
-            -s.trade_amount  # 交易金额大的优先
-        ))
+        # 优化排序：按信号质量综合评分排序
+        signals = self._sort_signals_by_quality(signals)
         
         logger.info(f"信号生成完成: 共 {len(signals)} 个信号")
         return signals
@@ -264,7 +264,7 @@ class SignalGenerator:
         is_in_window, report_warning = self.report_checker.check_report_window(code)
         
         # 4. 计算技术指标，判断信号（使用 T-1 及之前的数据）
-        signal_type, reason = self._check_signal_conditions(signal_df)
+        signal_type, reason, signal_strength = self._check_signal_conditions(signal_df)
         
         if signal_type is None:
             logger.debug(f"无交易信号: {code}")
@@ -322,12 +322,14 @@ class SignalGenerator:
             actual_fee_rate=actual_fee_rate,
             news_url=news_url,
             in_report_window=is_in_window,
-            report_warning=report_warning
+            report_warning=report_warning,
+            signal_strength=signal_strength
         )
         
         logger.info(
             f"生成信号: {code} {stock_name} - {signal_type.value}, "
             f"限价上限: ¥{limit_cap:.2f}, "
+            f"信号强度: {signal_strength:.1f}, "
             f"财报窗口期: {'是' if is_in_window else '否'}"
         )
         
@@ -336,7 +338,7 @@ class SignalGenerator:
     def _check_signal_conditions(
         self, 
         df: pd.DataFrame
-    ) -> Tuple[Optional[SignalType], str]:
+    ) -> Tuple[Optional[SignalType], str, float]:
         """
         检查技术指标条件，判断信号类型
         
@@ -346,7 +348,7 @@ class SignalGenerator:
             df: 股票历史数据 DataFrame
         
         Returns:
-            (信号类型, 信号依据) 或 (None, "") 无信号时
+            (信号类型, 信号依据, 信号强度) 或 (None, "", 0.0) 无信号时
         """
         if self.strategy_type == StrategyType.RSI_REVERSAL:
             return self._check_rsi_reversal_conditions(df)
@@ -356,22 +358,30 @@ class SignalGenerator:
     def _check_rsrs_conditions(
         self, 
         df: pd.DataFrame
-    ) -> Tuple[Optional[SignalType], str]:
+    ) -> Tuple[Optional[SignalType], str, float]:
         """
         RSRS 阻力支撑相对强度策略
         
         计算步骤：
         1. 取过去 N 天的 High/Low 数据，做线性回归，得到斜率 Beta
         2. 将 Beta 标准化（Z-Score），与过去 M 天的历史比较
-        3. RSRS 标准分 > 0.7 买入，< -0.7 卖出
+        3. RSRS 标准分 > buy_threshold 买入，< sell_threshold 卖出
+        
+        参数从共享配置加载，与回测页面保持一致
+        
+        Returns:
+            (信号类型, 信号依据, 信号强度)
+            信号强度基于 RSRS 标准分的绝对值，范围 0-100
         """
-        n_period = 18   # 斜率计算窗口
-        m_period = 600  # 标准化窗口
-        buy_threshold = 0.7
-        sell_threshold = -0.7
+        # 从共享配置加载参数
+        strategy_params = load_strategy_params()
+        n_period = strategy_params.rsrs_n_period      # 斜率计算窗口
+        m_period = strategy_params.rsrs_m_period      # 标准化窗口
+        buy_threshold = strategy_params.rsrs_buy_threshold
+        sell_threshold = strategy_params.rsrs_sell_threshold
         
         if len(df) < max(n_period, 100):  # 至少需要 100 天数据
-            return None, ""
+            return None, "", 0.0
         
         import numpy as np
         
@@ -399,7 +409,7 @@ class SignalGenerator:
             betas.append(beta)
         
         if len(betas) < 2:
-            return None, ""
+            return None, "", 0.0
         
         # 当前 beta
         current_beta = betas[-1]
@@ -418,17 +428,22 @@ class SignalGenerator:
         else:
             rsrs_score = 0
         
-        # 买入信号：RSRS 标准分 > 0.7
+        # 计算信号强度（基于 RSRS 标准分的绝对值）
+        # RSRS 标准分范围通常在 -3 到 3 之间
+        # 转换为 0-100 的评分：abs(rsrs_score) / 3 * 100
+        signal_strength = min(abs(rsrs_score) / 3.0 * 100, 100)
+        
+        # 买入信号：RSRS 标准分 > buy_threshold
         if rsrs_score > buy_threshold:
             reason = f"RSRS买入信号 (标准分={rsrs_score:.2f} > {buy_threshold})"
-            return SignalType.BUY, reason
+            return SignalType.BUY, reason, signal_strength
         
-        # 卖出信号：RSRS 标准分 < -0.7
+        # 卖出信号：RSRS 标准分 < sell_threshold
         if rsrs_score < sell_threshold:
             reason = f"RSRS卖出信号 (标准分={rsrs_score:.2f} < {sell_threshold})"
-            return SignalType.SELL, reason
+            return SignalType.SELL, reason, signal_strength
         
-        return None, ""
+        return None, "", 0.0
 
     def _check_bollinger_reversion_conditions(
         self, 
@@ -567,24 +582,30 @@ class SignalGenerator:
     def _check_rsi_reversal_conditions(
         self, 
         df: pd.DataFrame
-    ) -> Tuple[Optional[SignalType], str]:
+    ) -> Tuple[Optional[SignalType], str, float]:
         """
         RSI 超卖反弹策略（增强版）
         
         买入条件（全部满足）：
-        1. RSI < 30（超卖区反弹）
+        1. RSI < buy_threshold（超卖区反弹）
         2. 股价 > MA60 × 0.85（趋势确认，避免接飞刀）
         3. 股价 > MA20 × 0.90（短期趋势确认）
         
-        卖出条件：RSI > 70（超买区止盈）
+        卖出条件：RSI > sell_threshold（超买区止盈）
         
-        优化说明：
-        - 增加趋势确认，避免在单边下跌市中频繁抄底
-        - MA60 × 0.85 是趋势安全底线
-        - MA20 × 0.90 是短期趋势确认
+        参数从共享配置加载，与回测页面保持一致
+        
+        Returns:
+            (信号类型, 信号依据, 信号强度)
+            信号强度基于 RSI 偏离程度，范围 0-100
         """
         if len(df) < 60:
-            return None, ""
+            return None, "", 0.0
+        
+        # 从共享配置加载参数
+        strategy_params = load_strategy_params()
+        rsi_buy_threshold = strategy_params.rsi_buy_threshold
+        rsi_sell_threshold = strategy_params.rsi_sell_threshold
         
         close = df['close']
         current_close = close.iloc[-1]
@@ -608,33 +629,41 @@ class SignalGenerator:
         ma60_floor = ma60 * 0.85  # MA60 的 85% 是安全底线
         ma20_floor = ma20 * 0.90  # MA20 的 90% 是短期底线
         
-        # 买入信号：RSI < 30 + 趋势确认
-        if current_rsi < 30:
+        # 买入信号：RSI < buy_threshold + 趋势确认
+        if current_rsi < rsi_buy_threshold:
             # 检查趋势安全性
             if current_close < ma60_floor:
                 # 股价跌破 MA60 太多，可能是单边下跌，不买入
-                return None, ""
+                return None, "", 0.0
+            
+            # 计算信号强度：RSI 越低，信号越强
+            signal_strength = min((rsi_buy_threshold - current_rsi) / rsi_buy_threshold * 100 + 50, 100)
             
             if current_close < ma20_floor:
                 # 短期趋势太弱，谨慎买入
-                reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < 30, ⚠️短期趋势偏弱)"
+                reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < {rsi_buy_threshold}, ⚠️短期趋势偏弱)"
+                signal_strength *= 0.8  # 降低信号强度
             else:
-                reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < 30, 趋势确认✓)"
+                reason = f"RSI超卖反弹 (RSI={current_rsi:.1f} < {rsi_buy_threshold}, 趋势确认✓)"
             
-            return SignalType.BUY, reason
+            return SignalType.BUY, reason, signal_strength
         
-        # 备选买入：RSI 上穿 30 + 趋势确认
-        if prev_rsi < 30 and current_rsi >= 30:
+        # 备选买入：RSI 上穿 buy_threshold + 趋势确认
+        if prev_rsi < rsi_buy_threshold and current_rsi >= rsi_buy_threshold:
             if current_close >= ma60_floor:
-                reason = f"RSI低位金叉 (上穿30, RSI={current_rsi:.1f}, 趋势确认✓)"
-                return SignalType.BUY, reason
+                # 信号强度：刚上穿阈值，强度中等
+                signal_strength = 60.0
+                reason = f"RSI低位金叉 (上穿{rsi_buy_threshold}, RSI={current_rsi:.1f}, 趋势确认✓)"
+                return SignalType.BUY, reason, signal_strength
         
-        # 卖出信号：RSI > 70
-        if current_rsi > 70:
-            reason = f"RSI超买止盈 (RSI={current_rsi:.1f} > 70)"
-            return SignalType.SELL, reason
+        # 卖出信号：RSI > sell_threshold
+        if current_rsi > rsi_sell_threshold:
+            # 计算信号强度：RSI 越高，卖出信号越强
+            signal_strength = min((current_rsi - rsi_sell_threshold) / (100 - rsi_sell_threshold) * 100 + 50, 100)
+            reason = f"RSI超买止盈 (RSI={current_rsi:.1f} > {rsi_sell_threshold})"
+            return SignalType.SELL, reason, signal_strength
         
-        return None, ""
+        return None, "", 0.0
 
     def _calculate_limit_cap(self, close_price: float) -> float:
         """
@@ -684,6 +713,75 @@ class SignalGenerator:
             market = "sz"  # 默认深圳
         
         return self.EASTMONEY_NEWS_URL.format(market=market, code=code)
+
+    def _sort_signals_by_quality(self, signals: List[TradingSignal]) -> List[TradingSignal]:
+        """
+        按信号质量综合评分排序
+        
+        排序规则（优先级从高到低）：
+        1. 信号类型：买入信号优先于卖出信号
+        2. 风险标记：无财报窗口期、无高费率预警的优先
+        3. 信号强度：技术指标强度高的优先
+        4. 交易金额：金额大的优先（资金利用效率）
+        
+        评分公式：
+        - 基础分：信号强度（0-100）
+        - 财报窗口期：-30 分
+        - 高费率预警：-20 分
+        - 交易金额加成：log10(金额/1000) * 5（最多+15分）
+        
+        Args:
+            signals: 原始信号列表
+        
+        Returns:
+            排序后的信号列表
+        """
+        import math
+        
+        def calculate_quality_score(signal: TradingSignal) -> float:
+            """计算单个信号的质量评分"""
+            score = signal.signal_strength  # 基础分 0-100
+            
+            # 风险惩罚
+            if signal.in_report_window:
+                score -= 30  # 财报窗口期严重扣分
+            
+            if signal.high_fee_warning:
+                score -= 20  # 高费率预警扣分
+            
+            # 交易金额加成（对数缩放，避免金额差距过大）
+            if signal.trade_amount > 0:
+                amount_bonus = math.log10(signal.trade_amount / 1000) * 5
+                amount_bonus = max(0, min(amount_bonus, 15))  # 限制在 0-15 分
+                score += amount_bonus
+            
+            return score
+        
+        # 计算每个信号的质量评分
+        signal_scores = [(signal, calculate_quality_score(signal)) for signal in signals]
+        
+        # 排序：买入信号优先，然后按质量评分降序
+        signal_scores.sort(key=lambda x: (
+            0 if x[0].signal_type == SignalType.BUY else 1,  # 买入优先
+            -x[1]  # 质量评分降序
+        ))
+        
+        # 返回排序后的信号列表
+        sorted_signals = [signal for signal, score in signal_scores]
+        
+        # 记录排序结果（前5个）
+        if sorted_signals:
+            logger.info("信号排序结果（前5）：")
+            for i, (signal, score) in enumerate(signal_scores[:5]):
+                logger.info(
+                    f"  {i+1}. {signal.code} {signal.name} - "
+                    f"{signal.signal_type.value}, "
+                    f"质量评分: {score:.1f}, "
+                    f"信号强度: {signal.signal_strength:.1f}, "
+                    f"金额: ¥{signal.trade_amount:,.0f}"
+                )
+        
+        return sorted_signals
 
     def generate_no_signal_message(self) -> str:
         """

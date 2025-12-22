@@ -1,7 +1,7 @@
 """
-MiniQuant-Lite 微信通知模块
+MiniQuant-Lite 飞书通知模块
 
-通过企业微信群机器人 Webhook 实现交易信号的即时推送。
+通过飞书群机器人 Webhook 实现交易信号的即时推送。
 
 功能：
 - 配置管理和持久化
@@ -42,7 +42,7 @@ class NotificationConfig:
     
     Validates: Requirements 1.1
     """
-    webhook_url: str = ""                 # 企业微信 Webhook URL
+    webhook_url: str = ""                 # 飞书 Webhook URL
     enabled: bool = False                 # 是否启用通知
     notify_on_buy: bool = True            # 买入信号通知
     notify_on_sell: bool = True           # 卖出信号通知
@@ -62,7 +62,7 @@ class NotificationConfigStore:
     Validates: Requirements 1.3, 1.5, 1.6, 4.7
     """
     CONFIG_FILE = "data/notification_config.json"
-    ENV_VAR_NAME = "WECHAT_WEBHOOK_URL"
+    ENV_VAR_NAME = "FEISHU_WEBHOOK_URL"
     
     @classmethod
     def _get_config_path(cls) -> Path:
@@ -78,7 +78,7 @@ class NotificationConfigStore:
         
         优先级：
         1. 本地配置文件 (data/notification_config.json)
-        2. 环境变量 WECHAT_WEBHOOK_URL
+        2. 环境变量 FEISHU_WEBHOOK_URL
         3. 默认空配置
         
         Validates: Requirements 1.3, 1.6
@@ -130,20 +130,12 @@ class NotificationConfigStore:
         """
         脱敏显示 webhook URL
         
-        示例: https://qyapi.weixin.qq.com/...xy12
+        示例: https://open.feishu.cn/...xy12
         
         Validates: Requirements 4.7
         """
         if not url or len(url) < 10:
             return "未配置"
-        
-        # 提取 key 部分（最后的 UUID）
-        if "key=" in url:
-            parts = url.split("key=")
-            if len(parts) == 2 and len(parts[1]) >= 4:
-                key = parts[1]
-                masked_key = "*" * (len(key) - 4) + key[-4:]
-                return f"{parts[0]}key={masked_key}"
         
         # 通用脱敏：显示前 30 字符 + ... + 最后 4 字符
         if len(url) > 40:
@@ -158,7 +150,7 @@ class NotificationConfigStore:
 
 class NotificationService:
     """
-    微信通知服务
+    飞书通知服务
     
     Validates: Requirements 2.*, 3.*, 5.*
     """
@@ -193,7 +185,7 @@ class NotificationService:
         
         if signal.signal_type == SignalType.BUY:
             # 买入信号
-            content = f"""# 📈 MiniQuant 买入信号
+            content = f"""📈 **MiniQuant 买入信号**
 
 **股票**: {signal.code} {signal.name}
 **建议挂单价**: ¥{signal.limit_cap:.2f}
@@ -202,10 +194,10 @@ class NotificationService:
 {warnings}
 **生成时间**: {timestamp}
 
-> {self.OPERATION_REMINDER}"""
+{self.OPERATION_REMINDER}"""
         else:
             # 卖出信号
-            content = f"""# 📉 MiniQuant 卖出信号
+            content = f"""📉 **MiniQuant 卖出信号**
 
 **股票**: {signal.code} {signal.name}
 **参考价格**: ¥{signal.price_range[1]:.2f}
@@ -213,7 +205,7 @@ class NotificationService:
 {warnings}
 **生成时间**: {timestamp}
 
-> {self.OPERATION_REMINDER}"""
+{self.OPERATION_REMINDER}"""
         
         return content.strip()
     
@@ -255,7 +247,7 @@ class NotificationService:
         buy_signals = [s for s in signals if s.signal_type == SignalType.BUY]
         sell_signals = [s for s in signals if s.signal_type == SignalType.SELL]
         
-        content = f"""# 📊 MiniQuant 信号汇总
+        content = f"""📊 **MiniQuant 信号汇总**
 
 **买入信号**: {len(buy_signals)} 个
 **卖出信号**: {len(sell_signals)} 个
@@ -263,21 +255,21 @@ class NotificationService:
         
         # 买入信号列表
         if buy_signals:
-            content += "\n## 买入\n"
+            content += "\n**买入**\n"
             for s in buy_signals:
                 warning_icon = "⚠️" if s.in_report_window or s.high_fee_warning else ""
                 content += f"- {s.code} {s.name} 挂单价 ¥{s.limit_cap:.2f} {warning_icon}\n"
         
         # 卖出信号列表
         if sell_signals:
-            content += "\n## 卖出\n"
+            content += "\n**卖出**\n"
             for s in sell_signals:
                 content += f"- {s.code} {s.name}\n"
         
         content += f"""
 **生成时间**: {timestamp}
 
-> {self.OPERATION_REMINDER}"""
+{self.OPERATION_REMINDER}"""
         
         return content.strip()
     
@@ -302,7 +294,7 @@ class NotificationService:
     
     def _send_with_retry(self, content: str) -> Tuple[bool, str]:
         """
-        带重试机制的发送
+        带重试机制的发送（飞书格式）
         
         Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5
         
@@ -314,10 +306,11 @@ class NotificationService:
         if not HAS_REQUESTS:
             return False, "requests 库未安装"
         
+        # 飞书 Webhook 请求格式
         payload = {
-            "msgtype": "markdown",
-            "markdown": {
-                "content": content
+            "msg_type": "text",
+            "content": {
+                "text": content
             }
         }
         
@@ -333,11 +326,12 @@ class NotificationService:
                 
                 if response.status_code == 200:
                     result = response.json()
-                    if result.get("errcode") == 0:
-                        logger.info("微信通知发送成功")
+                    # 飞书成功响应: {"code": 0, "msg": "success"}
+                    if result.get("code") == 0 or result.get("StatusCode") == 0:
+                        logger.info("飞书通知发送成功")
                         return True, ""
                     else:
-                        last_error = f"企业微信返回错误: {result.get('errmsg', '未知错误')}"
+                        last_error = f"飞书返回错误: {result.get('msg', result.get('StatusMessage', '未知错误'))}"
                         logger.warning(f"第 {attempt + 1} 次发送失败: {last_error}")
                 else:
                     last_error = f"HTTP {response.status_code}: {response.text[:100]}"
@@ -357,7 +351,7 @@ class NotificationService:
             if attempt < self.config.max_retries - 1:
                 time.sleep(self.config.retry_interval)
         
-        logger.error(f"微信通知发送失败，已重试 {self.config.max_retries} 次: {last_error}")
+        logger.error(f"飞书通知发送失败，已重试 {self.config.max_retries} 次: {last_error}")
         return False, last_error
     
     def send_signal_notification(self, signals: list) -> bool:
@@ -377,7 +371,7 @@ class NotificationService:
         """
         # 检查是否启用 (Requirements 1.4)
         if not self.config.enabled:
-            logger.debug("微信通知未启用，跳过发送")
+            logger.debug("飞书通知未启用，跳过发送")
             return False
         
         # 检查 webhook_url (Requirements 1.2)
@@ -425,9 +419,9 @@ class NotificationService:
         buy_status = "✅ 开启" if self.config.notify_on_buy else "❌ 关闭"
         sell_status = "✅ 开启" if self.config.notify_on_sell else "❌ 关闭"
         
-        content = f"""# 🔔 MiniQuant 测试通知
+        content = f"""🔔 **MiniQuant 测试通知**
 
-恭喜！微信通知配置成功 ✅
+恭喜！飞书通知配置成功 ✅
 
 您将在以下情况收到通知：
 - 买入信号: {buy_status}

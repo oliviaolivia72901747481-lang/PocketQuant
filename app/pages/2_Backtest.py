@@ -30,6 +30,7 @@ from core.parameter_sensitivity import (
     RobustnessDiagnostics, HeatmapRenderer, STRATEGY_PARAM_CONFIGS,
     get_default_grid
 )
+from config.settings import save_strategy_params, load_strategy_params, StrategyParamsConfig
 
 
 # ==========================================
@@ -662,6 +663,45 @@ def main():
         if not selected_stocks:
             st.error("请选择至少一只股票")
         else:
+            # 保存策略参数到共享配置（供每日信号页面使用）
+            if strategy_name == "RSI 超卖反弹策略":
+                params_to_save = StrategyParamsConfig(
+                    rsi_period=strategy_config.get('rsi_period', 14),
+                    rsi_buy_threshold=strategy_config.get('buy_threshold', 30),
+                    rsi_sell_threshold=strategy_config.get('sell_threshold', 70),
+                    rsi_stop_loss=strategy_config.get('stop_loss', 0.05),
+                    rsi_take_profit=strategy_config.get('take_profit', 0.15),
+                )
+            elif strategy_name == "RSRS 阻力支撑策略":
+                params_to_save = StrategyParamsConfig(
+                    rsrs_n_period=strategy_config.get('n_period', 18),
+                    rsrs_m_period=strategy_config.get('m_period', 600),
+                    rsrs_buy_threshold=strategy_config.get('buy_threshold', 0.7),
+                    rsrs_sell_threshold=strategy_config.get('sell_threshold', -0.7),
+                    rsrs_hard_stop_loss=strategy_config.get('hard_stop_loss', -0.06),
+                )
+            else:
+                params_to_save = None
+            
+            if params_to_save:
+                # 加载现有参数，只更新当前策略的参数
+                existing_params = load_strategy_params()
+                if strategy_name == "RSI 超卖反弹策略":
+                    existing_params.rsi_period = params_to_save.rsi_period
+                    existing_params.rsi_buy_threshold = params_to_save.rsi_buy_threshold
+                    existing_params.rsi_sell_threshold = params_to_save.rsi_sell_threshold
+                    existing_params.rsi_stop_loss = params_to_save.rsi_stop_loss
+                    existing_params.rsi_take_profit = params_to_save.rsi_take_profit
+                elif strategy_name == "RSRS 阻力支撑策略":
+                    existing_params.rsrs_n_period = params_to_save.rsrs_n_period
+                    existing_params.rsrs_m_period = params_to_save.rsrs_m_period
+                    existing_params.rsrs_buy_threshold = params_to_save.rsrs_buy_threshold
+                    existing_params.rsrs_sell_threshold = params_to_save.rsrs_sell_threshold
+                    existing_params.rsrs_hard_stop_loss = params_to_save.rsrs_hard_stop_loss
+                
+                save_strategy_params(existing_params)
+                st.toast("✅ 策略参数已同步到每日信号页面", icon="🔄")
+            
             with st.spinner("正在回测中..."):
                 st.session_state.batch_results = run_batch_backtest(
                     backtest_config, strategy_name, strategy_config, selected_stocks
@@ -681,57 +721,60 @@ def main():
 
 
 def render_strategy_params_compact(strategy_name: str) -> Dict:
-    """紧凑版策略参数配置"""
+    """紧凑版策略参数配置（加载已保存的参数作为默认值）"""
     strategy_config = {}
+    
+    # 加载已保存的参数
+    saved_params = load_strategy_params()
     
     if strategy_name == "RSI 超卖反弹策略":
         strategy_config['rsi_period'] = st.number_input(
-            "RSI 周期", value=14, min_value=5, max_value=30, key="rsi_period"
+            "RSI 周期", value=saved_params.rsi_period, min_value=5, max_value=30, key="rsi_period"
         )
         
         col1, col2 = st.columns(2)
         with col1:
             strategy_config['buy_threshold'] = st.number_input(
-                "买入 (RSI<)", value=30, min_value=10, max_value=40, key="rsi_buy"
+                "买入 (RSI<)", value=saved_params.rsi_buy_threshold, min_value=10, max_value=40, key="rsi_buy"
             )
         with col2:
             strategy_config['sell_threshold'] = st.number_input(
-                "卖出 (RSI>)", value=70, min_value=60, max_value=90, key="rsi_sell"
+                "卖出 (RSI>)", value=saved_params.rsi_sell_threshold, min_value=60, max_value=90, key="rsi_sell"
             )
         
         col1, col2 = st.columns(2)
         with col1:
             strategy_config['stop_loss'] = st.number_input(
-                "止损 %", value=5.0, min_value=1.0, max_value=15.0, key="rsi_sl"
+                "止损 %", value=saved_params.rsi_stop_loss * 100, min_value=1.0, max_value=15.0, key="rsi_sl"
             ) / 100
         with col2:
             strategy_config['take_profit'] = st.number_input(
-                "止盈 %", value=15.0, min_value=5.0, max_value=50.0, key="rsi_tp"
+                "止盈 %", value=saved_params.rsi_take_profit * 100, min_value=5.0, max_value=50.0, key="rsi_tp"
             ) / 100
     
     elif strategy_name == "RSRS 阻力支撑策略":
         col1, col2 = st.columns(2)
         with col1:
             strategy_config['n_period'] = st.number_input(
-                "斜率窗口(N)", value=18, min_value=10, max_value=30, key="rsrs_n"
+                "斜率窗口(N)", value=saved_params.rsrs_n_period, min_value=10, max_value=30, key="rsrs_n"
             )
         with col2:
             strategy_config['m_period'] = st.number_input(
-                "标准化(M)", value=600, min_value=100, max_value=1000, key="rsrs_m"
+                "标准化(M)", value=saved_params.rsrs_m_period, min_value=100, max_value=1000, key="rsrs_m"
             )
         
         col1, col2 = st.columns(2)
         with col1:
             strategy_config['buy_threshold'] = st.number_input(
-                "买入阈值", value=0.7, min_value=0.3, max_value=1.5, format="%.1f", key="rsrs_buy"
+                "买入阈值", value=saved_params.rsrs_buy_threshold, min_value=0.3, max_value=1.5, format="%.1f", key="rsrs_buy"
             )
         with col2:
             strategy_config['sell_threshold'] = st.number_input(
-                "卖出阈值", value=-0.7, min_value=-1.5, max_value=-0.3, format="%.1f", key="rsrs_sell"
+                "卖出阈值", value=saved_params.rsrs_sell_threshold, min_value=-1.5, max_value=-0.3, format="%.1f", key="rsrs_sell"
             )
         
         strategy_config['hard_stop_loss'] = st.number_input(
-            "硬止损 %", value=-6.0, min_value=-15.0, max_value=-1.0, key="rsrs_sl"
+            "硬止损 %", value=saved_params.rsrs_hard_stop_loss * 100, min_value=-15.0, max_value=-1.0, key="rsrs_sl"
         ) / 100
     
     return strategy_config

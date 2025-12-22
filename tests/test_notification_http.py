@@ -46,10 +46,10 @@ class TestHttpSendSuccess:
         
         Requirements: 3.1
         """
-        # 模拟成功响应
+        # 模拟飞书成功响应
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response.json.return_value = {"code": 0, "msg": "success"}
         mock_post.return_value = mock_response
         
         success, error = notification_service._send_with_retry("测试消息")
@@ -61,22 +61,22 @@ class TestHttpSendSuccess:
     @patch('requests.post')
     def test_send_with_correct_payload(self, mock_post, notification_service):
         """
-        测试发送正确的 payload 格式
+        测试发送正确的 payload 格式（飞书格式）
         
         Requirements: 3.1
         """
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response.json.return_value = {"code": 0, "msg": "success"}
         mock_post.return_value = mock_response
         
         test_content = "# 测试标题\n\n**测试内容**"
         notification_service._send_with_retry(test_content)
         
-        # 验证调用参数
+        # 验证调用参数（飞书格式）
         call_args = mock_post.call_args
-        assert call_args[1]['json']['msgtype'] == 'markdown'
-        assert call_args[1]['json']['markdown']['content'] == test_content
+        assert call_args[1]['json']['msg_type'] == 'text'
+        assert call_args[1]['json']['content']['text'] == test_content
         assert call_args[1]['timeout'] == 10
     
     @patch('requests.post')
@@ -88,7 +88,7 @@ class TestHttpSendSuccess:
         """
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response.json.return_value = {"code": 0, "msg": "success"}
         mock_post.return_value = mock_response
         
         notification_service._send_with_retry("测试消息")
@@ -129,7 +129,7 @@ class TestHttpRetryMechanism:
         
         mock_response_success = MagicMock()
         mock_response_success.status_code = 200
-        mock_response_success.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response_success.json.return_value = {"code": 0, "msg": "success"}
         
         mock_post.side_effect = [mock_response_fail, mock_response_fail, mock_response_success]
         
@@ -141,18 +141,18 @@ class TestHttpRetryMechanism:
     @patch('requests.post')
     def test_retry_on_wechat_error_response(self, mock_post, notification_service):
         """
-        测试企业微信返回错误时重试
+        测试飞书返回错误时重试
         
         Requirements: 3.2, 3.5
         """
-        # 前两次返回企业微信错误，第三次成功
+        # 前两次返回飞书错误，第三次成功
         mock_response_fail = MagicMock()
         mock_response_fail.status_code = 200
-        mock_response_fail.json.return_value = {"errcode": 40014, "errmsg": "invalid access_token"}
+        mock_response_fail.json.return_value = {"code": 19001, "msg": "param invalid"}
         
         mock_response_success = MagicMock()
         mock_response_success.status_code = 200
-        mock_response_success.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response_success.json.return_value = {"code": 0, "msg": "success"}
         
         mock_post.side_effect = [mock_response_fail, mock_response_fail, mock_response_success]
         
@@ -232,7 +232,7 @@ class TestHttpTimeout:
         # 前两次超时，第三次成功
         mock_response_success = MagicMock()
         mock_response_success.status_code = 200
-        mock_response_success.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response_success.json.return_value = {"code": 0, "msg": "success"}
         
         mock_post.side_effect = [
             requests.Timeout("Connection timed out"),
@@ -269,7 +269,7 @@ class TestHttpTimeout:
         """
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response.json.return_value = {"code": 0, "msg": "success"}
         mock_post.return_value = mock_response
         
         notification_service._send_with_retry("测试消息")
@@ -296,7 +296,7 @@ class TestHttpTimeout:
         
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response.json.return_value = {"code": 0, "msg": "success"}
         mock_post.return_value = mock_response
         
         service._send_with_retry("测试消息")
@@ -329,7 +329,7 @@ class TestHttpNetworkErrors:
         """
         mock_response_success = MagicMock()
         mock_response_success.status_code = 200
-        mock_response_success.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response_success.json.return_value = {"code": 0, "msg": "success"}
         
         mock_post.side_effect = [
             requests.ConnectionError("Connection refused"),
@@ -406,7 +406,7 @@ class TestSendSignalNotification:
         
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response.json.return_value = {"code": 0, "msg": "success"}
         mock_post.return_value = mock_response
         
         result = service.send_signal_notification([buy_signal])
@@ -462,7 +462,7 @@ class TestSendTestNotification:
         
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"errcode": 0, "errmsg": "ok"}
+        mock_response.json.return_value = {"code": 0, "msg": "success"}
         mock_post.return_value = mock_response
         
         success, error = service.send_test_notification()
@@ -472,7 +472,7 @@ class TestSendTestNotification:
         
         # 验证消息内容包含配置状态
         call_args = mock_post.call_args
-        content = call_args[1]['json']['markdown']['content']
+        content = call_args[1]['json']['content']['text']
         assert "测试通知" in content
         assert "买入信号" in content
         assert "卖出信号" in content

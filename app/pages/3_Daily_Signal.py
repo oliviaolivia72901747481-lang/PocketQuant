@@ -32,6 +32,7 @@ from core.position_tracker import PositionTracker
 from core.sell_signal_checker import SellSignalChecker, SellSignal
 from core.logging_config import get_logger
 from core.notification import NotificationConfig, NotificationConfigStore, NotificationService, auto_send_notification
+from config.settings import load_strategy_params
 
 logger = get_logger(__name__)
 
@@ -863,20 +864,21 @@ def render_market_status():
 
 def render_notification_settings():
     """
-    渲染微信通知配置面板
+    渲染飞书通知配置面板
     
     Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7
     """
-    with st.expander("🔔 微信通知设置", expanded=False):
+    with st.expander("🔔 飞书通知设置", expanded=False):
         # 加载已保存配置 (Requirements 4.3)
         config = NotificationConfigStore.load()
         
         st.markdown("""
-        配置企业微信群机器人，在信号生成时自动推送到手机。
+        配置飞书群机器人，在信号生成时自动推送到手机。
         
         **获取 Webhook URL**：
-        1. 在企业微信群中添加「群机器人」
-        2. 复制机器人的 Webhook 地址
+        1. 在飞书群中点击「设置」→「群机器人」→「添加机器人」
+        2. 选择「自定义机器人」
+        3. 复制机器人的 Webhook 地址
         """)
         
         # Webhook URL 输入（密码框形式）(Requirements 4.7)
@@ -884,8 +886,8 @@ def render_notification_settings():
             "Webhook URL",
             value=config.webhook_url,
             type="password",
-            placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=...",
-            help="企业微信群机器人 Webhook 地址"
+            placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/...",
+            help="飞书群机器人 Webhook 地址"
         )
         
         # 显示脱敏的当前配置
@@ -939,7 +941,7 @@ def render_notification_settings():
                         success, message = service.send_test_notification()
                     
                     if success:
-                        st.success("✅ 测试通知发送成功！请检查企业微信群")
+                        st.success("✅ 测试通知发送成功！请检查飞书群")
                     else:
                         st.error(f"❌ 发送失败: {message}")
 
@@ -996,6 +998,42 @@ def main():
     
     strategy_info = STRATEGY_OPTIONS[strategy_name]
     st.info(f"💡 **{strategy_name}**：{strategy_info['description']}")
+    
+    # 显示当前使用的参数（与回测页面共享）
+    saved_params = load_strategy_params()
+    
+    with st.expander("📊 当前策略参数（与回测页面共享）", expanded=False):
+        if strategy_name == "RSI 超卖反弹策略":
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("RSI 周期", saved_params.rsi_period)
+            with col2:
+                st.metric("买入阈值 (RSI<)", saved_params.rsi_buy_threshold)
+            with col3:
+                st.metric("卖出阈值 (RSI>)", saved_params.rsi_sell_threshold)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("止损比例", f"{saved_params.rsi_stop_loss:.0%}")
+            with col2:
+                st.metric("止盈比例", f"{saved_params.rsi_take_profit:.0%}")
+        
+        elif strategy_name == "RSRS 阻力支撑策略":
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("斜率窗口 (N)", saved_params.rsrs_n_period)
+            with col2:
+                st.metric("标准化窗口 (M)", saved_params.rsrs_m_period)
+            with col3:
+                st.metric("硬止损", f"{saved_params.rsrs_hard_stop_loss:.0%}")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("买入阈值", f"{saved_params.rsrs_buy_threshold:.1f}")
+            with col2:
+                st.metric("卖出阈值", f"{saved_params.rsrs_sell_threshold:.1f}")
+        
+        st.caption("💡 参数在回测页面运行回测时自动同步，无需手动设置")
     
     st.divider()
     
@@ -1064,15 +1102,15 @@ def main():
         
         # 显示信号
         if signals:
-            # 自动发送微信通知 (Requirements 5.1)
+            # 自动发送飞书通知 (Requirements 5.1)
             notification_config = NotificationConfigStore.load()
             if notification_config.enabled and notification_config.webhook_url:
-                with st.spinner("正在发送微信通知..."):
+                with st.spinner("正在发送飞书通知..."):
                     notification_success = auto_send_notification(signals)
                 if notification_success:
-                    st.success("📱 微信通知已发送")
+                    st.success("📱 飞书通知已发送")
                 else:
-                    st.warning("📱 微信通知发送失败，请检查配置")
+                    st.warning("📱 飞书通知发送失败，请检查配置")
             
             # 信号汇总表
             render_signal_summary_table(signals)

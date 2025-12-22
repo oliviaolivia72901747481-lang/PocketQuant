@@ -123,6 +123,29 @@ class LogConfig:
 
 
 @dataclass
+class StrategyParamsConfig:
+    """
+    策略参数配置（回测与信号生成共享）
+    
+    用于在回测页面和每日信号页面之间共享策略参数，
+    确保信号生成使用与回测相同的参数。
+    """
+    # RSI 超卖反弹策略参数
+    rsi_period: int = 14                  # RSI 周期
+    rsi_buy_threshold: int = 30           # RSI 买入阈值（RSI < 此值买入）
+    rsi_sell_threshold: int = 70          # RSI 卖出阈值（RSI > 此值卖出）
+    rsi_stop_loss: float = 0.05           # RSI 策略止损比例
+    rsi_take_profit: float = 0.15         # RSI 策略止盈比例
+    
+    # RSRS 阻力支撑策略参数
+    rsrs_n_period: int = 18               # RSRS 斜率计算窗口
+    rsrs_m_period: int = 600              # RSRS 标准化窗口
+    rsrs_buy_threshold: float = 0.7       # RSRS 买入阈值（标准分 > 此值买入）
+    rsrs_sell_threshold: float = -0.7     # RSRS 卖出阈值（标准分 < 此值卖出）
+    rsrs_hard_stop_loss: float = -0.06    # RSRS 策略硬止损比例
+
+
+@dataclass
 class Settings:
     """
     全局配置类
@@ -136,6 +159,7 @@ class Settings:
     liquidity: LiquidityConfig = field(default_factory=LiquidityConfig)
     path: PathConfig = field(default_factory=PathConfig)
     log: LogConfig = field(default_factory=LogConfig)
+    strategy_params: StrategyParamsConfig = field(default_factory=StrategyParamsConfig)
     
     # AkShare 推荐版本
     RECOMMENDED_AKSHARE_VERSION: str = '1.12.0'
@@ -162,3 +186,96 @@ def reset_settings() -> None:
     """重置全局配置（主要用于测试）"""
     global _settings
     _settings = None
+
+
+# ==========================================
+# 策略参数持久化（回测与信号生成共享）
+# ==========================================
+
+import json
+
+_STRATEGY_PARAMS_FILE = 'data/strategy_params.json'
+
+
+def _get_strategy_params_path() -> str:
+    """获取策略参数文件的绝对路径"""
+    settings = get_settings()
+    return os.path.join(settings.path.base_dir, _STRATEGY_PARAMS_FILE)
+
+
+def save_strategy_params(params: StrategyParamsConfig) -> bool:
+    """
+    保存策略参数到 JSON 文件
+    
+    Args:
+        params: 策略参数配置对象
+        
+    Returns:
+        是否保存成功
+    """
+    try:
+        file_path = _get_strategy_params_path()
+        
+        # 确保目录存在
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
+        # 转换为字典
+        params_dict = {
+            'rsi_period': params.rsi_period,
+            'rsi_buy_threshold': params.rsi_buy_threshold,
+            'rsi_sell_threshold': params.rsi_sell_threshold,
+            'rsi_stop_loss': params.rsi_stop_loss,
+            'rsi_take_profit': params.rsi_take_profit,
+            'rsrs_n_period': params.rsrs_n_period,
+            'rsrs_m_period': params.rsrs_m_period,
+            'rsrs_buy_threshold': params.rsrs_buy_threshold,
+            'rsrs_sell_threshold': params.rsrs_sell_threshold,
+            'rsrs_hard_stop_loss': params.rsrs_hard_stop_loss,
+        }
+        
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(params_dict, f, indent=2, ensure_ascii=False)
+        
+        # 更新全局配置
+        settings = get_settings()
+        settings.strategy_params = params
+        
+        return True
+    except Exception as e:
+        print(f"保存策略参数失败: {e}")
+        return False
+
+
+def load_strategy_params() -> StrategyParamsConfig:
+    """
+    从 JSON 文件加载策略参数
+    
+    如果文件不存在，返回默认配置
+    
+    Returns:
+        策略参数配置对象
+    """
+    try:
+        file_path = _get_strategy_params_path()
+        
+        if not os.path.exists(file_path):
+            return StrategyParamsConfig()
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            params_dict = json.load(f)
+        
+        return StrategyParamsConfig(
+            rsi_period=params_dict.get('rsi_period', 14),
+            rsi_buy_threshold=params_dict.get('rsi_buy_threshold', 30),
+            rsi_sell_threshold=params_dict.get('rsi_sell_threshold', 70),
+            rsi_stop_loss=params_dict.get('rsi_stop_loss', 0.05),
+            rsi_take_profit=params_dict.get('rsi_take_profit', 0.15),
+            rsrs_n_period=params_dict.get('rsrs_n_period', 18),
+            rsrs_m_period=params_dict.get('rsrs_m_period', 600),
+            rsrs_buy_threshold=params_dict.get('rsrs_buy_threshold', 0.7),
+            rsrs_sell_threshold=params_dict.get('rsrs_sell_threshold', -0.7),
+            rsrs_hard_stop_loss=params_dict.get('rsrs_hard_stop_loss', -0.06),
+        )
+    except Exception as e:
+        print(f"加载策略参数失败: {e}")
+        return StrategyParamsConfig()
