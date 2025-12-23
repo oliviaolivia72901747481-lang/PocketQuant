@@ -121,38 +121,22 @@ def render_trade_table(journal: TradeJournal):
     
     df = pd.DataFrame(data)
     
-    # 计算盈亏状态（用于高亮）
-    # 需要匹配买卖对来确定盈亏
-    pnl_status = calculate_trade_pnl_status(trades)
-    df['pnl_status'] = df['id'].map(pnl_status)
-    
     # 显示用的列
     display_df = df[['trade_date', 'code', 'name', 'action', 'price', 'quantity', 
-                     'total_amount', 'commission', 'strategy', 'reason', 'note', 'pnl_status']].copy()
+                     'total_amount', 'commission', 'strategy', 'reason', 'note']].copy()
     
     display_df.columns = ['日期', '代码', '名称', '操作', '价格', '数量', 
-                          '金额', '手续费', '策略', '原因', '备注', 'pnl_status']
+                          '金额', '手续费', '策略', '原因', '备注']
     
-    # 高亮函数
-    def highlight_row(row):
-        if row['pnl_status'] == 'profit':
-            return ['background-color: #d4edda'] * len(row)  # 绿色 - 盈利
-        elif row['pnl_status'] == 'loss':
-            return ['background-color: #f8d7da'] * len(row)  # 红色 - 亏损
-        return [''] * len(row)
-    
-    # 应用样式
-    styled_df = display_df.style.apply(highlight_row, axis=1)
-    
+    # 直接显示表格，不应用背景色样式（保持统一深色背景）
     st.dataframe(
-        styled_df,
+        display_df,
         use_container_width=True,
         hide_index=True,
         column_config={
             '价格': st.column_config.NumberColumn('价格', format='¥%.2f'),
             '金额': st.column_config.NumberColumn('金额', format='¥%.0f'),
             '手续费': st.column_config.NumberColumn('手续费', format='¥%.2f'),
-            'pnl_status': None,  # 隐藏此列
         }
     )
     
@@ -777,9 +761,9 @@ def main():
         - 净利润 = 总盈亏 - 总手续费
         
         **表格说明：**
-        - 🟢 绿色高亮：盈利的卖出交易
-        - 🔴 红色高亮：亏损的卖出交易
         - 表格按交易日期降序排列（最新的在前）
+        - 通过"操作"列区分买入/卖出交易
+        - 盈亏情况可在统计概览中查看
         
         **导出数据：**
         - 点击"导出 CSV"按钮下载交易记录

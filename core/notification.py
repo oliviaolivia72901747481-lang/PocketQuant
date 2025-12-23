@@ -164,15 +164,12 @@ class NotificationService:
     
     def format_signal(self, signal) -> str:
         """
-        格式化单个信号为 Markdown
+        格式化单个信号为 Markdown（精简版）
         
         包含：
         - 股票代码、名称
-        - 买入：建议挂单价 + 参考收盘价
-        - 卖出：参考价格
         - 信号原因
-        - 风控警告
-        - 时间戳和操作提醒
+        - 风控警告（如有）
         
         Validates: Requirements 2.1, 2.2, 2.4, 2.5, 2.6, 2.7, 2.8
         """
@@ -185,33 +182,26 @@ class NotificationService:
         
         if signal.signal_type == SignalType.BUY:
             # 买入信号
-            content = f"""📈 **MiniQuant 买入信号**
+            content = f"""📈 **买入信号**
 
-**股票**: {signal.code} {signal.name}
-**建议挂单价**: ¥{signal.limit_cap:.2f}
-**参考收盘价**: ¥{signal.price_range[1]:.2f}
-**信号原因**: {signal.reason}
+{signal.code} {signal.name}
+{signal.reason}
 {warnings}
-**生成时间**: {timestamp}
-
-{self.OPERATION_REMINDER}"""
+{timestamp}"""
         else:
             # 卖出信号
-            content = f"""📉 **MiniQuant 卖出信号**
+            content = f"""📉 **卖出信号**
 
-**股票**: {signal.code} {signal.name}
-**参考价格**: ¥{signal.price_range[1]:.2f}
-**信号原因**: {signal.reason}
+{signal.code} {signal.name}
+{signal.reason}
 {warnings}
-**生成时间**: {timestamp}
-
-{self.OPERATION_REMINDER}"""
+{timestamp}"""
         
         return content.strip()
     
     def _format_warnings(self, signal) -> str:
         """
-        格式化风控警告
+        格式化风控警告（精简版）
         
         Validates: Requirements 2.6, 2.7
         """
@@ -219,20 +209,19 @@ class NotificationService:
         
         # 财报窗口期警告
         if signal.in_report_window:
-            warning_text = signal.report_warning or "请注意财报发布时间"
-            warnings.append(f"⚠️ **财报窗口期**: {warning_text}")
+            warnings.append("⚠️ 财报窗口期")
         
         # 高费率预警
         if signal.high_fee_warning:
-            warnings.append(f"⚠️ **高费率预警**: 实际费率 {signal.actual_fee_rate:.2%}，建议增加交易金额")
+            warnings.append("⚠️ 高费率")
         
         if warnings:
-            return "\n" + "\n".join(warnings) + "\n"
+            return " ".join(warnings)
         return ""
     
     def format_summary(self, signals: list) -> str:
         """
-        格式化信号摘要为 Markdown
+        格式化信号摘要为 Markdown（精简版）
         
         Validates: Requirements 2.3, 2.4, 2.5, 2.8
         """
@@ -247,29 +236,24 @@ class NotificationService:
         buy_signals = [s for s in signals if s.signal_type == SignalType.BUY]
         sell_signals = [s for s in signals if s.signal_type == SignalType.SELL]
         
-        content = f"""📊 **MiniQuant 信号汇总**
+        content = f"""📊 **信号汇总** ({timestamp})
 
-**买入信号**: {len(buy_signals)} 个
-**卖出信号**: {len(sell_signals)} 个
 """
         
         # 买入信号列表
         if buy_signals:
-            content += "\n**买入**\n"
+            content += "📈 **买入**\n"
             for s in buy_signals:
                 warning_icon = "⚠️" if s.in_report_window or s.high_fee_warning else ""
-                content += f"- {s.code} {s.name} 挂单价 ¥{s.limit_cap:.2f} {warning_icon}\n"
+                content += f"{s.code} {s.name} {warning_icon}\n"
         
         # 卖出信号列表
         if sell_signals:
-            content += "\n**卖出**\n"
+            if buy_signals:
+                content += "\n"
+            content += "📉 **卖出**\n"
             for s in sell_signals:
-                content += f"- {s.code} {s.name}\n"
-        
-        content += f"""
-**生成时间**: {timestamp}
-
-{self.OPERATION_REMINDER}"""
+                content += f"{s.code} {s.name}\n"
         
         return content.strip()
     
@@ -403,7 +387,7 @@ class NotificationService:
     
     def send_test_notification(self) -> Tuple[bool, str]:
         """
-        发送测试通知
+        发送测试通知（精简版）
         
         Validates: Requirements 4.4, 4.5, 4.6
         
@@ -416,18 +400,17 @@ class NotificationService:
         
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        buy_status = "✅ 开启" if self.config.notify_on_buy else "❌ 关闭"
-        sell_status = "✅ 开启" if self.config.notify_on_sell else "❌ 关闭"
+        buy_status = "✅" if self.config.notify_on_buy else "❌"
+        sell_status = "✅" if self.config.notify_on_sell else "❌"
         
-        content = f"""🔔 **MiniQuant 测试通知**
+        content = f"""🔔 **测试通知**
 
-恭喜！飞书通知配置成功 ✅
+飞书通知配置成功 ✅
 
-您将在以下情况收到通知：
-- 买入信号: {buy_status}
-- 卖出信号: {sell_status}
+买入信号: {buy_status}
+卖出信号: {sell_status}
 
-**测试时间**: {timestamp}"""
+{timestamp}"""
         
         return self._send_with_retry(content)
 

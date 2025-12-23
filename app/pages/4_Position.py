@@ -41,20 +41,27 @@ def get_data_feed() -> DataFeed:
 
 def get_current_prices(data_feed: DataFeed, codes: List[str]) -> Dict[str, float]:
     """
-    获取股票当前价格
+    获取股票最新收盘价（latest_price）
+    
+    注意：
+    - 使用本地历史数据的最新收盘价（df['close'].iloc[-1]）
+    - 与 Signal Generator 中的 latest_price 获取方式一致
+    - 非实时行情，需要先在"数据管理"页面更新数据
     
     Args:
         data_feed: 数据源
         codes: 股票代码列表
     
     Returns:
-        {股票代码: 当前价格}
+        {股票代码: 最新收盘价}
     """
     prices = {}
     for code in codes:
         df = data_feed.load_processed_data(code)
         if df is not None and not df.empty:
-            prices[code] = float(df['close'].iloc[-1])
+            # 获取最新收盘价（与 Signal Generator 的 latest_price 一致）
+            latest_price = float(df['close'].iloc[-1])
+            prices[code] = latest_price
     return prices
 
 
@@ -142,13 +149,14 @@ def render_position_list(tracker: PositionTracker, data_feed: DataFeed):
         st.info("📭 暂无持仓记录，请添加持仓")
         return
     
-    # 获取当前价格
+    # 获取当前价格（最新收盘价，与 Signal Generator 的 latest_price 一致）
     codes = [p.code for p in positions]
     prices = get_current_prices(data_feed, codes)
     
     # 构建表格数据
     data = []
     for holding in positions:
+        # 使用最新收盘价作为现价
         current_price = prices.get(holding.code, holding.buy_price)
         pnl = tracker.calculate_pnl(holding, current_price)
         
@@ -195,34 +203,41 @@ def render_position_list(tracker: PositionTracker, data_feed: DataFeed):
     
     st.divider()
     
-    # 显示持仓表格
+    # 添加刷新按钮和更新时间显示
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        # 显示数据更新时间
+        if 'last_price_update' not in st.session_state:
+            st.session_state['last_price_update'] = datetime.now()
+        
+        update_time = st.session_state['last_price_update'].strftime('%Y-%m-%d %H:%M:%S')
+        st.caption(f"💡 现价更新时间: {update_time} | 数据来源: 本地历史数据最新收盘价（与每日信号页面一致，非实时行情）")
+    
+    with col2:
+        if st.button("🔄 刷新价格", key="refresh_prices", help="重新加载最新收盘价"):
+            st.session_state['last_price_update'] = datetime.now()
+            st.rerun()
+    
+    # 显示持仓表格（移除背景色高亮，保持统一深色背景）
     display_df = df[['code', 'name', 'buy_price', 'current_price', 'quantity', 
-                     'pnl_amount', 'pnl_pct', 'holding_days', 'strategy', 'buy_date', 'is_stop_loss']].copy()
+                     'pnl_amount', 'pnl_pct', 'holding_days', 'strategy', 'buy_date']].copy()
+    
+    # 将盈亏百分比转换为百分比形式（0.05 -> 5.0）
+    display_df['pnl_pct'] = display_df['pnl_pct'] * 100
     
     display_df.columns = ['代码', '名称', '买入价', '现价', '数量', 
-                          '盈亏金额', '盈亏%', '持仓天数', '策略', '买入日期', 'is_stop_loss']
+                          '盈亏金额', '盈亏%', '持仓天数', '策略', '买入日期']
     
-    def highlight_row(row):
-        if row['is_stop_loss']:
-            return ['background-color: #ffcccc'] * len(row)
-        elif row['盈亏%'] > 0:
-            return ['background-color: #ccffcc'] * len(row)
-        return [''] * len(row)
-    
-    # 应用样式后隐藏 is_stop_loss 列
-    styled_df = display_df.style.apply(highlight_row, axis=1)
-    
-    # 只显示需要的列
+    # 直接显示表格，不应用背景色样式
     st.dataframe(
-        styled_df,
+        display_df,
         use_container_width=True,
         hide_index=True,
         column_config={
             '买入价': st.column_config.NumberColumn('买入价', format='¥%.2f'),
             '现价': st.column_config.NumberColumn('现价', format='¥%.2f'),
             '盈亏金额': st.column_config.NumberColumn('盈亏金额', format='¥%.0f'),
-            '盈亏%': st.column_config.NumberColumn('盈亏%', format='%.1f%%'),
-            'is_stop_loss': None,  # 隐藏此列
+            '盈亏%': st.column_config.NumberColumn('盈亏%', format='%.2f%%'),
         }
     )
     

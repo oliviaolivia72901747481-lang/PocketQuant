@@ -226,10 +226,10 @@ class SignalGenerator:
         """
         分析单只股票，生成交易信号
         
-        重要修复：使用 T-1 日数据生成信号，避免未来函数
-        - 信号基于 T-1 日收盘数据计算
-        - 限价上限基于 T-1 日收盘价 × 1.01
-        - 实际执行在 T 日
+        重要说明：
+        - 技术指标基于 T-1 日数据计算（避免未来函数）
+        - 限价上限基于最新可用数据（T 日收盘价，如果有）
+        - 实际执行在 T+1 日
         
         Args:
             code: 股票代码
@@ -250,31 +250,36 @@ class SignalGenerator:
             logger.warning(f"数据不足（{len(df)} 条），跳过: {code}")
             return None
         
-        # 2. 【重要修复】使用 T-1 日数据生成信号，避免未来函数
+        # 2. 【重要】使用 T-1 日数据生成信号，避免未来函数
         # df.iloc[-1] 是最新数据（T日），df.iloc[-2] 是前一天数据（T-1日）
         # 信号基于 T-1 日数据计算，T 日执行
         signal_df = df.iloc[:-1]  # 排除最新一天，使用 T-1 及之前的数据
         latest_row = signal_df.iloc[-1]  # T-1 日数据
-        close_price = float(latest_row['close'])  # T-1 日收盘价
+        signal_price = float(latest_row['close'])  # T-1 日收盘价（用于信号判断）
+        
+        # 3. 获取最新价格（用于限价上限计算）
+        # 如果有 T 日数据，使用 T 日收盘价；否则使用 T-1 日收盘价
+        latest_available_row = df.iloc[-1]  # 最新可用数据
+        latest_price = float(latest_available_row['close'])  # 最新收盘价（用于限价上限）
         
         # 获取股票名称
         stock_name = self._stock_names_cache.get(code, code)
         
-        # 3. 检查财报窗口期（硬风控）
+        # 4. 检查财报窗口期（硬风控）
         is_in_window, report_warning = self.report_checker.check_report_window(code)
         
-        # 4. 计算技术指标，判断信号（使用 T-1 及之前的数据）
+        # 5. 计算技术指标，判断信号（使用 T-1 及之前的数据）
         signal_type, reason, signal_strength = self._check_signal_conditions(signal_df)
         
         if signal_type is None:
             logger.debug(f"无交易信号: {code}")
             return None
         
-        # 5. 计算资金和费率
+        # 6. 计算资金和费率（使用最新价格）
         settings = get_settings()
         max_shares, high_fee_warning, reject_reason = calculate_max_shares(
             cash=current_cash,
-            price=close_price,
+            price=latest_price,
             commission_rate=settings.fund.commission_rate,
             min_commission=settings.fund.min_commission,
             max_positions_count=settings.position.max_positions_count,
@@ -291,7 +296,7 @@ class SignalGenerator:
             # 使用最小交易金额作为预估
             trade_amount = settings.position.min_trade_amount
         else:
-            trade_amount = max_shares * close_price
+            trade_amount = max_shares * latest_price
         
         # 计算实际费率
         actual_fee_rate = calculate_actual_fee_rate(
@@ -300,13 +305,13 @@ class SignalGenerator:
             settings.fund.min_commission
         )
         
-        # 6. 计算辅助数据
-        limit_cap = self._calculate_limit_cap(close_price)
+        # 7. 计算辅助数据（使用最新价格）
+        limit_cap = self._calculate_limit_cap(latest_price)
         news_url = self._generate_news_url(code)
         
-        # 计算建议价格区间（止损价作为下限）
-        stop_loss_price = round(close_price * (1 + settings.strategy.hard_stop_loss), 2)
-        price_range = (stop_loss_price, close_price)
+        # 计算建议价格区间（止损价作为下限，使用最新价格）
+        stop_loss_price = round(latest_price * (1 + settings.strategy.hard_stop_loss), 2)
+        price_range = (stop_loss_price, latest_price)
         
         # 7. 构建信号对象
         signal = TradingSignal(
@@ -669,12 +674,12 @@ class SignalGenerator:
         """
         计算限价上限
         
-        逻辑：建议挂单价格 = 今日收盘价 × 1.01（允许 1% 的高开滑点）
+        逻辑：建议挂单价格 = 最新收盘价 × 1.01（允许 1% 的高开滑点）
         
         这个价格用于次日挂单，防止因高开而盲目追高
         
         Args:
-            close_price: 今日收盘价
+            close_price: 最新收盘价（通常是 T 日收盘价）
         
         Returns:
             限价上限（四舍五入到小数点后两位）
