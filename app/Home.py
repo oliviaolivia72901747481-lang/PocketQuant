@@ -616,15 +616,96 @@ def get_risk_avoidance_stats() -> Dict[str, Any]:
         }
 
 
-def get_today_signal_count() -> int:
+def get_today_signal_count() -> Dict[str, int]:
     """
-    获取今日信号数量
+    获取今日信号数量（真实数据）
+    
+    统计科技股买入信号和卖出信号的数量。
+    使用缓存避免重复计算。
     
     Returns:
-        今日信号数量
+        {
+            'buy_signals': int,    # 买入信号数量
+            'sell_signals': int,   # 卖出信号数量
+            'total': int,          # 总信号数量
+        }
     """
-    # 简化实现：返回 0，实际信号在信号页面生成
-    return 0
+    # 使用缓存避免重复计算
+    cache_key = 'today_signal_count_cache'
+    
+    if cache_key in st.session_state:
+        return st.session_state[cache_key]
+    
+    result = {
+        'buy_signals': 0,
+        'sell_signals': 0,
+        'total': 0
+    }
+    
+    try:
+        from core.data_feed import DataFeed
+        from core.tech_stock.market_filter import MarketFilter
+        from core.tech_stock.sector_ranker import SectorRanker
+        from core.tech_stock.hard_filter import HardFilter
+        from core.tech_stock.signal_generator import TechSignalGenerator
+        from core.tech_stock.exit_manager import TechExitManager
+        from core.position_tracker import PositionTracker
+        from config.tech_stock_pool import get_all_tech_stocks
+        
+        settings = get_settings()
+        data_feed = DataFeed(
+            raw_path=settings.path.get_raw_path(),
+            processed_path=settings.path.get_processed_path()
+        )
+        
+        # 获取科技股池
+        all_codes = get_all_tech_stocks()
+        
+        # 1. 检查大盘状态
+        market_filter = MarketFilter(data_feed)
+        market_status = market_filter.check_market_status()
+        
+        # 2. 获取行业排名
+        sector_ranker = SectorRanker(data_feed)
+        sector_rankings = sector_ranker.get_sector_rankings()
+        
+        # 3. 硬性筛选
+        hard_filter = HardFilter(data_feed)
+        filter_results = hard_filter.filter_stocks(all_codes)
+        
+        # 4. 生成买入信号
+        signal_generator = TechSignalGenerator(data_feed)
+        buy_signals = signal_generator.generate_signals(
+            stock_pool=all_codes,
+            market_status=market_status,
+            sector_rankings=sector_rankings,
+            hard_filter_results=filter_results
+        )
+        result['buy_signals'] = len(buy_signals)
+        
+        # 5. 检查卖出信号（需要有持仓）
+        try:
+            position_tracker = PositionTracker()
+            holdings = position_tracker.get_holdings()
+            
+            if holdings:
+                exit_manager = TechExitManager(data_feed)
+                exit_signals = exit_manager.check_exit_signals(holdings)
+                result['sell_signals'] = len(exit_signals)
+        except Exception as e:
+            logger.debug(f"检查卖出信号失败: {e}")
+            result['sell_signals'] = 0
+        
+        result['total'] = result['buy_signals'] + result['sell_signals']
+        
+    except Exception as e:
+        logger.error(f"获取今日信号数量失败: {e}")
+        # 返回默认值
+        result = {'buy_signals': 0, 'sell_signals': 0, 'total': 0}
+    
+    # 缓存结果
+    st.session_state[cache_key] = result
+    return result
 
 
 def main():
@@ -673,7 +754,10 @@ def main():
     
     settings = get_settings()
     stock_pool = get_watchlist()
-    signal_count = get_today_signal_count()
+    
+    # 获取今日信号数量（带缓存）
+    with st.spinner("正在检查今日信号..."):
+        signal_counts = get_today_signal_count()
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -699,11 +783,34 @@ def main():
         )
     
     with col4:
+        # 显示今日信号总数，带详细提示
+        signal_help = f"买入信号: {signal_counts['buy_signals']} 个\n卖出信号: {signal_counts['sell_signals']} 个"
         st.metric(
             label="今日信号",
-            value=f"{signal_count} 个",
-            help="今日生成的交易信号数量（请前往信号页面查看）"
+            value=f"{signal_counts['total']} 个",
+            delta=f"买{signal_counts['buy_signals']}/卖{signal_counts['sell_signals']}" if signal_counts['total'] > 0 else None,
+            help=signal_help
         )
+    
+    # 如果有信号，显示快速入口
+    if signal_counts['total'] > 0:
+        st.info(f"""
+        📢 **今日有 {signal_counts['total']} 个交易信号！**
+        
+        - 🟢 买入信号: {signal_counts['buy_signals']} 个
+        - 🔴 卖出信号: {signal_counts['sell_signals']} 个
+        
+        👉 请前往 **🔬 Tech Stock** 页面查看详情
+        """)
+    
+    # 刷新信号按钮
+    col1, col2, col3 = st.columns([1, 1, 2])
+    with col1:
+        if st.button("🔄 刷新信号", key="refresh_signals"):
+            # 清除信号缓存
+            if 'today_signal_count_cache' in st.session_state:
+                del st.session_state['today_signal_count_cache']
+            st.rerun()
     
     # ========== 避险战绩看板 ==========
     st.divider()

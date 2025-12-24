@@ -39,30 +39,110 @@ def get_data_feed() -> DataFeed:
     )
 
 
-def get_current_prices(data_feed: DataFeed, codes: List[str]) -> Dict[str, float]:
+def get_current_prices(data_feed: DataFeed, codes: List[str], use_realtime: bool = True) -> Dict[str, float]:
     """
-    获取股票最新收盘价（latest_price）
-    
-    注意：
-    - 使用本地历史数据的最新收盘价（df['close'].iloc[-1]）
-    - 与 Signal Generator 中的 latest_price 获取方式一致
-    - 非实时行情，需要先在"数据管理"页面更新数据
+    获取股票最新价格
     
     Args:
         data_feed: 数据源
         codes: 股票代码列表
+        use_realtime: 是否使用实时行情（默认True）
     
     Returns:
-        {股票代码: 最新收盘价}
+        {股票代码: 最新价格}
     """
     prices = {}
+    
+    if use_realtime:
+        # 检查缓存（5分钟内有效）
+        cache_key = 'realtime_prices_cache'
+        cache_time_key = 'realtime_prices_cache_time'
+        
+        if cache_key in st.session_state and cache_time_key in st.session_state:
+            cache_age = (datetime.now() - st.session_state[cache_time_key]).total_seconds()
+            if cache_age < 300:  # 5分钟缓存
+                cached_prices = st.session_state[cache_key]
+                for code in codes:
+                    if code in cached_prices:
+                        prices[code] = cached_prices[code]
+                
+                # 如果所有股票都在缓存中，直接返回
+                if len(prices) == len(codes):
+                    logger.info(f"使用缓存的实时行情: {len(prices)} 只股票")
+                    return prices
+        
+        # 尝试获取实时行情
+        try:
+            import akshare as ak
+            
+            # 获取全市场实时行情
+            df = ak.stock_zh_a_spot_em()
+            
+            if df is not None and not df.empty:
+                # 创建代码到价格的映射（缓存全部数据）
+                all_prices = {}
+                for _, row in df.iterrows():
+                    all_prices[row['代码']] = float(row['最新价'])
+                
+                # 更新缓存
+                st.session_state[cache_key] = all_prices
+                st.session_state[cache_time_key] = datetime.now()
+                
+                # 获取需要的股票价格
+                for code in codes:
+                    if code in all_prices:
+                        prices[code] = all_prices[code]
+                    else:
+                        # 如果实时行情中没有，使用本地数据
+                        local_df = data_feed.load_processed_data(code)
+                        if local_df is not None and not local_df.empty:
+                            prices[code] = float(local_df['close'].iloc[-1])
+                
+                logger.info(f"获取实时行情成功: {len(prices)} 只股票")
+                return prices
+                
+        except Exception as e:
+            logger.warning(f"获取实时行情失败，使用本地数据: {e}")
+    
+    # 使用本地历史数据的最新收盘价
     for code in codes:
         df = data_feed.load_processed_data(code)
         if df is not None and not df.empty:
-            # 获取最新收盘价（与 Signal Generator 的 latest_price 一致）
             latest_price = float(df['close'].iloc[-1])
             prices[code] = latest_price
+    
     return prices
+
+
+def get_realtime_price_single(code: str) -> float:
+    """
+    获取单只股票的实时价格
+    
+    Args:
+        code: 股票代码
+    
+    Returns:
+        实时价格，获取失败返回 0
+    """
+    # 先检查缓存
+    cache_key = 'realtime_prices_cache'
+    if cache_key in st.session_state:
+        cached_prices = st.session_state[cache_key]
+        if code in cached_prices:
+            return cached_prices[code]
+    
+    try:
+        import akshare as ak
+        
+        df = ak.stock_zh_a_spot_em()
+        if df is not None and not df.empty:
+            matches = df[df['代码'] == code]
+            if not matches.empty:
+                return float(matches['最新价'].iloc[0])
+    except Exception as e:
+        logger.warning(f"获取 {code} 实时价格失败: {e}")
+    
+    return 0
 
 
 def render_sell_signals(tracker: PositionTracker, data_feed: DataFeed):
@@ -149,14 +229,46 @@ def render_position_list(tracker: PositionTracker, data_feed: DataFeed):
         st.info("📭 暂无持仓记录，请添加持仓")
         return
     
-    # 获取当前价格（最新收盘价，与 Signal Generator 的 latest_price 一致）
+    # 添加刷新按钮和实时行情开关
+    col1, col2, col3 = st.columns([2, 1, 1])
+    
+    with col1:
+        # 显示数据更新时间
+        if 'last_price_update' not in st.session_state:
+            st.session_state['last_price_update'] = datetime.now()
+        
+        update_time = st.session_state['last_price_update'].strftime('%Y-%m-%d %H:%M:%S')
+        
+        # 判断数据来源
+        use_realtime = st.session_state.get('use_realtime_price', True)
+        data_source = "实时行情" if use_realtime else "本地历史数据"
+        st.caption(f"💡 现价更新时间: {update_time} | 数据来源: {data_source}")
+    
+    with col2:
+        # 实时行情开关
+        use_realtime = st.checkbox(
+            "🔴 刷新价格", 
+            value=st.session_state.get('use_realtime_price', True),
+            key="use_realtime_checkbox",
+            help="勾选后使用 AkShare 实时行情，取消勾选使用本地历史数据"
+        )
+        st.session_state['use_realtime_price'] = use_realtime
+    
+    with col3:
+        if st.button("🔄 刷新价格", key="refresh_prices", help="重新加载最新价格"):
+            st.session_state['last_price_update'] = datetime.now()
+            st.rerun()
+    
+    # 获取当前价格
     codes = [p.code for p in positions]
-    prices = get_current_prices(data_feed, codes)
+    
+    with st.spinner("正在获取最新价格..."):
+        prices = get_current_prices(data_feed, codes, use_realtime=use_realtime)
     
     # 构建表格数据
     data = []
     for holding in positions:
-        # 使用最新收盘价作为现价
+        # 使用最新价格
         current_price = prices.get(holding.code, holding.buy_price)
         pnl = tracker.calculate_pnl(holding, current_price)
         
@@ -202,21 +314,6 @@ def render_position_list(tracker: PositionTracker, data_feed: DataFeed):
         st.error(f"⚠️ 有 {summary['stop_loss_count']} 只股票触发止损线！")
     
     st.divider()
-    
-    # 添加刷新按钮和更新时间显示
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        # 显示数据更新时间
-        if 'last_price_update' not in st.session_state:
-            st.session_state['last_price_update'] = datetime.now()
-        
-        update_time = st.session_state['last_price_update'].strftime('%Y-%m-%d %H:%M:%S')
-        st.caption(f"💡 现价更新时间: {update_time} | 数据来源: 本地历史数据最新收盘价（与每日信号页面一致，非实时行情）")
-    
-    with col2:
-        if st.button("🔄 刷新价格", key="refresh_prices", help="重新加载最新收盘价"):
-            st.session_state['last_price_update'] = datetime.now()
-            st.rerun()
     
     # 显示持仓表格（移除背景色高亮，保持统一深色背景）
     display_df = df[['code', 'name', 'buy_price', 'current_price', 'quantity', 
