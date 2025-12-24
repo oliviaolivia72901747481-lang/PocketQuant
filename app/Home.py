@@ -29,6 +29,113 @@ ensure_logging_initialized()
 logger = get_logger(__name__)
 
 
+def check_tech_stock_data_status() -> Dict[str, Any]:
+    """
+    检查科技股数据同步状态
+    
+    在系统启动时检查科技股池数据完整性，
+    如有问题则显示警告并提供快速修复入口。
+    
+    Returns:
+        {
+            'has_issues': bool,          # 是否有数据问题
+            'total_stocks': int,         # 科技股总数
+            'valid_stocks': int,         # 有效数据股票数
+            'missing_count': int,        # 缺失数据数量
+            'completion_rate': float,    # 数据完整率
+            'message': str,              # 状态消息
+        }
+        
+    Requirements: 3.1, 3.2 (tech-stock-data-fix)
+    """
+    try:
+        from core.data_feed import DataFeed
+        from core.tech_stock.data_validator import TechDataValidator
+        from config.tech_stock_pool import get_all_tech_stocks
+        
+        settings = get_settings()
+        data_feed = DataFeed(
+            raw_path=settings.path.get_raw_path(),
+            processed_path=settings.path.get_processed_path()
+        )
+        
+        validator = TechDataValidator(data_feed)
+        all_codes = get_all_tech_stocks()
+        
+        # 验证科技股数据
+        result = validator.validate_tech_stock_data(all_codes)
+        
+        missing_count = len(result.missing_files) + len(result.insufficient_data) + len(result.corrupted_files)
+        completion_rate = result.valid_stocks / result.total_stocks if result.total_stocks > 0 else 0
+        
+        has_issues = missing_count > 0
+        
+        if has_issues:
+            message = f"科技股数据不完整：{missing_count} 只股票数据缺失或异常"
+        else:
+            message = f"科技股数据完整：{result.valid_stocks}/{result.total_stocks} 只"
+        
+        return {
+            'has_issues': has_issues,
+            'total_stocks': result.total_stocks,
+            'valid_stocks': result.valid_stocks,
+            'missing_count': missing_count,
+            'completion_rate': completion_rate,
+            'message': message
+        }
+        
+    except Exception as e:
+        logger.error(f"检查科技股数据状态失败: {e}")
+        return {
+            'has_issues': True,
+            'total_stocks': 0,
+            'valid_stocks': 0,
+            'missing_count': 0,
+            'completion_rate': 0,
+            'message': f'检查科技股数据失败: {str(e)}'
+        }
+
+
+def render_tech_stock_data_warning():
+    """
+    渲染科技股数据同步警告
+    
+    如果科技股数据不完整，显示警告并提供快速修复入口。
+    
+    Returns:
+        bool: 是否显示了警告
+        
+    Requirements: 3.1, 3.2 (tech-stock-data-fix)
+    """
+    # 使用缓存避免重复检查
+    cache_key = 'tech_stock_data_status_cache'
+    
+    if cache_key not in st.session_state:
+        st.session_state[cache_key] = check_tech_stock_data_status()
+    
+    status = st.session_state[cache_key]
+    
+    if status['has_issues']:
+        st.warning(f"""
+        🔬 **科技股数据同步警告**
+        
+        {status['message']}
+        
+        数据完整率: **{status['completion_rate']*100:.1f}%** ({status['valid_stocks']}/{status['total_stocks']})
+        
+        ⚠️ **请前往"数据管理"页面的"科技股数据专区"下载缺失数据，否则科技股回测功能可能无法正常使用！**
+        """)
+        
+        # 提供刷新按钮
+        if st.button("🔄 重新检查科技股数据", key="refresh_tech_data_check"):
+            st.session_state[cache_key] = check_tech_stock_data_status()
+            st.rerun()
+        
+        return True
+    
+    return False
+
+
 def get_capital_health_status(available_cash: float) -> Dict[str, Any]:
     """
     获取资金健康度状态（资金红绿灯）
@@ -185,8 +292,8 @@ def check_data_freshness() -> Dict[str, Any]:
         today = date.today()
         days_old = (today - last_data_date).days
         
-        # 判断是否过期（超过 3 天视为过期）
-        is_stale = days_old > 3
+        # 判断是否过期（考虑周末因素，超过 5 天视为过期）
+        is_stale = days_old > 5
         
         if is_stale:
             message = f"数据已过期：最后更新于 {last_data_date.strftime('%Y-%m-%d')}（{days_old} 天前）"
@@ -543,10 +650,13 @@ def main():
     # ========== 数据新鲜度警告（最高优先级）==========
     data_stale = render_data_freshness_watchdog()
     
+    # ========== 科技股数据同步警告 ==========
+    tech_data_warning = render_tech_stock_data_warning()
+    
     # ========== 休市安民告示 ==========
     is_holiday = render_market_calendar_notice()
     
-    if data_stale or is_holiday:
+    if data_stale or tech_data_warning or is_holiday:
         st.divider()
     
     # ========== 新手引导弹窗（三大铁律）==========

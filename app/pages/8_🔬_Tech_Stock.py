@@ -21,6 +21,9 @@ import os
 from datetime import datetime, date, time
 from typing import List, Dict, Optional, Any
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 # 添加项目根目录到 Python 路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -39,6 +42,8 @@ from core.tech_stock.hard_filter import HardFilter, HardFilterResult
 from core.tech_stock.signal_generator import TechSignalGenerator, TechBuySignal
 from core.tech_stock.exit_manager import TechExitManager, TechExitSignal, SignalPriority
 from core.tech_stock.backtester import TechBacktester, TechBacktestResult
+from core.tech_stock.data_validator import TechDataValidator
+from core.tech_stock.data_downloader import TechDataDownloader
 from core.position_tracker import PositionTracker, Holding
 
 
@@ -49,6 +54,158 @@ def get_data_feed() -> DataFeed:
         raw_path=settings.path.get_raw_path(),
         processed_path=settings.path.get_processed_path()
     )
+
+
+# ==========================================
+# 数据状态检查面板 (Requirements: 3.1, 3.2)
+# ==========================================
+
+def render_data_status_panel(data_feed: DataFeed, stock_pool):
+    """
+    渲染数据状态检查面板
+    
+    显示科技股池数据完整性状态，提供自动下载功能
+    
+    Requirements: 3.1, 3.2
+    """
+    st.subheader("📊 数据状态检查")
+    
+    # 初始化验证器
+    validator = TechDataValidator(data_feed)
+    
+    # 检查数据状态
+    with st.spinner("正在检查科技股数据状态..."):
+        try:
+            status = validator.get_tech_stock_pool_status()
+        except Exception as e:
+            st.error(f"检查数据状态失败: {e}")
+            return
+    
+    # 显示总体状态
+    overall = status["overall"]
+    completion_rate = overall["completion_rate"]
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("总股票数", overall["total_stocks"])
+    with col2:
+        color = "normal" if completion_rate >= 0.8 else "inverse"
+        st.metric("数据完整率", f"{completion_rate:.1%}", delta_color=color)
+    with col3:
+        st.metric("有效数据", overall["valid_stocks"])
+    with col4:
+        problem_count = overall["missing_files"] + overall["insufficient_data"] + overall["corrupted_files"]
+        st.metric("问题数据", problem_count, delta_color="inverse" if problem_count > 0 else "normal")
+    
+    # 如果有问题数据，显示详细信息和解决方案
+    if problem_count > 0:
+        st.warning(f"⚠️ 发现 {problem_count} 只股票存在数据问题，可能影响回测功能")
+        
+        with st.expander("查看问题详情", expanded=True):
+            problems = status["problem_stocks"]
+            
+            if problems["missing_files"]:
+                st.markdown("**缺少数据文件的股票:**")
+                missing_names = [
+                    f"{code}({stock_pool.get_stock_name(code)})" 
+                    for code in problems["missing_files"]
+                ]
+                st.markdown("• " + ", ".join(missing_names))
+            
+            if problems["insufficient_data"]:
+                st.markdown("**数据时间范围不足的股票:**")
+                for item in problems["insufficient_data"]:
+                    st.markdown(f"• {item['code']}({item['name']}): {item['first_date']} ~ {item['last_date']}")
+            
+            if problems["corrupted_files"]:
+                st.markdown("**数据文件损坏的股票:**")
+                corrupted_names = [
+                    f"{code}({stock_pool.get_stock_name(code)})" 
+                    for code in problems["corrupted_files"]
+                ]
+                st.markdown("• " + ", ".join(corrupted_names))
+        
+        # 提供解决方案
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            st.info("""
+            **建议解决方案:**
+            1. 点击右侧"下载科技股数据"按钮自动获取所需数据
+            2. 或者在"数据管理"页面手动管理股票数据
+            3. 对于损坏的文件，系统会自动重新下载
+            """)
+        
+        with col2:
+            if st.button("🔄 下载科技股数据", type="primary", use_container_width=True):
+                download_tech_stock_data(data_feed, stock_pool)
+    
+    else:
+        st.success("✅ 所有科技股数据完整，可以正常进行回测")
+
+
+def download_tech_stock_data(data_feed: DataFeed, stock_pool):
+    """
+    下载科技股数据
+    
+    Args:
+        data_feed: 数据获取模块实例
+        stock_pool: 科技股池实例
+    """
+    # 初始化下载器
+    downloader = TechDataDownloader(data_feed)
+    
+    # 获取所有科技股代码
+    all_codes = stock_pool.get_all_codes()
+    
+    st.info(f"开始下载 {len(all_codes)} 只科技股数据，请稍候...")
+    
+    # 创建进度条
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    def progress_callback(progress):
+        """进度回调函数"""
+        if progress.total_stocks > 0:
+            completion = progress.completed_stocks / progress.total_stocks
+            progress_bar.progress(completion)
+            
+            if progress.current_stock:
+                status_text.text(f"正在下载: {progress.current_stock} ({progress.current_stock_name})")
+            
+            if progress.is_completed:
+                status_text.text("下载完成!")
+    
+    try:
+        # 执行下载
+        result = downloader.download_tech_stock_pool(
+            progress_callback=progress_callback,
+            force_update=False  # 不强制更新已存在的数据
+        )
+        
+        # 显示结果
+        if result.success:
+            st.success(f"✅ 下载完成! 成功: {len(result.successful_downloads)} 只, 跳过: {len(result.skipped_downloads)} 只")
+        else:
+            st.warning(f"⚠️ 部分下载失败: 成功 {len(result.successful_downloads)} 只, 失败 {len(result.failed_downloads)} 只")
+            
+            if result.failed_downloads:
+                with st.expander("查看失败详情"):
+                    for failed in result.failed_downloads:
+                        st.text(f"• {failed['code']} ({failed['name']}): {failed.get('error', '未知错误')}")
+        
+        # 建议刷新页面
+        st.info("💡 数据下载完成后，建议刷新页面以更新数据状态")
+        
+    except Exception as e:
+        st.error(f"下载过程中出现错误: {e}")
+        logger.error(f"科技股数据下载失败: {e}")
+    
+    finally:
+        # 清理进度显示
+        progress_bar.empty()
+        status_text.empty()
 
 
 # ==========================================
@@ -63,23 +220,23 @@ def render_market_status_section(market_status: MarketStatus):
     """
     st.subheader("🚦 大盘红绿灯")
     
-    # 状态颜色和图标
+    # 深色主题状态颜色和图标
     if market_status.is_green:
-        status_color = "green"
+        status_color = "#28a745"
         status_icon = "🟢"
         status_text = "绿灯 - 允许买入"
-        container_style = "background-color: #d4edda; border: 2px solid #28a745;"
+        container_style = "background-color: #1a4d3a; border: 2px solid #28a745; color: #d4edda;"
     else:
-        status_color = "red"
+        status_color = "#dc3545"
         status_icon = "🔴"
         status_text = "红灯 - 禁止买入"
-        container_style = "background-color: #f8d7da; border: 2px solid #dc3545;"
+        container_style = "background-color: #4d1a1a; border: 2px solid #dc3545; color: #f8d7da;"
     
-    # 显示状态卡片
+    # 显示状态卡片（深色主题）
     st.markdown(f"""
     <div style="{container_style} padding: 20px; border-radius: 10px; margin-bottom: 20px;">
         <h2 style="margin: 0; color: {status_color};">{status_icon} {status_text}</h2>
-        <p style="margin: 10px 0 0 0; font-size: 14px;">检查日期: {market_status.check_date}</p>
+        <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.8;">检查日期: {market_status.check_date}</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -146,11 +303,11 @@ def render_sector_rankings_section(sector_rankings: List[SectorRank]):
     
     df = pd.DataFrame(data)
     
-    # 高亮可交易行业（排名1-2）
+    # 高亮可交易行业（排名1-2）- 深色主题
     def highlight_tradable(row):
         if row["排名"] <= 2:
-            return ['background-color: #d4edda'] * len(row)
-        return [''] * len(row)
+            return ['background-color: #1a4d3a; color: #d4edda'] * len(row)
+        return ['background-color: #1e1e1e; color: #fafafa'] * len(row)
     
     st.dataframe(
         df.style.apply(highlight_tradable, axis=1),
@@ -440,22 +597,22 @@ def render_exit_signals_section(exit_signals: List[TechExitSignal]):
 
 def render_exit_signal_card(signal: TechExitSignal):
     """渲染单个卖出信号卡片"""
-    # 优先级颜色和图标
+    # 深色主题优先级颜色和图标
     priority_config = {
-        SignalPriority.EMERGENCY: {"icon": "🔴", "color": "#dc3545", "bg": "#f8d7da"},
-        SignalPriority.STOP_LOSS: {"icon": "🟠", "color": "#fd7e14", "bg": "#fff3cd"},
-        SignalPriority.TAKE_PROFIT: {"icon": "🟡", "color": "#ffc107", "bg": "#fff9e6"},
-        SignalPriority.TREND_BREAK: {"icon": "🔵", "color": "#007bff", "bg": "#cce5ff"},
+        SignalPriority.EMERGENCY: {"icon": "🔴", "color": "#dc3545", "bg": "#4d1a1a"},
+        SignalPriority.STOP_LOSS: {"icon": "🟠", "color": "#fd7e14", "bg": "#4d2d1a"},
+        SignalPriority.TAKE_PROFIT: {"icon": "🟡", "color": "#ffc107", "bg": "#4d3d1a"},
+        SignalPriority.TREND_BREAK: {"icon": "🔵", "color": "#007bff", "bg": "#1a2d4d"},
     }
     
-    config = priority_config.get(signal.priority, {"icon": "⚪", "color": "#6c757d", "bg": "#f8f9fa"})
+    config = priority_config.get(signal.priority, {"icon": "⚪", "color": "#6c757d", "bg": "#2d2d2d"})
     
     # 特殊持仓标记
     special_marker = ""
     if signal.is_min_position:
         special_marker = " 🔸 严格止盈"
     
-    # 卡片容器
+    # 卡片容器（深色主题）
     st.markdown(f"""
     <div style="background-color: {config['bg']}; padding: 15px; border-radius: 10px; 
                 border-left: 5px solid {config['color']}; margin-bottom: 15px;">
@@ -533,14 +690,116 @@ def render_special_positions_section(holdings: List[Holding]):
     for p in min_positions:
         holding = p["holding"]
         st.markdown(f"""
-        <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; 
-                    border-left: 4px solid #ffc107; margin-bottom: 10px;">
+        <div style="background-color: #4d3d1a; padding: 10px; border-radius: 5px; 
+                    border-left: 4px solid #ffc107; margin-bottom: 10px; color: #fff3cd;">
             <b>🔸 {holding.code} {holding.name}</b> - 100股 | 
             成本: ¥{holding.buy_price:.2f} | 
             买入日期: {holding.buy_date}
             <br><small>⚠️ 严格止盈：RSI>85时止损紧贴MA5</small>
         </div>
         """, unsafe_allow_html=True)
+
+
+# ==========================================
+# 策略参数显示 (v11.2 最佳参数)
+# ==========================================
+
+def render_strategy_params_section():
+    """
+    渲染当前策略参数显示区域
+    
+    显示 v11.4g 平衡版策略的核心参数配置
+    """
+    st.subheader("⚙️ 当前策略参数 (v11.4g 平衡版)")
+    
+    # 参数定义（与 backtester.py 保持一致）
+    params = {
+        "止损": {"value": "-4.6%", "desc": "硬性止损线"},
+        "止盈": {"value": "+22%", "desc": "固定止盈目标"},
+        "移动止盈触发": {"value": "+9%", "desc": "盈利达到后启用移动止盈"},
+        "移动止盈回撤": {"value": "2.8%", "desc": "从最高点回撤卖出"},
+        "RSI范围": {"value": "44-70", "desc": "买入信号RSI区间"},
+        "RSI超买": {"value": ">80", "desc": "触发卖出（仅盈利时）"},
+        "最大持仓天数": {"value": "15天", "desc": "超时强制卖出"},
+        "信号强度门槛": {"value": "≥83", "desc": "买入信号最低分数"},
+        "单只仓位上限": {"value": "≤11%", "desc": "单只股票最大仓位"},
+        "最大持仓数": {"value": "≤5只", "desc": "同时持有股票上限"},
+    }
+    
+    # 使用两列布局显示参数
+    col1, col2 = st.columns(2)
+    
+    # 风控参数
+    with col1:
+        st.markdown("**🛡️ 风控参数**")
+        st.markdown(f"""
+        | 参数 | 值 | 说明 |
+        |------|-----|------|
+        | 止损 | `{params['止损']['value']}` | {params['止损']['desc']} |
+        | 止盈 | `{params['止盈']['value']}` | {params['止盈']['desc']} |
+        | 移动止盈触发 | `{params['移动止盈触发']['value']}` | {params['移动止盈触发']['desc']} |
+        | 移动止盈回撤 | `{params['移动止盈回撤']['value']}` | {params['移动止盈回撤']['desc']} |
+        | 最大持仓天数 | `{params['最大持仓天数']['value']}` | {params['最大持仓天数']['desc']} |
+        """)
+    
+    # 买入参数
+    with col2:
+        st.markdown("**📈 买入参数**")
+        st.markdown(f"""
+        | 参数 | 值 | 说明 |
+        |------|-----|------|
+        | RSI范围 | `{params['RSI范围']['value']}` | {params['RSI范围']['desc']} |
+        | RSI超买 | `{params['RSI超买']['value']}` | {params['RSI超买']['desc']} |
+        | 信号强度门槛 | `{params['信号强度门槛']['value']}` | {params['信号强度门槛']['desc']} |
+        | 单只仓位上限 | `{params['单只仓位上限']['value']}` | {params['单只仓位上限']['desc']} |
+        | 最大持仓数 | `{params['最大持仓数']['value']}` | {params['最大持仓数']['desc']} |
+        """)
+    
+    # 策略说明
+    with st.expander("📖 策略说明", expanded=False):
+        st.markdown("""
+        **v11.4g 平衡版策略特点：**
+        
+        1. **趋势过滤**：MA20斜率检查，只在上升趋势中买入
+        2. **价格位置过滤**：避免追高，价格不能高于MA5超过5%
+        3. **更高止盈目标**：止盈提升至22%，捕捉更大行情
+        4. **移动止盈保护**：+9%触发，回撤2.8%卖出
+        5. **RSI超买仅盈利卖出**：避免亏损时因RSI超买被迫卖出
+        
+        **卖出优先级：**
+        1. 🔴 止损（-4.6%）
+        2. 🟡 移动止盈（+9%触发，回撤2.8%）
+        3. 🟢 固定止盈（+22%）
+        4. 📊 RSI超买（>80且盈利）
+        5. 🔵 趋势反转（MA5<MA20且亏损）
+        6. ⏰ 持仓超时（≥15天）
+        """)
+    
+    # 版本对比
+    with st.expander("📊 v11.2 vs v11.4g 对比", expanded=False):
+        st.markdown("""
+        | 参数 | v11.2 | v11.4g | 变化 |
+        |------|-------|--------|------|
+        | 止损 | -4.5% | -4.6% | 略放宽 |
+        | 止盈 | +20% | +22% | 提高2% |
+        | 移动止盈触发 | +9% | +9% | 不变 |
+        | 移动止盈回撤 | 2.8% | 2.8% | 不变 |
+        | RSI范围 | 45-72 | 44-70 | 略调整 |
+        | 最大持仓天数 | 15天 | 15天 | 不变 |
+        | 趋势过滤 | ❌ | ✅ | 新增 |
+        | 价格位置过滤 | ❌ | ✅ | 新增 |
+        | RSI超买仅盈利卖 | ❌ | ✅ | 新增 |
+        
+        **回测对比（2022-12-26 ~ 2024-12-20）：**
+        | 指标 | v11.2 | v11.4g | 改善 |
+        |------|-------|--------|------|
+        | 收益率 | 39.70% | 33.51% | -16% |
+        | 最大回撤 | -11.39% | -4.81% | -58% |
+        | 胜率 | 21.9% | 24.5% | +12% |
+        | 收益/回撤比 | 3.48 | 6.96 | +100% |
+        
+        **v11.4g 是收益与风险的最佳平衡版本**
+        """)
 
 
 # ==========================================
@@ -748,6 +1007,127 @@ def main():
         layout="wide"
     )
     
+    # 添加深色主题CSS
+    st.markdown("""
+    <style>
+    /* 深色主题样式 */
+    .stApp {
+        background-color: #0e1117;
+        color: #fafafa;
+    }
+    
+    /* 主容器深色背景 */
+    .main .block-container {
+        background-color: #0e1117;
+        color: #fafafa;
+    }
+    
+    /* 侧边栏深色 */
+    .css-1d391kg {
+        background-color: #262730;
+    }
+    
+    /* 卡片和容器深色 */
+    .stContainer, .element-container {
+        background-color: #1e1e1e;
+        border-radius: 10px;
+    }
+    
+    /* 表格深色主题 */
+    .stDataFrame {
+        background-color: #1e1e1e;
+        color: #fafafa;
+    }
+    
+    /* 按钮深色主题 */
+    .stButton > button {
+        background-color: #262730;
+        color: #fafafa;
+        border: 1px solid #404040;
+    }
+    
+    .stButton > button:hover {
+        background-color: #404040;
+        border-color: #606060;
+    }
+    
+    /* 输入框深色主题 */
+    .stSelectbox > div > div {
+        background-color: #262730;
+        color: #fafafa;
+    }
+    
+    .stTextInput > div > div > input {
+        background-color: #262730;
+        color: #fafafa;
+        border: 1px solid #404040;
+    }
+    
+    /* 标签页深色主题 */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #262730;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background-color: #262730;
+        color: #fafafa;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: #404040;
+    }
+    
+    /* 指标卡片深色主题 */
+    .metric-container {
+        background-color: #1e1e1e;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #404040;
+    }
+    
+    /* 展开器深色主题 */
+    .streamlit-expanderHeader {
+        background-color: #262730;
+        color: #fafafa;
+    }
+    
+    .streamlit-expanderContent {
+        background-color: #1e1e1e;
+        border: 1px solid #404040;
+    }
+    
+    /* 深色主题文本颜色 */
+    h1, h2, h3, h4, h5, h6, p, span, div {
+        color: #fafafa !important;
+    }
+    
+    /* 成功/错误/警告消息深色主题 */
+    .stSuccess {
+        background-color: #1a4d3a;
+        border: 1px solid #28a745;
+        color: #d4edda;
+    }
+    
+    .stError {
+        background-color: #4d1a1a;
+        border: 1px solid #dc3545;
+        color: #f8d7da;
+    }
+    
+    .stWarning {
+        background-color: #4d3d1a;
+        border: 1px solid #ffc107;
+        color: #fff3cd;
+    }
+    
+    .stInfo {
+        background-color: #1a3d4d;
+        border: 1px solid #17a2b8;
+        color: #d1ecf1;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     st.title("🔬 科技股专属板块")
     st.markdown("科技股筛选和交易系统 - 小资金生存优先 | T+1 尾盘判定 | 风险控制优先")
     
@@ -757,6 +1137,11 @@ def main():
     data_feed = get_data_feed()
     stock_pool = get_tech_stock_pool()
     all_codes = stock_pool.get_all_codes()
+    
+    # 数据状态检查面板
+    render_data_status_panel(data_feed, stock_pool)
+    
+    st.divider()
     
     # 创建标签页
     tab1, tab2, tab3, tab4 = st.tabs(["📊 市场概览", "🎯 交易信号", "📈 回测验证", "📋 股票池"])
@@ -899,6 +1284,12 @@ def main():
     # Tab 3: 回测验证
     # ==========================================
     with tab3:
+        # 显示当前策略参数
+        render_strategy_params_section()
+        
+        st.divider()
+        
+        # 回测功能
         render_backtest_section()
     
     # ==========================================

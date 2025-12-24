@@ -47,6 +47,10 @@ SEMICONDUCTOR_STOCKS = [
     {"code": "688396", "name": "华润微"},
     {"code": "603986", "name": "兆易创新"},
     {"code": "300782", "name": "卓胜微"},
+    # 新增半导体股票
+    {"code": "688733", "name": "壁仞科技"},
+    {"code": "688205", "name": "德科立"},
+    {"code": "300456", "name": "赛微电子"},
 ]
 
 # AI应用行业股票池
@@ -61,6 +65,10 @@ AI_APPLICATION_STOCKS = [
     {"code": "002410", "name": "广联达"},
     {"code": "300418", "name": "昆仑万维"},
     {"code": "688561", "name": "奇安信"},
+    # 新增AI应用股票
+    {"code": "300045", "name": "华力创通"},
+    {"code": "300236", "name": "上海新阳"},
+    {"code": "300739", "name": "明阳智能"},
 ]
 
 # 算力行业股票池
@@ -74,6 +82,10 @@ COMPUTING_POWER_STOCKS = [
     {"code": "300474", "name": "景嘉微"},
     {"code": "688126", "name": "沪硅产业"},
     {"code": "688041", "name": "海光信息"},
+    # 新增算力股票
+    {"code": "300118", "name": "东方日升"},
+    {"code": "300731", "name": "科创信息"},
+    {"code": "603703", "name": "盛洋科技"},
 ]
 
 # 消费电子行业股票池
@@ -88,6 +100,21 @@ CONSUMER_ELECTRONICS_STOCKS = [
     {"code": "300136", "name": "信维通信"},
     {"code": "002273", "name": "水晶光电"},
     {"code": "300115", "name": "长盈精密"},
+    # 新增消费电子股票
+    {"code": "300358", "name": "楚天科技"},
+    {"code": "300435", "name": "中泰股份"},
+    {"code": "002044", "name": "美年健康"},
+    {"code": "002228", "name": "合兴包装"},
+]
+
+# 新增：新能源科技行业股票池
+NEW_ENERGY_TECH_STOCKS = [
+    {"code": "300750", "name": "宁德时代"},
+    {"code": "000063", "name": "中兴通讯"},
+    {"code": "300900", "name": "广联航空"},
+    {"code": "300963", "name": "中洲特材"},
+    {"code": "603169", "name": "兰石重装"},
+    {"code": "603528", "name": "多伦科技"},
 ]
 
 # 科技股池总配置
@@ -96,6 +123,7 @@ TECH_STOCK_POOL: Dict[str, List[Dict[str, str]]] = {
     "AI应用": AI_APPLICATION_STOCKS,
     "算力": COMPUTING_POWER_STOCKS,
     "消费电子": CONSUMER_ELECTRONICS_STOCKS,
+    "新能源科技": NEW_ENERGY_TECH_STOCKS,
 }
 
 

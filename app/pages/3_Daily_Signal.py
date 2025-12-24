@@ -293,7 +293,7 @@ def check_data_freshness() -> Dict[str, Any]:
         # 计算数据过期天数
         today = date.today()
         days_old = (today - last_data_date).days
-        is_stale = days_old > 3  # 超过3天认为过期
+        is_stale = days_old > 5  # 考虑周末因素，超过5天认为过期
         
         if is_stale:
             message = f"数据已过期：最后更新于 {last_data_date.strftime('%Y-%m-%d')}（{days_old} 天前）"

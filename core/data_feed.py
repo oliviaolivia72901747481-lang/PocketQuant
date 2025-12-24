@@ -135,7 +135,7 @@ class DataFeed:
     """
     
     # 推荐的 AkShare 版本（经过测试验证）
-    RECOMMENDED_AKSHARE_VERSION = "1.12.0"
+    RECOMMENDED_AKSHARE_VERSION = "1.17.99"
     
     def __init__(self, raw_path: str, processed_path: str):
         """
@@ -176,10 +176,10 @@ class DataFeed:
             else:
                 logger.info(f"AkShare 版本检查通过: {current_version}")
         except ImportError:
-            logger.error(
-                "AkShare 未安装！请运行: pip install akshare=={self.RECOMMENDED_AKSHARE_VERSION}"
+            logger.warning(
+                f"AkShare 未安装！下载新数据功能将不可用。如需下载数据，请运行: pip install akshare=={self.RECOMMENDED_AKSHARE_VERSION}"
             )
-            raise
+            # 不再抛出异常，允许使用已有的本地数据
     
     def download_stock_data(
         self, 

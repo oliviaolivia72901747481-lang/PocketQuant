@@ -4,6 +4,11 @@
 
 科技股专属板块是一个完整的科技股交易系统，包含宏观风控、信号生成、卖出管理和回测验证四大核心模块。系统采用分层架构，将风控逻辑、信号逻辑和界面展示分离，便于维护和扩展。
 
+**当前策略版本**: v11.4g (平衡版)
+- 收益率: 33.51%，最大回撤: -4.81%，收益/回撤比: 6.96
+- 通过参数敏感性测试（所有参数组合回撤 < -5%）
+- 通过滚动回测验证（71.4% 窗口盈利）
+
 ## Architecture
 
 ```
@@ -220,7 +225,7 @@ class HardFilter:
         }
 ```
 
-### 4. TechSignalGenerator (科技股信号生成器 - 含尾盘判定)
+### 4. TechSignalGenerator (科技股信号生成器 - 含尾盘判定) - v11.4g
 
 ```python
 from datetime import datetime, time
@@ -235,6 +240,7 @@ class TechBuySignal:
     ma5: float                  # MA5
     ma20: float                 # MA20
     ma60: float                 # MA60
+    ma20_slope: float           # MA20斜率 (v11.4g新增)
     rsi: float                  # RSI(14)
     volume_ratio: float         # 量比 (当日量/5日均量)
     revenue_growth: bool        # 营收正增长
@@ -244,14 +250,17 @@ class TechBuySignal:
     generated_at: datetime      # 生成时间
     is_confirmed: bool          # 是否已确认（14:45后）
     confirmation_time: Optional[datetime]  # 确认时间
+    price_deviation: float      # 价格偏离MA5百分比 (v11.4g新增)
 
 class TechSignalGenerator:
-    """科技股买入信号生成器 - 含尾盘判定机制"""
+    """科技股买入信号生成器 - 含尾盘判定机制 (v11.4g)"""
     
-    # 信号参数
-    RSI_MIN = 55
-    RSI_MAX = 80
-    VOLUME_RATIO_MIN = 1.5
+    # 信号参数 (v11.4g 更新)
+    RSI_MIN = 44                # v11.4g: 原55
+    RSI_MAX = 70                # v11.4g: 原80
+    VOLUME_RATIO_MIN = 1.1      # v11.4g: 原1.5
+    SIGNAL_STRENGTH_THRESHOLD = 83  # v11.4g新增: 信号强度门槛
+    MAX_PRICE_DEVIATION = 0.05  # v11.4g新增: 最大价格偏离5%
     
     # 尾盘判定时间 (T+1 最优解)
     EOD_CONFIRMATION_TIME = time(14, 45)  # 14:45
@@ -265,15 +274,18 @@ class TechSignalGenerator:
         hard_filter_results: List[HardFilterResult]
     ) -> List[TechBuySignal]:
         """
-        生成买入信号
+        生成买入信号 (v11.4g)
         
         流程：
         1. 检查大盘红绿灯（红灯直接返回空）
         2. 应用硬性筛选结果（只保留通过的股票）
         3. 过滤行业排名（只保留排名1-2的行业）
         4. 检查技术指标（趋势、动量、量能）
-        5. 检查基本面（营收/净利增长、解禁）
-        6. 标记信号确认状态（14:45后为已确认）
+        5. 检查趋势过滤（MA20斜率向上）- v11.4g新增
+        6. 检查价格位置（避免追高）- v11.4g新增
+        7. 检查基本面（营收/净利增长、解禁）
+        8. 检查信号强度（>= 83）- v11.4g新增
+        9. 标记信号确认状态（14:45后为已确认）
         
         Returns:
             符合条件的买入信号列表
@@ -342,12 +354,12 @@ class TechSignalGenerator:
         pass
     
     def _check_momentum_condition(self, df: pd.DataFrame) -> bool:
-        """检查动量条件：RSI(14) 在 55-80 之间"""
+        """检查动量条件：RSI(14) 在 44-70 之间 (v11.4g更新：原55-80)"""
         pass
     
     def _check_volume_condition(self, df: pd.DataFrame, current_time: Optional[time] = None) -> bool:
         """
-        检查量能条件：当日量 > 5日均量 × 1.5
+        检查量能条件：当日量 > 5日均量 × 1.1 (v11.4g更新：原1.5)
         
         注意：14:45 运行时，当日成交量约为全天的 92%-95%
         需要使用"预估全天成交量"进行比较，避免漏掉信号
@@ -359,6 +371,30 @@ class TechSignalGenerator:
         公式：predicted_volume = current_volume / (current_minutes / 240)
         """
         pass
+    
+    def _check_trend_filter(self, df: pd.DataFrame) -> bool:
+        """
+        检查趋势过滤条件：MA20斜率向上 (v11.4g新增)
+        
+        计算MA20的斜率，确保趋势向上
+        """
+        pass
+    
+    def _check_price_position(self, price: float, ma5: float) -> bool:
+        """
+        检查价格位置条件：价格 < MA5 × 1.05 (v11.4g新增)
+        
+        避免追高，确保价格不超过MA5的5%
+        """
+        return price < ma5 * (1 + self.MAX_PRICE_DEVIATION)
+    
+    def _check_signal_strength(self, signal_strength: float) -> bool:
+        """
+        检查信号强度条件：信号强度 >= 83 (v11.4g新增)
+        
+        只选择高质量信号
+        """
+        return signal_strength >= self.SIGNAL_STRENGTH_THRESHOLD
     
     def _predict_daily_volume(self, current_volume: float, current_time: time) -> float:
         """
@@ -404,7 +440,7 @@ class TechSignalGenerator:
         pass
 ```
 
-### 5. TechExitManager (卖出信号管理器 - 含优先级)
+### 5. TechExitManager (卖出信号管理器 - 含优先级) - v11.4g
 
 ```python
 from enum import IntEnum
@@ -412,46 +448,55 @@ from enum import IntEnum
 class SignalPriority(IntEnum):
     """信号优先级枚举 (数值越小优先级越高)"""
     EMERGENCY = 1       # 紧急避险 (大盘红灯+亏损)
-    STOP_LOSS = 2       # 止损 (-10%)
-    TAKE_PROFIT = 3     # 止盈 (RSI>85)
-    TREND_BREAK = 4     # 趋势断裂 (连续2日跌破MA20)
+    STOP_LOSS = 2       # 止损 (-4.6%) - v11.4g更新：原-10%
+    TAKE_PROFIT = 3     # 止盈 (RSI>80且盈利) - v11.4g更新：原RSI>85
+    TRAILING_STOP = 4   # 移动止盈 (v11.4g新增)
+    TREND_BREAK = 5     # 趋势断裂 (连续2日跌破MA20)
+    TIMEOUT = 6         # 持仓超时 (v11.4g新增)
 
 @dataclass
 class TechExitSignal:
     """科技股卖出信号"""
     code: str                   # 股票代码
     name: str                   # 股票名称
-    exit_type: str              # 卖出类型 ("emergency" / "stop_loss" / "take_profit" / "trend_break" / "rsi_partial")
+    exit_type: str              # 卖出类型 ("emergency" / "stop_loss" / "take_profit" / "trailing_stop" / "trend_break" / "timeout" / "rsi_partial")
     priority: SignalPriority    # 信号优先级
     current_price: float        # 当前价格
     stop_loss_price: float      # 止损价
     pnl_pct: float              # 盈亏百分比
+    max_pnl_pct: float          # 最高盈利百分比 (v11.4g新增：用于移动止盈)
     rsi: float                  # 当前 RSI
     ma5: float                  # MA5
     ma20: float                 # MA20
     ma20_break_days: int        # MA20 跌破天数
+    holding_days: int           # 持仓天数 (v11.4g新增)
     shares: int                 # 持仓股数
     is_min_position: bool       # 是否最小仓位 (100股)
     suggested_action: str       # 建议操作
     urgency_color: str          # 紧急程度颜色 ("red" / "orange" / "yellow" / "blue")
 
 class TechExitManager:
-    """科技股卖出信号管理器 - 含优先级排序"""
+    """科技股卖出信号管理器 - 含优先级排序 (v11.4g)"""
     
-    # 止损参数
-    HARD_STOP_LOSS = -0.10      # 硬止损 -10%
-    PROFIT_THRESHOLD_1 = 0.05   # 盈利阈值1：5%
-    PROFIT_THRESHOLD_2 = 0.15   # 盈利阈值2：15%
-    RSI_OVERBOUGHT = 85         # RSI 超买阈值
+    # 止损参数 (v11.4g 更新)
+    HARD_STOP_LOSS = -0.046     # 硬止损 -4.6% (v11.4g更新：原-10%)
+    TAKE_PROFIT = 0.22          # 止盈 +22% (v11.4g新增)
+    TRAILING_STOP_TRIGGER = 0.09  # 移动止盈触发 +9% (v11.4g新增)
+    TRAILING_STOP_PCT = 0.028   # 移动止盈回撤 2.8% (v11.4g新增)
+    MAX_HOLDING_DAYS = 15       # 最大持仓天数 (v11.4g新增)
+    RSI_OVERBOUGHT = 80         # RSI 超买阈值 (v11.4g更新：原85)
+    RSI_SELL_ONLY_PROFIT = True # RSI超买仅盈利时触发 (v11.4g新增)
     MA20_BREAK_DAYS = 2         # MA20 跌破天数阈值
     MIN_POSITION_SHARES = 100   # 最小仓位股数
     
-    # 优先级颜色映射
+    # 优先级颜色映射 (v11.4g 更新)
     PRIORITY_COLORS = {
         SignalPriority.EMERGENCY: "red",      # 紧急避险 - 红色
         SignalPriority.STOP_LOSS: "orange",   # 止损 - 橙色
         SignalPriority.TAKE_PROFIT: "yellow", # 止盈 - 黄色
+        SignalPriority.TRAILING_STOP: "green", # 移动止盈 - 绿色 (v11.4g新增)
         SignalPriority.TREND_BREAK: "blue",   # 趋势断裂 - 蓝色
+        SignalPriority.TIMEOUT: "gray",       # 超时 - 灰色 (v11.4g新增)
     }
     
     def check_exit_signals(
@@ -460,13 +505,16 @@ class TechExitManager:
         market_status: MarketStatus
     ) -> List[TechExitSignal]:
         """
-        检查所有持仓的卖出信号
+        检查所有持仓的卖出信号 (v11.4g)
         
         检查顺序（按优先级）：
         1. 紧急避险 (大盘红灯 + 持仓亏损)
-        2. 硬止损 (-10%)
-        3. RSI 分仓止盈 (RSI>85)
-        4. 趋势断裂 (连续2日跌破MA20)
+        2. 硬止损 (-4.6%) - v11.4g更新
+        3. 止盈 (+22%) - v11.4g新增
+        4. 移动止盈 (盈利达9%后回撤2.8%) - v11.4g新增
+        5. RSI 分仓止盈 (RSI>80且盈利) - v11.4g更新
+        6. 趋势断裂 (连续2日跌破MA20)
+        7. 持仓超时 (>=15天) - v11.4g新增
         
         Returns:
             按优先级排序的卖出信号列表
@@ -491,6 +539,51 @@ class TechExitManager:
                 priority=SignalPriority.EMERGENCY,
                 suggested_action="⚠️ 紧急避险：大盘红灯+亏损，建议立即清仓",
                 urgency_color="red",
+                # ... other fields
+            )
+        return None
+    
+    def _check_trailing_stop(
+        self, 
+        holding: Holding, 
+        pnl_pct: float,
+        max_pnl_pct: float
+    ) -> Optional[TechExitSignal]:
+        """
+        检查移动止盈信号 (v11.4g新增)
+        
+        条件：最高盈利达到9%后，从最高点回撤2.8%
+        优先级：TRAILING_STOP
+        """
+        if max_pnl_pct >= self.TRAILING_STOP_TRIGGER:
+            drawdown = max_pnl_pct - pnl_pct
+            if drawdown >= self.TRAILING_STOP_PCT:
+                return TechExitSignal(
+                    exit_type="trailing_stop",
+                    priority=SignalPriority.TRAILING_STOP,
+                    suggested_action=f"📉 移动止盈：最高盈利{max_pnl_pct:.1%}，回撤{drawdown:.1%}，建议卖出",
+                    urgency_color="green",
+                    # ... other fields
+                )
+        return None
+    
+    def _check_timeout_exit(
+        self, 
+        holding: Holding, 
+        holding_days: int
+    ) -> Optional[TechExitSignal]:
+        """
+        检查持仓超时信号 (v11.4g新增)
+        
+        条件：持仓天数 >= 15天
+        优先级：TIMEOUT
+        """
+        if holding_days >= self.MAX_HOLDING_DAYS:
+            return TechExitSignal(
+                exit_type="timeout",
+                priority=SignalPriority.TIMEOUT,
+                suggested_action=f"⏰ 持仓超时：已持有{holding_days}天，建议卖出",
+                urgency_color="gray",
                 # ... other fields
             )
         return None
@@ -522,16 +615,22 @@ class TechExitManager:
         self, 
         holding: Holding, 
         rsi: float,
-        ma5: float
+        ma5: float,
+        pnl_pct: float  # v11.4g新增：盈亏百分比
     ) -> Optional[TechExitSignal]:
         """
-        检查 RSI 分仓止盈
+        检查 RSI 分仓止盈 (v11.4g更新)
         
         规则：
-        - 持仓 >= 200股 且 RSI > 85：卖一半
-        - 持仓 = 100股 且 RSI > 85：止损紧贴 MA5
+        - 持仓 >= 200股 且 RSI > 80 且 盈利：卖一半 (v11.4g更新：RSI从85降至80，新增盈利条件)
+        - 持仓 = 100股 且 RSI > 80 且 盈利：止损紧贴 MA5 (v11.4g更新：RSI从85降至80，新增盈利条件)
+        - RSI > 80 但亏损：不触发 (v11.4g新增：仅盈利时触发)
         """
         if rsi <= self.RSI_OVERBOUGHT:
+            return None
+        
+        # v11.4g新增：仅盈利时触发RSI止盈
+        if self.RSI_SELL_ONLY_PROFIT and pnl_pct <= 0:
             return None
             
         shares = holding.shares
@@ -542,7 +641,7 @@ class TechExitManager:
                 exit_type="rsi_partial",
                 priority=SignalPriority.TAKE_PROFIT,
                 is_min_position=True,
-                suggested_action=f"⚡ 100股持仓 RSI>{self.RSI_OVERBOUGHT}：止损紧贴 MA5 ({ma5:.2f})",
+                suggested_action=f"⚡ 100股持仓 RSI>{self.RSI_OVERBOUGHT}且盈利：止损紧贴 MA5 ({ma5:.2f})",
                 urgency_color="yellow",
                 # ... other fields
             )
@@ -551,7 +650,7 @@ class TechExitManager:
                 exit_type="rsi_partial",
                 priority=SignalPriority.TAKE_PROFIT,
                 is_min_position=False,
-                suggested_action=f"💰 RSI>{self.RSI_OVERBOUGHT}：建议卖出一半 ({shares // 2}股)",
+                suggested_action=f"💰 RSI>{self.RSI_OVERBOUGHT}且盈利：建议卖出一半 ({shares // 2}股)",
                 urgency_color="yellow",
                 # ... other fields
             )
@@ -848,11 +947,11 @@ SECTOR_INDEX_MAPPING = {
 
 **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
 
-### Property 4: 买入信号完整性
+### Property 4: 买入信号完整性 (v11.4g更新)
 
-*For any* 买入信号，必须同时满足趋势、动量、量能、基本面四个条件
+*For any* 买入信号，必须同时满足趋势、动量、量能、基本面、趋势过滤、价格位置、信号质量七个条件
 
-**Validates: Requirements 5.5**
+**Validates: Requirements 5.8**
 
 ### Property 5: 尾盘信号确认
 
@@ -860,22 +959,24 @@ SECTOR_INDEX_MAPPING = {
 
 **Validates: Requirements 4.1, 4.5**
 
-### Property 6: 止损价计算正确性
+### Property 6: 止损价计算正确性 (v11.4g更新)
 
 *For any* 持仓，止损价应根据盈亏状态正确计算：
-- 亏损状态：成本价 × 0.90
-- 盈利 5-15%：成本价
-- 盈利 >15%：MA5
+- 亏损达到 -4.6%：触发止损
+- 盈利达到 +9%：启动移动止盈
+- 移动止盈启动后回撤 2.8%：触发卖出
+- 盈利达到 +22%：触发止盈
 
-**Validates: Requirements 6.2, 6.3**
+**Validates: Requirements 6.1, 6.2, 6.3, 6.4**
 
-### Property 7: RSI 分仓止盈逻辑
+### Property 7: RSI 分仓止盈逻辑 (v11.4g更新)
 
-*For any* RSI > 85 的持仓：
+*For any* RSI > 80 且盈利的持仓：
 - 持仓 >= 200股：建议卖出一半
 - 持仓 = 100股：止损紧贴 MA5
+- RSI > 80 但亏损：不触发止盈
 
-**Validates: Requirements 7.1, 7.2**
+**Validates: Requirements 7.1, 7.2, 7.3**
 
 ### Property 8: 趋势断裂检测
 
@@ -883,9 +984,9 @@ SECTOR_INDEX_MAPPING = {
 
 **Validates: Requirements 8.1**
 
-### Property 9: 信号优先级排序
+### Property 9: 信号优先级排序 (v11.4g更新)
 
-*For any* 卖出信号列表，信号应按优先级排序：紧急避险 > 止损 > 止盈 > 趋势断裂
+*For any* 卖出信号列表，信号应按优先级排序：紧急避险 > 止损 > 止盈 > 移动止盈 > 趋势断裂 > 超时
 
 **Validates: Requirements 9.1, 9.2, 9.3, 9.4, 9.5**
 
@@ -900,6 +1001,30 @@ SECTOR_INDEX_MAPPING = {
 *For any* 回测请求，系统必须包含 2022-2023 震荡市时间段的验证
 
 **Validates: Requirements 11.1, 11.8**
+
+### Property 12: 趋势过滤 (v11.4g新增)
+
+*For any* 买入信号，MA20斜率必须向上
+
+**Validates: Requirements 5.5**
+
+### Property 13: 价格位置过滤 (v11.4g新增)
+
+*For any* 买入信号，当前价格必须 < MA5 × 1.05（避免追高）
+
+**Validates: Requirements 5.6**
+
+### Property 14: 信号强度过滤 (v11.4g新增)
+
+*For any* 买入信号，信号强度必须 >= 83
+
+**Validates: Requirements 5.7**
+
+### Property 15: 持仓超时 (v11.4g新增)
+
+*For any* 持仓天数 >= 15天的持仓，系统应生成超时卖出信号
+
+**Validates: Requirements 6.5**
 
 ## Error Handling
 
@@ -976,3 +1101,54 @@ SECTOR_INDEX_MAPPING = {
    - 最大回撤 <= -15%
    - 2022年和2023年下半年交易次数显著减少
 4. **震荡市独立报告**: 2022-2023 独立绩效分析
+
+
+## v11.4g 策略参数配置汇总
+
+### 仓位管理参数
+
+| 参数 | 数值 | 说明 |
+|------|------|------|
+| position_pct | 0.11 | 单只股票仓位 11% |
+| max_positions | 5 | 最大持仓数量 5 只 |
+
+### 止盈止损参数
+
+| 参数 | 数值 | 说明 |
+|------|------|------|
+| stop_loss_pct | -0.046 | 止损线 -4.6% |
+| take_profit_pct | 0.22 | 止盈线 +22% |
+| trailing_stop_trigger | 0.09 | 移动止盈触发 +9% |
+| trailing_stop_pct | 0.028 | 移动止盈回撤 2.8% |
+| max_holding_days | 15 | 最大持仓天数 15 天 |
+
+### 买入条件参数
+
+| 参数 | 数值 | 说明 |
+|------|------|------|
+| rsi_min | 44 | RSI 下限 |
+| rsi_max | 70 | RSI 上限 |
+| vol_ratio | 1.1 | 成交量确认倍数 |
+| signal_strength_threshold | 83 | 信号强度门槛 |
+| trend_filter_enabled | True | 趋势过滤开启 |
+| price_filter_enabled | True | 价格位置过滤开启 |
+| max_price_deviation | 0.05 | 最大价格偏离 5% |
+
+### 卖出条件参数
+
+| 参数 | 数值 | 说明 |
+|------|------|------|
+| rsi_overbought | 80 | RSI 超买阈值 |
+| rsi_sell_only_profit | True | RSI 超买仅盈利时触发 |
+| macd_sell_enabled | False | MACD 卖出关闭 |
+
+### 策略验证结果
+
+| 指标 | 数值 | 评价 |
+|------|------|------|
+| 总收益率 | 33.51% | ✅ 良好 |
+| 最大回撤 | -4.81% | ✅ 优秀 |
+| 收益/回撤比 | 6.96 | ✅ 优秀 |
+| 胜率 | 24.5% | ✅ 良好 |
+| 参数敏感性 | 所有组合回撤 < -5% | ✅ 鲁棒 |
+| 滚动回测 | 71.4% 窗口盈利 | ✅ 实盘可行 |

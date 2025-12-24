@@ -162,7 +162,7 @@ class Settings:
     strategy_params: StrategyParamsConfig = field(default_factory=StrategyParamsConfig)
     
     # AkShare 推荐版本
-    RECOMMENDED_AKSHARE_VERSION: str = '1.12.0'
+    RECOMMENDED_AKSHARE_VERSION: str = '1.17.99'
 
 
 # 全局配置实例（单例模式）

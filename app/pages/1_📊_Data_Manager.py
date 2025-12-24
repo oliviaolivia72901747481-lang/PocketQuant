@@ -4,16 +4,17 @@ MiniQuant-Lite 数据管理页面
 提供数据管理功能：
 - 数据状态概览
 - 股票数据下载
+- 科技股数据专区
 - 一键清空缓存
 
-Requirements: 7.2, 7.3
+Requirements: 7.2, 7.3, 5.1, 5.2, 5.3
 """
 
 import streamlit as st
 import sys
 import os
 from datetime import date, timedelta
-from typing import List, Dict
+from typing import List, Dict, Any
 import pandas as pd
 
 # 添加项目根目录到 Python 路径
@@ -22,6 +23,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from config.settings import get_settings
 from config.stock_pool import get_watchlist, StockPool, validate_stock_codes
 from core.data_feed import DataFeed
+from core.tech_stock.data_validator import TechDataValidator
+from core.tech_stock.data_downloader import TechDataDownloader
+from config.tech_stock_pool import get_tech_stock_pool, get_all_tech_stocks
 
 
 def get_data_feed() -> DataFeed:
@@ -315,6 +319,233 @@ def render_cache_management(data_feed: DataFeed):
                 st.rerun()
 
 
+def render_tech_stock_data_section(data_feed: DataFeed):
+    """
+    渲染科技股数据专区
+    
+    显示科技股池中所有股票的数据状态，提供批量下载和更新功能。
+    
+    Args:
+        data_feed: DataFeed 实例
+        
+    Requirements: 5.1, 5.2, 5.3
+    """
+    st.subheader("🔬 科技股数据专区")
+    
+    # 初始化验证器和下载器
+    validator = TechDataValidator(data_feed)
+    downloader = TechDataDownloader(data_feed)
+    tech_pool = get_tech_stock_pool()
+    
+    # 获取科技股池状态概览
+    try:
+        pool_status = validator.get_tech_stock_pool_status()
+    except Exception as e:
+        st.error(f"获取科技股数据状态失败: {e}")
+        return
+    
+    overall = pool_status['overall']
+    
+    # ========== 数据完整性统计 ==========
+    st.markdown("#### 📈 数据完整性统计")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("科技股总数", f"{overall['total_stocks']} 只")
+    with col2:
+        completion_pct = overall['completion_rate'] * 100
+        delta_color = "normal" if completion_pct >= 80 else "inverse"
+        st.metric(
+            "数据完整率", 
+            f"{completion_pct:.1f}%",
+            delta=f"{overall['valid_stocks']} 只有效" if overall['valid_stocks'] > 0 else None
+        )
+    with col3:
+        missing_count = overall['missing_files']
+        st.metric(
+            "缺失数据", 
+            f"{missing_count} 只",
+            delta=f"-{missing_count}" if missing_count > 0 else None,
+            delta_color="inverse" if missing_count > 0 else "off"
+        )
+    with col4:
+        problem_count = overall['insufficient_data'] + overall['corrupted_files']
+        st.metric(
+            "问题数据", 
+            f"{problem_count} 只",
+            delta=f"-{problem_count}" if problem_count > 0 else None,
+            delta_color="inverse" if problem_count > 0 else "off"
+        )
+    
+    # ========== 按行业统计 ==========
+    st.markdown("#### 🏭 按行业统计")
+    
+    sector_data = []
+    for sector, stats in pool_status['by_sector'].items():
+        completion_rate = stats['valid'] / stats['total'] * 100 if stats['total'] > 0 else 0
+        status_icon = "✅" if completion_rate == 100 else ("⚠️" if completion_rate >= 50 else "❌")
+        sector_data.append({
+            '行业': sector,
+            '状态': status_icon,
+            '总数': stats['total'],
+            '有效': stats['valid'],
+            '缺失': stats['missing'],
+            '不足': stats['insufficient'],
+            '损坏': stats['corrupted'],
+            '完整率': f"{completion_rate:.0f}%"
+        })
+    
+    sector_df = pd.DataFrame(sector_data)
+    st.dataframe(
+        sector_df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            '行业': st.column_config.TextColumn('行业', width='medium'),
+            '状态': st.column_config.TextColumn('状态', width='small'),
+            '总数': st.column_config.NumberColumn('总数', width='small'),
+            '有效': st.column_config.NumberColumn('有效', width='small'),
+            '缺失': st.column_config.NumberColumn('缺失', width='small'),
+            '不足': st.column_config.NumberColumn('不足', width='small'),
+            '损坏': st.column_config.NumberColumn('损坏', width='small'),
+            '完整率': st.column_config.TextColumn('完整率', width='small')
+        }
+    )
+    
+    # ========== 问题股票详情 ==========
+    problem_stocks = pool_status['problem_stocks']
+    has_problems = (
+        len(problem_stocks['missing_files']) > 0 or 
+        len(problem_stocks['insufficient_data']) > 0 or 
+        len(problem_stocks['corrupted_files']) > 0
+    )
+    
+    if has_problems:
+        with st.expander("⚠️ 查看问题股票详情", expanded=False):
+            if problem_stocks['missing_files']:
+                st.markdown("**缺失数据文件的股票:**")
+                missing_names = [
+                    f"{code} ({tech_pool.get_stock_name(code)})" 
+                    for code in problem_stocks['missing_files']
+                ]
+                st.text(", ".join(missing_names))
+            
+            if problem_stocks['insufficient_data']:
+                st.markdown("**数据时间范围不足的股票:**")
+                for item in problem_stocks['insufficient_data']:
+                    st.text(f"• {item['code']} ({item['name']}): {item['first_date']} ~ {item['last_date']}")
+            
+            if problem_stocks['corrupted_files']:
+                st.markdown("**数据文件损坏的股票:**")
+                corrupted_names = [
+                    f"{code} ({tech_pool.get_stock_name(code)})" 
+                    for code in problem_stocks['corrupted_files']
+                ]
+                st.text(", ".join(corrupted_names))
+    
+    # ========== 批量下载功能 ==========
+    st.markdown("#### 📥 批量下载")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        download_option = st.radio(
+            "下载选项",
+            options=["仅下载缺失数据", "更新全部科技股数据"],
+            index=0,
+            help="选择下载模式"
+        )
+    
+    with col2:
+        force_update = st.checkbox(
+            "强制覆盖已有数据",
+            value=False,
+            help="勾选后会重新下载所有数据，包括已存在的"
+        )
+    
+    # 下载按钮
+    download_key = 'tech_stock_download_in_progress'
+    
+    if st.button("🚀 开始下载科技股数据", type="primary", disabled=st.session_state.get(download_key, False)):
+        st.session_state[download_key] = True
+        
+        # 确定要下载的股票列表
+        if download_option == "仅下载缺失数据":
+            codes_to_download = problem_stocks['missing_files'] + problem_stocks['corrupted_files']
+            # 添加数据不足的股票
+            codes_to_download += [item['code'] for item in problem_stocks['insufficient_data']]
+            codes_to_download = list(set(codes_to_download))  # 去重
+        else:
+            codes_to_download = get_all_tech_stocks()
+        
+        if not codes_to_download:
+            st.info("✅ 所有科技股数据已完整，无需下载")
+            st.session_state[download_key] = False
+        else:
+            st.info(f"准备下载 {len(codes_to_download)} 只科技股数据...")
+            
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            # 执行下载
+            def update_progress(progress):
+                pct = progress.completed_stocks / progress.total_stocks if progress.total_stocks > 0 else 0
+                progress_bar.progress(pct)
+                status_text.text(
+                    f"正在下载: {progress.current_stock} ({progress.current_stock_name}) "
+                    f"[{progress.completed_stocks}/{progress.total_stocks}] "
+                    f"成功: {progress.success_count}, 失败: {progress.failed_count}"
+                )
+            
+            result = downloader.download_stocks(
+                stock_codes=codes_to_download,
+                progress_callback=update_progress,
+                force_update=force_update or download_option == "更新全部科技股数据"
+            )
+            
+            progress_bar.empty()
+            status_text.empty()
+            
+            # 显示结果
+            if result.success:
+                st.success(f"✅ 下载完成！成功: {len(result.successful_downloads)} 只，跳过: {len(result.skipped_downloads)} 只")
+            else:
+                st.warning(
+                    f"⚠️ 下载完成，部分失败。成功: {len(result.successful_downloads)} 只，"
+                    f"失败: {len(result.failed_downloads)} 只，跳过: {len(result.skipped_downloads)} 只"
+                )
+                
+                if result.failed_downloads:
+                    with st.expander("查看失败详情"):
+                        for failed in result.failed_downloads:
+                            st.text(f"• {failed['code']} ({failed['name']}): {failed.get('error', '未知错误')}")
+            
+            st.session_state[download_key] = False
+            st.rerun()
+    
+    # ========== 数据覆盖范围 ==========
+    st.markdown("#### 📅 数据覆盖范围")
+    
+    # 获取数据时间范围统计
+    all_codes = get_all_tech_stocks()
+    date_ranges = []
+    
+    for code in all_codes[:10]:  # 只检查前10只以提高性能
+        status = validator.check_single_stock_data(code)
+        if status.has_file and status.first_date and status.last_date:
+            date_ranges.append({
+                'first': status.first_date,
+                'last': status.last_date
+            })
+    
+    if date_ranges:
+        earliest = min(d['first'] for d in date_ranges)
+        latest = max(d['last'] for d in date_ranges)
+        st.info(f"📊 数据覆盖范围（采样）: {earliest} ~ {latest}")
+    else:
+        st.warning("⚠️ 暂无可用数据，请先下载科技股数据")
+
+
 def render_stock_pool_management():
     """渲染股票池管理区域"""
     st.subheader("📋 股票池管理")
@@ -389,6 +620,11 @@ def main():
     
     # 数据下载
     render_download_section(data_feed, stock_pool)
+    
+    st.divider()
+    
+    # 科技股数据专区 (Task 3.1)
+    render_tech_stock_data_section(data_feed)
     
     st.divider()
     
