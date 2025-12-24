@@ -53,7 +53,7 @@ class BacktestConfig:
 
 @dataclass
 class StrategyConfig:
-    """策略配置"""
+    """策略配置 - 优化版 v2.0"""
     # MACD 参数
     macd_fast_period: int = 12
     macd_slow_period: int = 26
@@ -68,10 +68,12 @@ class StrategyConfig:
     rsi_upper: int = 80                   # RSI 上限
     rsi_extreme: int = 90                 # RSI 极端值
     
-    # 止损止盈参数
-    hard_stop_loss: float = -0.08         # 硬止损（-8%）
-    trailing_start: float = 0.15          # 移动止盈启动阈值（+15%）
-    trailing_stop: float = 0.05           # 移动止盈回撤比例（5%）
+    # 止损止盈参数（优化版 v2.0）
+    hard_stop_loss: float = -0.05         # 硬止损（-5%，原-8%）
+    take_profit: float = 0.20             # 止盈（+20%）
+    trailing_start: float = 0.08          # 移动止盈启动阈值（+8%，原15%）
+    trailing_stop: float = 0.03           # 移动止盈回撤比例（3%，原5%）
+    max_hold_days: int = 15               # 最大持仓天数
 
 
 @dataclass
@@ -125,24 +127,35 @@ class LogConfig:
 @dataclass
 class StrategyParamsConfig:
     """
-    策略参数配置（回测与信号生成共享）
+    策略参数配置（回测与信号生成共享）- 优化版 v2.0
     
     用于在回测页面和每日信号页面之间共享策略参数，
     确保信号生成使用与回测相同的参数。
+    
+    优化说明（借鉴科技股策略成功经验）：
+    - 添加移动止盈机制
+    - 优化止损止盈参数
+    - 添加最大持仓天数限制
     """
-    # RSI 超卖反弹策略参数
+    # RSI 超卖反弹策略参数（布林带策略使用）
     rsi_period: int = 14                  # RSI 周期
-    rsi_buy_threshold: int = 30           # RSI 买入阈值（RSI < 此值买入）
+    rsi_buy_threshold: int = 45           # RSI 买入阈值（放宽，原30）
     rsi_sell_threshold: int = 70          # RSI 卖出阈值（RSI > 此值卖出）
-    rsi_stop_loss: float = 0.05           # RSI 策略止损比例
-    rsi_take_profit: float = 0.15         # RSI 策略止盈比例
+    rsi_stop_loss: float = 0.05           # RSI 策略止损比例（-5%）
+    rsi_take_profit: float = 0.18         # RSI 策略止盈比例（+18%）
     
     # RSRS 阻力支撑策略参数
     rsrs_n_period: int = 18               # RSRS 斜率计算窗口
     rsrs_m_period: int = 600              # RSRS 标准化窗口
-    rsrs_buy_threshold: float = 0.7       # RSRS 买入阈值（标准分 > 此值买入）
-    rsrs_sell_threshold: float = -0.7     # RSRS 卖出阈值（标准分 < 此值卖出）
-    rsrs_hard_stop_loss: float = -0.06    # RSRS 策略硬止损比例
+    rsrs_buy_threshold: float = 0.5       # RSRS 买入阈值（放宽，原0.7）
+    rsrs_sell_threshold: float = -0.5     # RSRS 卖出阈值（放宽，原-0.7）
+    rsrs_hard_stop_loss: float = -0.05    # RSRS 策略硬止损比例（-5%）
+    
+    # 通用优化参数（v2.0 新增）
+    trailing_stop_trigger: float = 0.08   # 移动止盈触发点（+8%）
+    trailing_stop_pct: float = 0.03       # 移动止盈回撤比例（3%）
+    max_hold_days: int = 15               # 最大持仓天数
+    trend_filter: bool = False            # 趋势过滤（默认关闭以增加交易机会）
 
 
 @dataclass
