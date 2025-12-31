@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\data_feed.py
+# hypothesis_version: 6.148.7
+
+[0.02, 0.15, 5000000000.0, 50000000000.0, 100, 300, 365, 1095, 3600, '%Y-%m-%d', '-', '1.17.99', '40', '50', 'AttributeError', 'Error', 'HTTPError', 'IndexError', 'KeyError', 'N/A', 'ST', 'ValueError', 'close', 'code', 'coerce', 'connection', 'daily', 'date', 'exists', 'has_market_snapshot', 'has_stock_names', 'high', 'last_date', 'low', 'market_cap', 'name', 'network', 'open', 'price', 'qfq', 'record_count', 'refused', 'reset', 'stock_data_count', 'timeout', 'turnover_rate', 'volume', '代码', '内存缓存已清空', '名称', '市场快照缓存命中', '市场快照缓存更新', '开盘', '成交量', '换手率', '收盘', '日期', '最低', '最新价', '最高', '正在获取全市场实时快照...', '流通市值', '股票名称缓存命中', '股票名称缓存更新', '获取市场快照失败: 返回数据为空']

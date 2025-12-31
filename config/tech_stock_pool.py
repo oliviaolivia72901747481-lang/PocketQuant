@@ -90,7 +90,7 @@ COMPUTING_POWER_STOCKS = [
 
 # 消费电子行业股票池
 CONSUMER_ELECTRONICS_STOCKS = [
-    {"code": "002600", "name": "长盈精密"},
+    {"code": "002600", "name": "领益智造"},
     {"code": "002475", "name": "立讯精密"},
     {"code": "601138", "name": "工业富联"},
     {"code": "002241", "name": "歌尔股份"},

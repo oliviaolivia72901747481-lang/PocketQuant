@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\realtime_monitor\signal_engine.py
+# hypothesis_version: 6.148.7
+
+[100, 'ma20_slope_positive', 'ma5_above_ma20', 'price_above_ma60', 'price_not_too_high', 'rsi_in_range', 'rsi_overbought', 'stop_loss', 'take_profit', 'timeout', 'trailing_stop', 'trend_reversal', 'volume_ratio_ok']

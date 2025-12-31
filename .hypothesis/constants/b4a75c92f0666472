@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\realtime_monitor\monitor.py
+# hypothesis_version: 6.148.7
+
+[0.0, 'position_count', 'total_cost_value', 'total_market_value', 'total_pnl', 'total_pnl_pct']

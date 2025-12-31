@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\logging_config.py
+# hypothesis_version: 6.148.7
+
+[100, '%Y-%m-%d', '.log', '.log.', 'filename', 'midnight', 'modified', 'path', 'r', 'size', 'utf-8']

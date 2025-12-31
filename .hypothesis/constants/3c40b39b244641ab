@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\realtime_monitor\models.py
+# hypothesis_version: 6.148.7
+
+[0.0, 'BuySignal', 'MA5下穿MA20且处于亏损状态', 'SellSignal', 'high', 'immediate_sell', 'low', 'ma20_slope_positive', 'ma5_above_ma20', 'medium', 'monitor', 'price_above_ma60', 'price_not_too_high', 'reduce_position', 'rsi_in_range', 'rsi_overbought', 'stop_loss', 'take_profit', 'timeout', 'trailing_stop', 'trend_reversal', 'volume_ratio_ok']

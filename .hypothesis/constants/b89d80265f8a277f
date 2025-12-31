@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\sizers.py
+# hypothesis_version: 6.148.7
+
+[0.0, 0.0003, 0.05, 5.0, 15000.0, 55000.0, 100, 'cash_buffer', 'commission_rate', 'max_positions', 'max_positions_count', 'min_commission', 'min_trade_amount', 'percent', 'position_tolerance', '可用现金不足（<=0）', '股票价格无效（<=0）']

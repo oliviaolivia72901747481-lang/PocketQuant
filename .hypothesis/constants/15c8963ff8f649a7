@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\realtime_monitor\data_fetcher.py
+# hypothesis_version: 6.148.7
+
+[0.0, 100, 300, 3600, 10000, '%Y%m%d', '6', 'AkShare 未安装，无法获取历史数据', 'AkShare 未安装，无法获取实时数据', 'AkShare 未安装，无法获取资金流向', 'after_hours', 'change_pct', 'close', 'closed', 'code', 'current_price', 'daily', 'date', 'fund_flow', 'high', 'historical', 'hit_count', 'hit_rate', 'low', 'lunch_break', 'ma10', 'ma20', 'ma20_slope', 'ma5', 'ma60', 'miss_count', 'name', 'open', 'pre_market', 'prev_close', 'qfq', 'realtime', 'rsi', 'sh', 'size', 'sz', 'turnover', 'volume', 'volume_ratio', '上午交易时段', '下午交易时段', '主力净流入-净额', '代码', '使用批量行情缓存', '午休时段', '名称', '周末休市', '已收盘', '开盘', '成交量', '成交额', '收盘', '数据缓存已清空', '日期', '昨收', '更新批量行情缓存', '最低', '最新价', '最高', '涨跌幅', '盘前，等待开盘', '获取实时行情失败: 返回数据为空']

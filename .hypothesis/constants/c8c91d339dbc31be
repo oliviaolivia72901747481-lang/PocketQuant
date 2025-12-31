@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\realtime_monitor\indicators.py
+# hypothesis_version: 6.148.7
+
+[0.0, 1.0, 50.0, 100, 'current_price', 'ma10', 'ma20', 'ma20_slope', 'ma5', 'ma60', 'rsi', 'volume_ratio']

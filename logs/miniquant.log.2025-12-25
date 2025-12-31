@@ -1,0 +1,931 @@
+2025-12-25 13:04:18 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 13:04:20 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 13:04:20 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 13:04:20 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 13:04:20 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 13:04:20 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 13:04:20 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 13:04:20 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 13:04:20 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 13:04:20 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 13:04:20 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 13:04:23 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 13:04:23 - core.tech_stock.sector_ranker - INFO -   1. 半导体: 7.57% (index) ✓ 可交易
+2025-12-25 13:04:23 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 5.85% (index) ✓ 可交易
+2025-12-25 13:04:23 - core.tech_stock.sector_ranker - INFO -   3. 算力: 3.66% (index) ✗ 不可交易
+2025-12-25 13:04:23 - core.tech_stock.sector_ranker - INFO -   4. 消费电子: -1.46% (index) ✗ 不可交易
+2025-12-25 13:04:23 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 13:04:25 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 13:04:25 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 13:04:25 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 13:04:26 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 13:04:26 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 13:04:26 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 13:04:26 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 13:04:26 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 13:04:26 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 13:04:26 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 13:04:26 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 13:04:26 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 13:04:26 - core.tech_stock.sector_ranker - INFO -   1. 半导体: 7.57% (index) ✓ 可交易
+2025-12-25 13:04:26 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 5.85% (index) ✓ 可交易
+2025-12-25 13:04:26 - core.tech_stock.sector_ranker - INFO -   3. 算力: 3.65% (index) ✗ 不可交易
+2025-12-25 13:04:26 - core.tech_stock.sector_ranker - INFO -   4. 消费电子: -1.46% (index) ✗ 不可交易
+2025-12-25 13:04:26 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 13:04:30 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 13:04:30 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 26/60 只股票通过
+2025-12-25 13:04:30 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 13:04:30 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 26 只股票
+2025-12-25 13:04:30 - core.tech_stock.signal_generator - INFO - 可交易行业: {'半导体', 'AI应用'}
+2025-12-25 13:04:30 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 13:04:30 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 13:04:30 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 13:04:30 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 13:04:30 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 13:04:30 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 13:04:35 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 13:04:35 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 26/60 只股票通过
+2025-12-25 13:04:35 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 13:04:35 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 26 只股票
+2025-12-25 13:04:35 - core.tech_stock.signal_generator - INFO - 可交易行业: {'半导体', 'AI应用'}
+2025-12-25 13:04:35 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 13:04:35 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 13:04:35 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 13:04:35 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 13:04:35 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 13:04:35 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 13:04:42 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 13:04:42 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 13:04:50 - __main__ - INFO - 获取实时行情成功: 1 只股票
+2025-12-25 13:04:55 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 13:04:55 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 13:04:55 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 13:04:55 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 13:04:56 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 13:04:56 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 13:04:56 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 13:05:26 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 13:05:26 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 13:05:26 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 13:05:26 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 13:05:27 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 13:05:27 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 13:05:27 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 13:05:27 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 13:05:34 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 13:05:34 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 26/60 只股票通过
+2025-12-25 13:05:34 - core.tech_stock.hard_filter - INFO - 筛选汇总: 总数 60, 通过 26 (43.3%), 拒绝 34 (股价: 16, 市值: 28, 成交额: 2, 无数据: 0)
+2025-12-25 13:05:34 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 13:05:34 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 26 只股票
+2025-12-25 13:05:34 - core.tech_stock.signal_generator - INFO - 可交易行业: {'消费电子', 'AI应用'}
+2025-12-25 13:05:34 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 13:05:34 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 13:05:34 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 13:05:34 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 13:05:34 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 13:05:34 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 14:20:01 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 14:20:03 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 14:20:03 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 14:20:03 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 14:20:03 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 14:20:03 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 14:20:03 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 14:20:03 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 14:20:03 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 14:20:03 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 14:20:03 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 14:20:05 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 14:20:05 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 14:20:06 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 14:20:06 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 14:20:06 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 14:20:06 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:20:06 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 14:20:06 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 14:20:06 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 14:20:06 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 14:20:09 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 14:20:09 - core.tech_stock.sector_ranker - INFO -   1. 半导体: 7.57% (index) ✓ 可交易
+2025-12-25 14:20:09 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 6.59% (index) ✓ 可交易
+2025-12-25 14:20:09 - core.tech_stock.sector_ranker - INFO -   3. 算力: 4.36% (index) ✗ 不可交易
+2025-12-25 14:20:09 - core.tech_stock.sector_ranker - INFO -   4. 消费电子: -1.28% (index) ✗ 不可交易
+2025-12-25 14:20:09 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 14:20:10 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 14:20:10 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 14:20:10 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 14:20:10 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 14:20:10 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 14:20:10 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 14:20:10 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:20:10 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 14:20:10 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 14:20:10 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 14:20:10 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 14:20:11 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 14:20:11 - core.tech_stock.sector_ranker - INFO -   1. 半导体: 7.57% (index) ✓ 可交易
+2025-12-25 14:20:11 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 6.59% (index) ✓ 可交易
+2025-12-25 14:20:11 - core.tech_stock.sector_ranker - INFO -   3. 算力: 4.36% (index) ✗ 不可交易
+2025-12-25 14:20:11 - core.tech_stock.sector_ranker - INFO -   4. 消费电子: -1.28% (index) ✗ 不可交易
+2025-12-25 14:20:11 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 14:20:16 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 14:20:16 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 26/60 只股票通过
+2025-12-25 14:20:16 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 14:20:16 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 26 只股票
+2025-12-25 14:20:16 - core.tech_stock.signal_generator - INFO - 可交易行业: {'AI应用', '半导体'}
+2025-12-25 14:20:16 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 14:20:16 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 14:20:16 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 14:20:16 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 14:20:16 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 14:20:16 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 14:20:18 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 14:20:18 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 26/60 只股票通过
+2025-12-25 14:20:18 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 14:20:18 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 26 只股票
+2025-12-25 14:20:18 - core.tech_stock.signal_generator - INFO - 可交易行业: {'AI应用', '半导体'}
+2025-12-25 14:20:18 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 14:20:18 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 14:20:18 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 14:20:18 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 14:20:18 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 14:20:18 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 14:20:22 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:20:22 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 14:20:22 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 14:20:22 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 14:20:22 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 14:20:22 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 14:20:23 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 14:20:23 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 14:20:23 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 14:20:23 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 14:20:23 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 14:20:23 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 14:20:23 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 14:20:23 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 14:20:23 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 14:20:23 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 14:20:23 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 14:20:23 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 14:20:36 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 14:20:36 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 14:20:36 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 14:20:36 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 14:20:36 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 14:20:36 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 14:20:36 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 14:20:36 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 14:20:44 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 14:20:44 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 26/60 只股票通过
+2025-12-25 14:20:44 - core.tech_stock.hard_filter - INFO - 筛选汇总: 总数 60, 通过 26 (43.3%), 拒绝 34 (股价: 16, 市值: 28, 成交额: 2, 无数据: 0)
+2025-12-25 14:20:44 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 14:20:44 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 26 只股票
+2025-12-25 14:20:44 - core.tech_stock.signal_generator - INFO - 可交易行业: {'AI应用', '消费电子'}
+2025-12-25 14:20:44 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 14:20:44 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 14:20:44 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 14:20:44 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 14:20:44 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 14:20:44 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 14:20:49 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:20:49 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 14:20:52 - core.trade_journal - INFO - 成功加载 2 条交易记录
+2025-12-25 14:24:19 - core.trade_journal - INFO - 成功加载 2 条交易记录
+2025-12-25 14:24:19 - core.trade_journal - INFO - 添加交易记录成功: b3476f6d - 002008 买入
+2025-12-25 14:24:19 - core.trade_journal - INFO - 成功加载 3 条交易记录
+2025-12-25 14:25:56 - core.trade_journal - INFO - 成功加载 3 条交易记录
+2025-12-25 14:25:56 - core.trade_journal - INFO - 添加交易记录成功: c34fe8a9 - 600113 买入
+2025-12-25 14:25:56 - core.trade_journal - INFO - 成功加载 4 条交易记录
+2025-12-25 14:26:00 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:26:00 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 14:26:07 - __main__ - INFO - 获取实时行情成功: 1 只股票
+2025-12-25 14:26:16 - core.trade_journal - INFO - 成功加载 4 条交易记录
+2025-12-25 14:26:19 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 14:26:19 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 14:26:19 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 14:26:19 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 14:26:19 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 14:26:19 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 14:26:19 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 14:26:19 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 14:26:26 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:26:26 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 14:26:26 - __main__ - INFO - 使用缓存的实时行情: 1 只股票
+2025-12-25 14:26:27 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 14:26:27 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 26/60 只股票通过
+2025-12-25 14:27:34 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:27:34 - core.position_tracker - INFO - 加载 1 条持仓记录
+2025-12-25 14:27:34 - __main__ - INFO - 使用缓存的实时行情: 1 只股票
+2025-12-25 14:27:34 - core.position_tracker - INFO - 添加持仓: 600113 工业富联
+2025-12-25 14:27:34 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:27:34 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 14:27:34 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:27:34 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 14:27:34 - __main__ - INFO - 使用缓存的实时行情: 2 只股票
+2025-12-25 14:27:46 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:27:46 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 14:27:46 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:27:46 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 14:27:46 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:27:47 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:27:47 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 14:27:47 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:27:47 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 14:27:47 - __main__ - INFO - 使用缓存的实时行情: 2 只股票
+2025-12-25 14:27:50 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:27:50 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 14:27:50 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:27:50 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 14:27:51 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:27:51 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 14:27:51 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:27:51 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 14:27:51 - __main__ - INFO - 使用缓存的实时行情: 2 只股票
+2025-12-25 14:27:52 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:27:52 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 14:27:52 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:27:52 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 14:27:52 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:27:52 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 14:27:52 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:27:52 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 14:27:52 - __main__ - INFO - 使用缓存的实时行情: 2 只股票
+2025-12-25 14:29:24 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 14:29:24 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 14:29:24 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 14:29:24 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 14:29:35 - __main__ - INFO - 获取实时行情成功: 2 只股票
+2025-12-25 15:10:10 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 15:10:11 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 15:10:11 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:10:11 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:10:12 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:10:12 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 15:10:12 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:10:12 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:10:12 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:10:12 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:10:12 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:10:15 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:10:15 - core.tech_stock.sector_ranker - INFO -   1. 半导体: 7.57% (index) ✓ 可交易
+2025-12-25 15:10:15 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 6.61% (index) ✓ 可交易
+2025-12-25 15:10:15 - core.tech_stock.sector_ranker - INFO -   3. 算力: 4.36% (index) ✗ 不可交易
+2025-12-25 15:10:15 - core.tech_stock.sector_ranker - INFO -   4. 消费电子: -1.26% (index) ✗ 不可交易
+2025-12-25 15:10:15 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 15:10:15 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 15:10:15 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 15:10:16 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 15:10:16 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 15:10:16 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 15:10:16 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 15:10:16 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:10:16 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:10:16 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:10:16 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:10:16 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:10:17 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:10:17 - core.tech_stock.sector_ranker - INFO -   1. 半导体: 7.57% (index) ✓ 可交易
+2025-12-25 15:10:17 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 6.61% (index) ✓ 可交易
+2025-12-25 15:10:17 - core.tech_stock.sector_ranker - INFO -   3. 算力: 4.36% (index) ✗ 不可交易
+2025-12-25 15:10:17 - core.tech_stock.sector_ranker - INFO -   4. 消费电子: -1.26% (index) ✗ 不可交易
+2025-12-25 15:10:17 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 15:10:26 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 15:10:26 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 27/60 只股票通过
+2025-12-25 15:10:26 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 15:10:26 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 27 只股票
+2025-12-25 15:10:26 - core.tech_stock.signal_generator - INFO - 可交易行业: {'半导体', 'AI应用'}
+2025-12-25 15:10:26 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 15:10:26 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 15:10:26 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 15:10:26 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 15:10:26 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 15:10:26 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:10:27 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 15:10:27 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 27/60 只股票通过
+2025-12-25 15:10:27 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 15:10:27 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 27 只股票
+2025-12-25 15:10:27 - core.tech_stock.signal_generator - INFO - 可交易行业: {'半导体', 'AI应用'}
+2025-12-25 15:10:27 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 15:10:27 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 15:10:27 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 15:10:27 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 15:10:27 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 15:10:27 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:10:31 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:10:31 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:10:31 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:10:31 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:10:32 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:10:39 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:10:44 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:10:44 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:10:49 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:10:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:11:01 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:11:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:11:04 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:11:04 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:11:10 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:11:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:11:10 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:11:10 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:11:10 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:11:10 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:11:10 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:11:48 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:11:48 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:11:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:11:49 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:11:49 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:11:49 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:11:49 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:11:49 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:11:49 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 15:12:00 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 15:12:00 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 27/60 只股票通过
+2025-12-25 15:12:00 - core.tech_stock.hard_filter - INFO - 筛选汇总: 总数 60, 通过 27 (45.0%), 拒绝 33 (股价: 17, 市值: 28, 成交额: 1, 无数据: 0)
+2025-12-25 15:12:00 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 15:12:00 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 27 只股票
+2025-12-25 15:12:00 - core.tech_stock.signal_generator - INFO - 可交易行业: {'消费电子', 'AI应用'}
+2025-12-25 15:12:00 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 15:12:00 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 15:12:00 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 15:12:00 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 15:12:00 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 15:12:00 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:12:00 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:12:00 - core.tech_stock.exit_manager - WARNING - 600113 无法获取数据，跳过卖出信号检查
+2025-12-25 15:13:07 - core.trade_journal - INFO - 成功加载 4 条交易记录
+2025-12-25 15:13:14 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:13:14 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:13:14 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:13:14 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:13:25 - __main__ - INFO - 获取实时行情成功: 2 只股票
+2025-12-25 15:13:59 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:13:59 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:13:59 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:13:59 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:13:59 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:14:00 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:14:00 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:14:00 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:14:00 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:14:00 - __main__ - INFO - 使用缓存的实时行情: 2 只股票
+2025-12-25 15:14:05 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:14:05 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:14:05 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:14:05 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:14:05 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:14:05 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:14:05 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:14:05 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:14:05 - __main__ - INFO - 使用缓存的实时行情: 2 只股票
+2025-12-25 15:14:16 - core.trade_journal - INFO - 成功加载 4 条交易记录
+2025-12-25 15:14:20 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:14:20 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:14:20 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:14:20 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:14:20 - __main__ - INFO - 使用缓存的实时行情: 2 只股票
+2025-12-25 15:14:25 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:14:25 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:14:25 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:14:25 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:14:33 - __main__ - INFO - 获取实时行情成功: 2 只股票
+2025-12-25 15:16:12 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:16:12 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:16:12 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:16:12 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:16:19 - __main__ - INFO - 获取实时行情成功: 2 只股票
+2025-12-25 15:16:25 - core.trade_journal - INFO - 成功加载 4 条交易记录
+2025-12-25 15:16:42 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:16:42 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:16:42 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:16:42 - core.sell_signal_checker - WARNING - 无法加载股票数据: 600113
+2025-12-25 15:16:42 - __main__ - INFO - 使用缓存的实时行情: 2 只股票
+2025-12-25 15:16:47 - core.trade_journal - INFO - 成功加载 4 条交易记录
+2025-12-25 15:16:51 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:16:51 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:16:51 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:16:51 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:16:52 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:16:52 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:16:52 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:17:01 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:17:01 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:17:02 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:17:02 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:17:02 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:17:02 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:17:02 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:17:02 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:17:10 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:17:10 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:17:11 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:17:11 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:17:11 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:17:11 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:17:11 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:17:11 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:17:11 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 15:17:19 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 15:17:19 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 27/60 只股票通过
+2025-12-25 15:17:19 - core.tech_stock.hard_filter - INFO - 筛选汇总: 总数 60, 通过 27 (45.0%), 拒绝 33 (股价: 17, 市值: 28, 成交额: 1, 无数据: 0)
+2025-12-25 15:17:19 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 15:17:19 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 27 只股票
+2025-12-25 15:17:19 - core.tech_stock.signal_generator - INFO - 可交易行业: {'消费电子', 'AI应用'}
+2025-12-25 15:17:19 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 15:17:19 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 15:17:19 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 15:17:19 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 15:17:19 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 15:17:19 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:17:19 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:17:19 - core.tech_stock.exit_manager - WARNING - 600113 无法获取数据，跳过卖出信号检查
+2025-12-25 15:19:45 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:19:45 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:19:45 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:19:45 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:19:46 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:19:46 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:19:46 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:19:46 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 15:19:53 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 15:19:53 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 27/60 只股票通过
+2025-12-25 15:19:53 - core.tech_stock.hard_filter - INFO - 筛选汇总: 总数 60, 通过 27 (45.0%), 拒绝 33 (股价: 17, 市值: 28, 成交额: 1, 无数据: 0)
+2025-12-25 15:19:53 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 15:19:53 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 27 只股票
+2025-12-25 15:19:53 - core.tech_stock.signal_generator - INFO - 可交易行业: {'消费电子', 'AI应用'}
+2025-12-25 15:19:53 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 15:19:53 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 15:19:53 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 15:19:53 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 15:19:53 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 15:19:53 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:19:53 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:19:53 - core.tech_stock.exit_manager - WARNING - 600113 无法获取数据，跳过卖出信号检查
+2025-12-25 15:20:21 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:20:21 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:20:22 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:20:22 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:20:22 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:20:22 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:20:22 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:20:22 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:20:22 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:20:22 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:20:22 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 15:20:29 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 15:20:29 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 27/60 只股票通过
+2025-12-25 15:20:29 - core.tech_stock.hard_filter - INFO - 筛选汇总: 总数 60, 通过 27 (45.0%), 拒绝 33 (股价: 17, 市值: 28, 成交额: 1, 无数据: 0)
+2025-12-25 15:20:29 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 15:20:29 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 27 只股票
+2025-12-25 15:20:29 - core.tech_stock.signal_generator - INFO - 可交易行业: {'消费电子', 'AI应用'}
+2025-12-25 15:20:29 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 15:20:29 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 15:20:29 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 15:20:29 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 15:20:29 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 15:20:29 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:20:29 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:20:29 - core.tech_stock.exit_manager - WARNING - 600113 无法获取数据，跳过卖出信号检查
+2025-12-25 15:20:31 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 15:20:31 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 15:20:31 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 15:20:31 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 15:20:31 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 15:20:31 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3229.58 > MA20 3133.47 ✓; MACD 状态: golden_cross ✓
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:20:31 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 15:20:31 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 15:20:38 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 15:20:38 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 27/60 只股票通过
+2025-12-25 15:20:38 - core.tech_stock.hard_filter - INFO - 筛选汇总: 总数 60, 通过 27 (45.0%), 拒绝 33 (股价: 17, 市值: 28, 成交额: 1, 无数据: 0)
+2025-12-25 15:20:38 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 15:20:38 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 27 只股票
+2025-12-25 15:20:38 - core.tech_stock.signal_generator - INFO - 可交易行业: {'消费电子', 'AI应用'}
+2025-12-25 15:20:38 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 15:20:38 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 15:20:38 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 15:20:38 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 15:20:38 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 15:20:38 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 15:20:38 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 15:20:38 - core.tech_stock.exit_manager - WARNING - 600113 无法获取数据，跳过卖出信号检查
+2025-12-25 15:20:38 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 请求回测: 2022-01-01 - 2024-12-01, 股票: ['002008']
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 可用数据范围: 2022-12-26 - 2025-12-23
+2025-12-25 15:20:38 - core.tech_stock.backtester - WARNING - 请求的开始日期 2022-01-01 早于可用数据 2022-12-26，自动调整
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 实际回测时间: 2022-12-26 - 2024-12-01
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 正在验证数据完整性...
+2025-12-25 15:20:38 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 1 只股票
+2025-12-25 15:20:38 - core.tech_stock.data_validator - INFO - 数据验证完成: 1/1 只股票数据有效
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 数据验证完成: 1/1 只股票可用于回测
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - ✅ 时间段包含震荡市验证 (2022-01-01 - 2023-12-31)
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - ✅ 002008 数据完整，数据范围: 2022-12-26 ~ 2025-12-23
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 数据完整性检查: 1/1 只股票可用
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 开始主回测逻辑，有效股票: 1 只
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 加载 002008 数据: 467 条记录
+2025-12-25 15:20:38 - core.tech_stock.backtester - INFO - 回测模拟: 467 个交易日
+2025-12-25 15:20:39 - core.tech_stock.backtester - INFO - 回测模拟完成: 2 笔交易
+2025-12-25 15:20:39 - core.tech_stock.backtester - INFO - 开始震荡市验证: 2022-01-01 - 2023-12-31
+2025-12-25 15:20:39 - core.tech_stock.backtester - INFO - 加载 002008 数据: 247 条记录
+2025-12-25 15:20:39 - core.tech_stock.backtester - INFO - 回测模拟: 247 个交易日
+2025-12-25 15:20:39 - core.tech_stock.backtester - INFO - 回测模拟完成: 0 笔交易
+2025-12-25 15:20:39 - core.tech_stock.backtester - INFO - 震荡市验证完成: 收益率=0.00%, 最大回撤=0.00%
+2025-12-25 15:20:39 - core.tech_stock.backtester - INFO - 回测完成: 收益率=-0.59%, 最大回撤=-0.63%, 交易次数=2
+2025-12-25 22:09:43 - __main__ - INFO - MiniQuant-Lite 首页加载
+2025-12-25 22:09:45 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 22:09:45 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 22:09:45 - __main__ - ERROR - 检查交易日历失败: name 'pd' is not defined
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 22:09:46 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 22:09:49 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 22:09:49 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 22:09:49 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 22:09:49 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 22:09:50 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 22:09:50 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3239.34 > MA20 3143.87 ✓; MACD 状态: golden_cross ✓
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 22:09:50 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 22:10:14 - core.data_feed - WARNING - AkShare 版本不匹配！当前: 1.17.96, 推荐: 1.17.99。如遇数据获取问题，请尝试: pip install akshare==1.17.99
+2025-12-25 22:10:14 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 60 只股票
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 数据验证完成: 60/60 只股票数据有效
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 15 只股票
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 数据验证完成: 15/15 只股票数据有效
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 13 只股票
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 数据验证完成: 13/13 只股票数据有效
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 12 只股票
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 数据验证完成: 12/12 只股票数据有效
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 14 只股票
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 数据验证完成: 14/14 只股票数据有效
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 开始验证科技股数据: 6 只股票
+2025-12-25 22:10:15 - core.tech_stock.data_validator - INFO - 数据验证完成: 6/6 只股票数据有效
+2025-12-25 22:10:15 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\399006.csv
+2025-12-25 22:10:15 - core.tech_stock.market_filter - INFO - 从 AkShare 获取创业板指数据: 399006
+2025-12-25 22:10:15 - core.tech_stock.market_filter - INFO - 获取创业板指数据成功: 60 条记录
+2025-12-25 22:10:15 - core.tech_stock.market_filter - INFO - 大盘状态检查: 🟢 绿灯 - 收盘价 3239.34 > MA20 3143.87 ✓; MACD 状态: golden_cross ✓
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO - 行业 半导体 使用龙头股平均涨幅作为替代
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO - 行业 AI应用 使用龙头股平均涨幅作为替代
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO - 行业 算力 使用龙头股平均涨幅作为替代
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO - 行业 消费电子 使用龙头股平均涨幅作为替代
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO - 行业强弱排名:
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO -   1. 消费电子: 10.33% (proxy_stocks) ✓ 可交易
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO -   2. AI应用: 9.94% (proxy_stocks) ✓ 可交易
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO -   3. 半导体: 8.17% (proxy_stocks) ✗ 不可交易
+2025-12-25 22:10:15 - core.tech_stock.sector_ranker - INFO -   4. 算力: 2.09% (proxy_stocks) ✗ 不可交易
+2025-12-25 22:10:15 - core.tech_stock.hard_filter - INFO - 从 AkShare 获取 60 只股票的实时数据...
+2025-12-25 22:10:35 - core.tech_stock.hard_filter - INFO - 成功获取 59/60 只股票的数据
+2025-12-25 22:10:35 - core.tech_stock.hard_filter - INFO - 硬性筛选完成: 27/60 只股票通过
+2025-12-25 22:10:35 - core.tech_stock.hard_filter - INFO - 筛选汇总: 总数 60, 通过 27 (45.0%), 拒绝 33 (股价: 17, 市值: 28, 成交额: 1, 无数据: 0)
+2025-12-25 22:10:35 - core.tech_stock.signal_generator - INFO - 🟢 大盘绿灯，开始生成买入信号
+2025-12-25 22:10:35 - core.tech_stock.signal_generator - INFO - 通过硬性筛选: 27 只股票
+2025-12-25 22:10:35 - core.tech_stock.signal_generator - INFO - 可交易行业: {'消费电子', 'AI应用'}
+2025-12-25 22:10:35 - core.tech_stock.signal_generator - INFO - 符合条件的股票: 1 只
+2025-12-25 22:10:35 - core.tech_stock.signal_generator - INFO - 批量加载股票数据...
+2025-12-25 22:10:35 - core.tech_stock.performance_optimizer - ERROR - 加载股票 300496 数据失败: DataFeed.get_stock_data() got an unexpected keyword argument 'start_date'
+2025-12-25 22:10:35 - core.tech_stock.performance_optimizer - INFO - 批量加载完成: 0/1 只股票
+2025-12-25 22:10:35 - core.tech_stock.signal_generator - INFO - 没有股票有足够的数据
+2025-12-25 22:10:35 - core.position_tracker - INFO - 加载 2 条持仓记录
+2025-12-25 22:10:35 - core.data_feed - WARNING - 数据文件不存在: C:\Users\hn511\Desktop\VibeCoding\stock2\data/processed\600113.csv
+2025-12-25 22:10:35 - core.tech_stock.exit_manager - WARNING - 600113 无法获取数据，跳过卖出信号检查

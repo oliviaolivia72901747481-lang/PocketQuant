@@ -1,0 +1,4 @@
+# file: C:\Users\hn511\Desktop\VibeCoding\stock2\core\realtime_monitor\signal_engine.py
+# hypothesis_version: 6.148.7
+
+[100, 'action_description', 'entry_price', 'ma20_slope_positive', 'ma5_above_ma20', 'price_above_ma60', 'price_not_too_high', 'reason_explanation', 'rsi_in_range', 'rsi_overbought', 'stop_loss', 'stop_loss_price', 'take_profit', 'take_profit_price', 'timeout', 'trailing_stop', 'trend_reversal', 'urgency_description', 'volume_ratio_ok', '中 - 建议尽快处理', '低 - 可继续观察', '减仓 - 卖出部分持仓', '未知', '立即卖出 - 全部清仓', '观察 - 密切关注后续走势', '高 - 建议立即执行']
