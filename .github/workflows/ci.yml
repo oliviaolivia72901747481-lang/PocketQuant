@@ -1,0 +1,181 @@
+# MiniQuant-Lite 持续集成工作流
+# 科技股池扩充项目自动化测试
+
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'core/**'
+      - 'tests/**'
+      - 'config/**'
+      - 'strategies/**'
+      - 'requirements.txt'
+      - 'pytest.ini'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - 'core/**'
+      - 'tests/**'
+      - 'config/**'
+      - 'strategies/**'
+      - 'requirements.txt'
+      - 'pytest.ini'
+
+jobs:
+  test:
+    name: 运行测试
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+      fail-fast: false
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+    
+    - name: 设置 Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest-timeout pytest-xdist
+    
+    - name: 运行单元测试
+      run: |
+        pytest tests/ -v --tb=short -m "not slow and not integration" --timeout=60 -x
+      env:
+        TESTING: 'true'
+    
+    - name: 运行集成测试
+      run: |
+        pytest tests/ -v --tb=short -m "integration" --timeout=120
+      env:
+        TESTING: 'true'
+      continue-on-error: true
+
+  lint:
+    name: 代码检查
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+    
+    - name: 设置 Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: 安装检查工具
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort
+    
+    - name: 运行 flake8 检查
+      run: |
+        flake8 core/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 core/ --count --exit-zero --max-complexity=15 --max-line-length=120 --statistics
+      continue-on-error: true
+    
+    - name: 检查代码格式
+      run: |
+        black --check --diff core/ tests/ --line-length=120
+      continue-on-error: true
+
+  screener-tests:
+    name: 股票筛选测试
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+    
+    - name: 设置 Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest-timeout
+    
+    - name: 运行筛选器测试
+      run: |
+        pytest tests/test_stock_screener_framework.py tests/test_stock_screener_advanced.py -v --tb=short --timeout=120
+      env:
+        TESTING: 'true'
+    
+    - name: 运行硬过滤器测试
+      run: |
+        pytest tests/test_hard_filter.py tests/test_market_filter.py -v --tb=short --timeout=60
+      env:
+        TESTING: 'true'
+
+  quality-check:
+    name: 质量检查
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+    
+    - name: 设置 Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest-timeout pytest-cov
+    
+    - name: 运行数据质量测试
+      run: |
+        pytest tests/test_data_accuracy_validation.py tests/test_stability_tracker.py -v --tb=short --timeout=120
+      env:
+        TESTING: 'true'
+    
+    - name: 运行风险控制测试
+      run: |
+        pytest tests/test_stock_quality_comparator.py -v --tb=short --timeout=60
+      env:
+        TESTING: 'true'
+
+  notification:
+    name: 通知
+    runs-on: ubuntu-latest
+    needs: [test, screener-tests, quality-check]
+    if: always()
+    
+    steps:
+    - name: 检查测试结果
+      run: |
+        if [ "${{ needs.test.result }}" == "failure" ]; then
+          echo "::error::单元测试失败"
+          exit 1
+        fi
+        if [ "${{ needs.screener-tests.result }}" == "failure" ]; then
+          echo "::warning::筛选器测试失败"
+        fi
+        if [ "${{ needs.quality-check.result }}" == "failure" ]; then
+          echo "::warning::质量检查失败"
+        fi
+        echo "✅ CI 流程完成"

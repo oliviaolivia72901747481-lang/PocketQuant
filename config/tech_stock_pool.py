@@ -2,9 +2,12 @@
 科技股池配置模块
 
 提供科技股池的完整配置和管理功能，包括：
-- 四个科技行业的股票池（半导体、AI应用、算力、消费电子）
+- 九个科技行业的股票池（半导体、人工智能、算力、消费电子、新能源科技、软件服务、生物医药科技、5G通信、智能制造）
 - 股票池管理功能（添加、删除、筛选）
 - 行业分类查询
+
+更新时间: 2026-01-05 21:30:00
+股票总数: 100只 (目标: 80-100只) ✅
 
 Requirements: 12.1, 12.2, 12.3, 12.4
 """
@@ -33,97 +36,157 @@ class StockInfo:
         }
 
 
-# 半导体行业股票池
+# 半导体行业股票池 (13只)
 SEMICONDUCTOR_STOCKS = [
     {"code": "002371", "name": "北方华创"},
-    {"code": "688981", "name": "中芯国际"},
     {"code": "002049", "name": "紫光国微"},
     {"code": "603501", "name": "韦尔股份"},
-    {"code": "688012", "name": "中微公司"},
-    {"code": "688008", "name": "澜起科技"},
     {"code": "002185", "name": "华天科技"},
     {"code": "600584", "name": "长电科技"},
     {"code": "002156", "name": "通富微电"},
-    {"code": "688396", "name": "华润微"},
     {"code": "603986", "name": "兆易创新"},
-    {"code": "300782", "name": "卓胜微"},
-    # 新增半导体股票
-    {"code": "688733", "name": "壁仞科技"},
-    {"code": "688205", "name": "德科立"},
-    {"code": "300456", "name": "赛微电子"},
+    {"code": "600460", "name": "士兰微"},
+    {"code": "600703", "name": "三安光电"},
+    {"code": "002036", "name": "联创电子"},
+    {"code": "600353", "name": "旭光电子"},
+    {"code": "002077", "name": "大港股份"},
+    {"code": "002129", "name": "中环股份"},
 ]
 
-# AI应用行业股票池
+# 人工智能行业股票池 (11只)
 AI_APPLICATION_STOCKS = [
-    {"code": "300308", "name": "中际旭创"},
     {"code": "002415", "name": "海康威视"},
-    {"code": "300496", "name": "中科创达"},
     {"code": "002230", "name": "科大讯飞"},
-    {"code": "300033", "name": "同花顺"},
-    {"code": "688099", "name": "晶晨股份"},
-    {"code": "300454", "name": "深信服"},
     {"code": "002410", "name": "广联达"},
-    {"code": "300418", "name": "昆仑万维"},
-    {"code": "688561", "name": "奇安信"},
-    # 新增AI应用股票
-    {"code": "300045", "name": "华力创通"},
-    {"code": "300236", "name": "上海新阳"},
-    {"code": "300739", "name": "明阳智能"},
+    {"code": "603011", "name": "合锻智能"},
+    {"code": "001339", "name": "智微智能"},
+    {"code": "002421", "name": "达实智能"},
+    {"code": "002849", "name": "威星智能"},
+    {"code": "002313", "name": "日海智能"},
+    {"code": "002362", "name": "汉王科技"},
+    {"code": "002405", "name": "四维图新"},
+    {"code": "002232", "name": "启明信息"},
 ]
 
-# 算力行业股票池
+# 算力行业股票池 (10只)
 COMPUTING_POWER_STOCKS = [
     {"code": "000977", "name": "浪潮信息"},
     {"code": "603019", "name": "中科曙光"},
-    {"code": "688256", "name": "寒武纪"},
     {"code": "002439", "name": "启明星辰"},
-    {"code": "300454", "name": "深信服"},
     {"code": "002916", "name": "深南电路"},
-    {"code": "300474", "name": "景嘉微"},
-    {"code": "688126", "name": "沪硅产业"},
-    {"code": "688041", "name": "海光信息"},
-    # 新增算力股票
-    {"code": "300118", "name": "东方日升"},
-    {"code": "300731", "name": "科创信息"},
     {"code": "603703", "name": "盛洋科技"},
+    {"code": "000066", "name": "中国长城"},
+    {"code": "600756", "name": "浪潮软件"},
+    {"code": "002368", "name": "太极股份"},
+    {"code": "600845", "name": "宝信软件"},
+    {"code": "002065", "name": "东华软件"},
 ]
 
-# 消费电子行业股票池
+# 消费电子行业股票池 (15只)
 CONSUMER_ELECTRONICS_STOCKS = [
     {"code": "002600", "name": "领益智造"},
     {"code": "002475", "name": "立讯精密"},
     {"code": "601138", "name": "工业富联"},
     {"code": "002241", "name": "歌尔股份"},
-    {"code": "300433", "name": "蓝思科技"},
     {"code": "002456", "name": "欧菲光"},
     {"code": "002008", "name": "大族激光"},
-    {"code": "300136", "name": "信维通信"},
     {"code": "002273", "name": "水晶光电"},
-    {"code": "300115", "name": "长盈精密"},
-    # 新增消费电子股票
-    {"code": "300358", "name": "楚天科技"},
-    {"code": "300435", "name": "中泰股份"},
     {"code": "002044", "name": "美年健康"},
     {"code": "002228", "name": "合兴包装"},
+    {"code": "002236", "name": "大华股份"},
+    {"code": "002351", "name": "漫步者"},
+    {"code": "002055", "name": "得润电子"},
+    {"code": "002384", "name": "东山精密"},
+    {"code": "002106", "name": "莱宝高科"},
+    {"code": "002045", "name": "国光电器"},
 ]
 
-# 新增：新能源科技行业股票池
+# 新能源科技行业股票池 (14只)
 NEW_ENERGY_TECH_STOCKS = [
-    {"code": "300750", "name": "宁德时代"},
     {"code": "000063", "name": "中兴通讯"},
-    {"code": "300900", "name": "广联航空"},
-    {"code": "300963", "name": "中洲特材"},
     {"code": "603169", "name": "兰石重装"},
     {"code": "603528", "name": "多伦科技"},
+    {"code": "600617", "name": "国新能源"},
+    {"code": "001258", "name": "立新能源"},
+    {"code": "000690", "name": "宝新能源"},
+    {"code": "002202", "name": "金风科技"},
+    {"code": "601012", "name": "隆基绿能"},
+    {"code": "002459", "name": "晶澳科技"},
+    {"code": "600438", "name": "通威股份"},
+    {"code": "002074", "name": "国轩高科"},
+    {"code": "002594", "name": "比亚迪"},
+    {"code": "600089", "name": "特变电工"},
 ]
+
+# 软件服务行业股票池 (11只)
+SOFTWARE_SERVICE_STOCKS = [
+    {"code": "600588", "name": "用友网络"},
+    {"code": "002279", "name": "久其软件"},
+    {"code": "002474", "name": "榕基软件"},
+    {"code": "603189", "name": "网达软件"},
+    {"code": "600570", "name": "恒生电子"},
+    {"code": "002268", "name": "卫士通"},
+    {"code": "002212", "name": "天融信"},
+    {"code": "002197", "name": "证通电子"},
+    {"code": "600446", "name": "金证股份"},
+    {"code": "002401", "name": "中远海科"},
+    {"code": "002777", "name": "久远银海"},
+]
+
+# 生物医药科技行业股票池 (9只)
+BIOMEDICAL_TECH_STOCKS = [
+    {"code": "002030", "name": "达安基因"},
+    {"code": "603658", "name": "安图生物"},
+    {"code": "002223", "name": "鱼跃医疗"},
+    {"code": "000661", "name": "长春高新"},
+    {"code": "002007", "name": "华兰生物"},
+    {"code": "000963", "name": "华东医药"},
+    {"code": "002252", "name": "上海莱士"},
+    {"code": "002432", "name": "九安医疗"},
+    {"code": "002551", "name": "尚荣医疗"},
+]
+
+# 5G通信行业股票池 (8只)
+COMMUNICATION_5G_STOCKS = [
+    {"code": "600498", "name": "烽火通信"},
+    {"code": "002396", "name": "星网锐捷"},
+    {"code": "002093", "name": "国脉科技"},
+    {"code": "002115", "name": "三维通信"},
+    {"code": "002446", "name": "盛路通信"},
+    {"code": "002194", "name": "武汉凡谷"},
+    {"code": "002281", "name": "光迅科技"},
+    {"code": "600522", "name": "中天科技"},
+]
+
+# 智能制造行业股票池 (10只)
+SMART_MANUFACTURING_STOCKS = [
+    {"code": "002184", "name": "海得控制"},
+    {"code": "002527", "name": "新时达"},
+    {"code": "002747", "name": "埃斯顿"},
+    {"code": "002472", "name": "双环传动"},
+    {"code": "002270", "name": "华明装备"},
+    {"code": "002097", "name": "山河智能"},
+    {"code": "002248", "name": "华东数控"},
+    {"code": "002611", "name": "东方精工"},
+    {"code": "002031", "name": "巨轮智能"},
+    {"code": "002698", "name": "博实股份"},
+]
+
+# 科技ETF股票池 (保留为空，用户无权限)
+TECH_ETF_STOCKS = []
 
 # 科技股池总配置
 TECH_STOCK_POOL: Dict[str, List[Dict[str, str]]] = {
     "半导体": SEMICONDUCTOR_STOCKS,
-    "AI应用": AI_APPLICATION_STOCKS,
+    "人工智能": AI_APPLICATION_STOCKS,
     "算力": COMPUTING_POWER_STOCKS,
     "消费电子": CONSUMER_ELECTRONICS_STOCKS,
     "新能源科技": NEW_ENERGY_TECH_STOCKS,
+    "软件服务": SOFTWARE_SERVICE_STOCKS,
+    "生物医药科技": BIOMEDICAL_TECH_STOCKS,
+    "5G通信": COMMUNICATION_5G_STOCKS,
+    "智能制造": SMART_MANUFACTURING_STOCKS,
+    "科技ETF": TECH_ETF_STOCKS,
 }
 
 
@@ -195,13 +258,13 @@ class TechStockPool:
             codes.append(stock["code"])
         
         return codes
-    
+
     def get_stocks_by_sector(self, sector: str) -> List[StockInfo]:
         """
         按行业筛选股票
         
         Args:
-            sector: 行业名称（"半导体"、"AI应用"、"算力"、"消费电子"）
+            sector: 行业名称
         
         Returns:
             该行业的股票列表
@@ -292,7 +355,7 @@ class TechStockPool:
         """
         stock_info = self.get_stock_info(code)
         return stock_info.name if stock_info else code
-    
+
     def add_stock(self, code: str, name: str, sector: Optional[str] = None) -> bool:
         """
         添加股票到股票池
