@@ -1,0 +1,113 @@
+{
+  "last_updated": "2026-01-06 10:59:50",
+  "topics": [
+    {
+      "name": "CES科技展",
+      "keywords": [
+        "CES",
+        "消费电子",
+        "AI眼镜",
+        "VR",
+        "AR",
+        "智能穿戴",
+        "XR"
+      ],
+      "weight": 1.5,
+      "start_date": "2026-01-01",
+      "end_date": "2026-01-15",
+      "description": "CES 2026消费电子展，AI眼镜、VR/AR设备是焦点",
+      "source": "preset",
+      "heat_score": 95,
+      "related_stocks": []
+    },
+    {
+      "name": "AI人工智能",
+      "keywords": [
+        "AI",
+        "人工智能",
+        "大模型",
+        "ChatGPT",
+        "算力",
+        "GPU",
+        "英伟达"
+      ],
+      "weight": 1.4,
+      "start_date": "2025-01-01",
+      "end_date": null,
+      "description": "AI长期主线，持续受资金关注",
+      "source": "preset",
+      "heat_score": 90,
+      "related_stocks": []
+    },
+    {
+      "name": "半导体国产替代",
+      "keywords": [
+        "半导体",
+        "芯片",
+        "封测",
+        "光刻",
+        "国产替代",
+        "先进封装"
+      ],
+      "weight": 1.35,
+      "start_date": "2025-01-01",
+      "end_date": null,
+      "description": "半导体国产替代，政策持续支持",
+      "source": "preset",
+      "heat_score": 88,
+      "related_stocks": []
+    },
+    {
+      "name": "人形机器人",
+      "keywords": [
+        "机器人",
+        "人形机器人",
+        "特斯拉",
+        "Optimus",
+        "减速器",
+        "伺服"
+      ],
+      "weight": 1.3,
+      "start_date": "2025-10-01",
+      "end_date": null,
+      "description": "人形机器人概念，特斯拉Optimus带动",
+      "source": "preset",
+      "heat_score": 82,
+      "related_stocks": []
+    },
+    {
+      "name": "低空经济",
+      "keywords": [
+        "低空",
+        "eVTOL",
+        "飞行汽车",
+        "无人机",
+        "空中交通"
+      ],
+      "weight": 1.25,
+      "start_date": "2025-11-01",
+      "end_date": null,
+      "description": "低空经济政策支持，eVTOL商业化加速",
+      "source": "preset",
+      "heat_score": 78,
+      "related_stocks": []
+    },
+    {
+      "name": "新能源汽车",
+      "keywords": [
+        "新能源",
+        "电动车",
+        "锂电池",
+        "充电桩",
+        "固态电池"
+      ],
+      "weight": 1.1,
+      "start_date": "2024-01-01",
+      "end_date": null,
+      "description": "新能源汽车，长期赛道但短期热度一般",
+      "source": "preset",
+      "heat_score": 65,
+      "related_stocks": []
+    }
+  ]
+}
