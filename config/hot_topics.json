@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-06 10:59:50",
+  "last_updated": "2026-01-06 14:32:46",
   "topics": [
     {
       "name": "CES科技展",
@@ -107,6 +107,370 @@
       "description": "新能源汽车，长期赛道但短期热度一般",
       "source": "preset",
       "heat_score": 65,
+      "related_stocks": []
+    },
+    {
+      "name": "医疗服务板块",
+      "keywords": [
+        "医疗服务"
+      ],
+      "weight": 1.15,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 3只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "互联网服板块",
+      "keywords": [
+        "互联网服"
+      ],
+      "weight": 1.15,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 3只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "专用设备板块",
+      "keywords": [
+        "专用设备"
+      ],
+      "weight": 1.3,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 6只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "通用设备板块",
+      "keywords": [
+        "通用设备"
+      ],
+      "weight": 1.3,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 6只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "医疗器械板块",
+      "keywords": [
+        "医疗器械"
+      ],
+      "weight": 1.3,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 6只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "装修建材板块",
+      "keywords": [
+        "装修建材"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "通信设备板块",
+      "keywords": [
+        "通信设备"
+      ],
+      "weight": 1.3,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 6只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "医药商业板块",
+      "keywords": [
+        "医药商业"
+      ],
+      "weight": 1.15,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 3只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "房地产开板块",
+      "keywords": [
+        "房地产开"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "造纸印刷板块",
+      "keywords": [
+        "造纸印刷"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "计算机设板块",
+      "keywords": [
+        "计算机设"
+      ],
+      "weight": 1.15,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 3只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "电网设备板块",
+      "keywords": [
+        "电网设备"
+      ],
+      "weight": 1.15,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 3只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "化学原料板块",
+      "keywords": [
+        "化学原料"
+      ],
+      "weight": 1.4,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 8只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "有色金属板块",
+      "keywords": [
+        "有色金属"
+      ],
+      "weight": 1.15,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 3只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "汽车零部板块",
+      "keywords": [
+        "汽车零部"
+      ],
+      "weight": 1.4,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 8只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "光学光电板块",
+      "keywords": [
+        "光学光电"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "半导体板块",
+      "keywords": [
+        "半导体"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "文化传媒板块",
+      "keywords": [
+        "文化传媒"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "化肥行业板块",
+      "keywords": [
+        "化肥行业"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "装修装饰板块",
+      "keywords": [
+        "装修装饰"
+      ],
+      "weight": 1.15,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 3只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "证券板块",
+      "keywords": [
+        "证券"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "小金属板块",
+      "keywords": [
+        "小金属"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "专业服务板块",
+      "keywords": [
+        "专业服务"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "光伏设备板块",
+      "keywords": [
+        "光伏设备"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "交运设备板块",
+      "keywords": [
+        "交运设备"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "化学制品板块",
+      "keywords": [
+        "化学制品"
+      ],
+      "weight": 1.15,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 3只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "软件开发板块",
+      "keywords": [
+        "软件开发"
+      ],
+      "weight": 1.2,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 4只涨停",
+      "source": "auto",
+      "heat_score": 100,
+      "related_stocks": []
+    },
+    {
+      "name": "航天航空板块",
+      "keywords": [
+        "航天航空"
+      ],
+      "weight": 1.1,
+      "start_date": "2026-01-06",
+      "end_date": "2026-01-13",
+      "description": "自动识别: 2只涨停",
+      "source": "auto",
+      "heat_score": 100,
       "related_stocks": []
     }
   ]

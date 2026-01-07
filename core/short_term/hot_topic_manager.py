@@ -426,12 +426,12 @@ class HotTopicManager:
                     topic = HotTopic(
                         name=f"{sector}板块",
                         keywords=[sector],
-                        weight=1.0 + count * 0.05,
+                        weight=min(1.5, 1.0 + count * 0.05),
                         start_date=today,
                         end_date=(datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d"),
                         description=f"自动识别: {count}只涨停",
                         source="auto",
-                        heat_score=50 + count * 10
+                        heat_score=min(100, 50 + count * 10)
                     )
                     new_topics.append(topic)
         
@@ -446,12 +446,12 @@ class HotTopicManager:
                     topic = HotTopic(
                         name=concept,
                         keywords=[concept],
-                        weight=1.0 + count * 0.05,
+                        weight=min(1.5, 1.0 + count * 0.05),
                         start_date=today,
                         end_date=(datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d"),
                         description=f"自动识别: {count}只涨停",
                         source="auto",
-                        heat_score=50 + count * 10
+                        heat_score=min(100, 50 + count * 10)
                     )
                     new_topics.append(topic)
         
